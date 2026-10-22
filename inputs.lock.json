@@ -1,11 +1,2540 @@
 {
   "schema": 1,
-  "trust": "Trust on first use; missing pins deliberately stop before building. Existing WP1 observations retained.",
+  "trust": "Trust on first use on Windows runner 2026-10-22; not independent vendor authentication. WP1 ISO/driver hashes matched.",
+  "observation_run": "https://github.com/reindertpelsma/win-gpu-image/actions/runs/39827032414",
   "files": [
-    {"path":"adk/adksetup.exe","url":"https://go.microsoft.com/fwlink/?linkid=2289980","sha256":null},
-    {"path":"winpe/adkwinpesetup.exe","url":"https://go.microsoft.com/fwlink/?linkid=2289981","sha256":null},
-    {"path":"nvidia.exe","url":"https://us.download.nvidia.com/Windows/580.88/580.88-desktop-win10-win11-64bit-international-dch-whql.exe","sha256":"90c49f925b41ee062e02cc8094a16b6d057abfde4e85235a76d63ffe267f63a9","observed_utc":"2026-10-22","observation":"WP1 reproduction record"},
-    {"path":"win11-ltsc-eval.iso","url":"https://go.microsoft.com/fwlink/?linkid=2289029&clcid=0x409&culture=en-us&country=us","sha256":"67cec5865eaa037a72ddc633a717a10a2bed50778862267223ddb9c60ef5da68","observed_utc":"2026-10-22","observation":"WP1 reproduction record"},
-    {"path":"qemu.exe","url":"https://qemu.weilnetz.de/w64/qemu-w64-setup-20260811.exe","sha256":null}
+    {
+      "path": "adk/adksetup.exe",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2289980",
+      "sha256": "ac6a930fdb5c2980ba5fefe606d47edaafcf5f647b4337411500d158ea77300f",
+      "resolved_url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/adksetup.exe",
+      "observed_utc": "2026-10-22T17:56:48.747351+00:00",
+      "observation": "First-use download on Windows runner; no independent authenticity claim",
+      "bytes": 2233776
+    },
+    {
+      "path": "winpe/adkwinpesetup.exe",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2289981",
+      "sha256": "d4de67acc83de253ccc941dd0590808d83726bdd8ea768a374a7beaff7949d6a",
+      "resolved_url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/adkwinpesetup.exe",
+      "observed_utc": "2026-10-22T17:56:49.169785+00:00",
+      "observation": "First-use download on Windows runner; no independent authenticity claim",
+      "bytes": 1951784
+    },
+    {
+      "path": "nvidia.exe",
+      "url": "https://us.download.nvidia.com/Windows/580.88/580.88-desktop-win10-win11-64bit-international-dch-whql.exe",
+      "sha256": "90c49f925b41ee062e02cc8094a16b6d057abfde4e85235a76d63ffe267f63a9",
+      "observed_utc": "2026-10-22",
+      "observation": "WP1 reproduction record",
+      "resolved_url": "https://us.download.nvidia.com/Windows/580.88/580.88-desktop-win10-win11-64bit-international-dch-whql.exe",
+      "bytes": 890807536
+    },
+    {
+      "path": "win11-ltsc-eval.iso",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2289029&clcid=0x409&culture=en-us&country=us",
+      "sha256": "67cec5865eaa037a72ddc633a717a10a2bed50778862267223ddb9c60ef5da68",
+      "observed_utc": "2026-10-22",
+      "observation": "WP1 reproduction record",
+      "resolved_url": "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26100.1742.240906-0331.ge_release_svc_refresh_CLIENT_LTSC_EVAL_x64FRE_en-us.iso",
+      "bytes": 5112850432
+    },
+    {
+      "path": "qemu.exe",
+      "url": "https://qemu.weilnetz.de/w64/qemu-w64-setup-20260811.exe",
+      "sha256": "f98a8aeb5f7faea9765b6dee28316c266cd179d80354a2fed8e50176f9a2e59f",
+      "resolved_url": "https://qemu.weilnetz.de/w64/qemu-w64-setup-20260811.exe",
+      "observed_utc": "2026-10-22T17:56:56.489135+00:00",
+      "observation": "First-use download on Windows runner; no independent authenticity claim",
+      "bytes": 206615928
+    },
+    {
+      "path": "adk/Installers/01c28e2afff11c906894fd0d3e54ea0c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/01c28e2afff11c906894fd0d3e54ea0c.cab",
+      "sha256": "f1653025794a75a385dfb1639753d5a7b9a8e5d4e5afd4f910e08b475833c40a",
+      "bytes": 1233684,
+      "observed_utc": "2026-10-22T17:59:23.028108+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/01edf4d7f252a4b769447470b9829c01.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/01edf4d7f252a4b769447470b9829c01.cab",
+      "sha256": "d16d8afb8bfebbbb0a5387c7bb935470572abc16b6555a7bc9d088613cb36961",
+      "bytes": 107054,
+      "observed_utc": "2026-10-22T17:59:23.028108+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/01fca1465219b13ba419f35fef19e47a.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/01fca1465219b13ba419f35fef19e47a.cab",
+      "sha256": "192dcce04db450ef7c8cb6ef52f7fc3a998ed772c45eb21394ec49f6791343c5",
+      "bytes": 4738472,
+      "observed_utc": "2026-10-22T17:59:23.028108+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/02a156ff2a70e93ae2fcafa25d77c1f7.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/02a156ff2a70e93ae2fcafa25d77c1f7.cab",
+      "sha256": "dcc4468578d6d47f244c03219a207dc7a42abed7b40332e3b9022e32b659dd6f",
+      "bytes": 19912,
+      "observed_utc": "2026-10-22T17:59:23.028108+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/02d4c8ffdaa6632c8f1bad53fa8843b2.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/02d4c8ffdaa6632c8f1bad53fa8843b2.cab",
+      "sha256": "44d62bf41e44738fd279f5539330bbe69f55d6977cf62d968f8f9229af0cedf6",
+      "bytes": 1910464,
+      "observed_utc": "2026-10-22T17:59:23.028108+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/060c8936d4a55c475808092fa4e2b28b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/060c8936d4a55c475808092fa4e2b28b.cab",
+      "sha256": "278ecefebb8dab3277f600a012db3868b2372424f216b0e89621674b79ffc10a",
+      "bytes": 1606484,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0a3a39d2f8a258e1dea4e76da0ec31b8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0a3a39d2f8a258e1dea4e76da0ec31b8.cab",
+      "sha256": "ab59040ebfd8f30413138fbf19e3b4fc137aefc40e8703cf52d2a0617f4451de",
+      "bytes": 506524,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0ab24be4ae66cd2d38e5495684e0a5a1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0ab24be4ae66cd2d38e5495684e0a5a1.cab",
+      "sha256": "eee0b225dccb64b482c41e3d2b9df4effce3a9338fe04f74bdb18cfb2911485c",
+      "bytes": 21266,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0c48c56ca00155f992c30167beb8f23d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0c48c56ca00155f992c30167beb8f23d.cab",
+      "sha256": "a45c5b34b7ef93cc31459e86b73a483c9ee31e3d55151e35a506f7079491aff1",
+      "bytes": 187182,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0d981f062236baed075df3f42b1747db.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0d981f062236baed075df3f42b1747db.cab",
+      "sha256": "1f3c4f333587120f173f0b8f78ef79118e38ae0d01df0f88ce42cd4ad9c616e7",
+      "bytes": 3133600,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0e01877d7cebd7fc6730e1aae0091728.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0e01877d7cebd7fc6730e1aae0091728.cab",
+      "sha256": "55968eb0580b17f29cba13670eb44d6fb9c7875bd29f7d23cb218c76c97f217a",
+      "bytes": 75328,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/0f1c8d6eb8e918847a7b1cfbda99b3e5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/0f1c8d6eb8e918847a7b1cfbda99b3e5.cab",
+      "sha256": "38a6bed0cd5ebb382850f74b32879bb6f4809e0e89413ff5fbec175de045acaf",
+      "bytes": 873886,
+      "observed_utc": "2026-10-22T17:59:23.043745+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/10892e7d30d8df29192b7063f0867a97.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/10892e7d30d8df29192b7063f0867a97.cab",
+      "sha256": "1ff5b9c462213bbd44c27944f8b24ed4a716b5f929b72726e11a9bd2c5dc6244",
+      "bytes": 14535522,
+      "observed_utc": "2026-10-22T17:59:23.059376+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/138162d1f2774ceee5b9e192c96a3814.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/138162d1f2774ceee5b9e192c96a3814.cab",
+      "sha256": "1aab9f002e9acba65911d329e5278e201c82bbcfba1a7fbab00fc9743948a96b",
+      "bytes": 19116,
+      "observed_utc": "2026-10-22T17:59:23.059376+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/1439dbcbd472f531c37a149237b300fc.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/1439dbcbd472f531c37a149237b300fc.cab",
+      "sha256": "14e94c0df75823d22bfe28e62791225bd7ade065cc3dd32a47a90894d51e45c7",
+      "bytes": 21222,
+      "observed_utc": "2026-10-22T17:59:23.059376+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/14e8947966d288df0e3be47b88005ecd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/14e8947966d288df0e3be47b88005ecd.cab",
+      "sha256": "bb5ddcf4a9491d7b1cbb3496af0632bebc5cb2d71c43ab83205a1f9e795037a7",
+      "bytes": 1707424,
+      "observed_utc": "2026-10-22T17:59:23.059376+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/14f4df8a2a7fc82a4f415cf6a341415d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/14f4df8a2a7fc82a4f415cf6a341415d.cab",
+      "sha256": "7338d08bca83f2e0b39c9c339f8da0ad615fe0b3b2f49c4fadad2d3114dd0dca",
+      "bytes": 10897672,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/154d4e953fccda55774e27ffbe8710a8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/154d4e953fccda55774e27ffbe8710a8.cab",
+      "sha256": "f698dc3ddc37a5361bc9bd08c4109d06a74394735d4aa210e4d0e6ccd2f12496",
+      "bytes": 85006,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/186c4aa0cae637da0996e87ababf5b71.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/186c4aa0cae637da0996e87ababf5b71.cab",
+      "sha256": "a2a0e3f80e5326ce86c2caf990acad6feed09b5e66dd959a5d0c00d500765d8e",
+      "bytes": 5446396,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/18d637f31dd17f0b1e8ebd6b0abed487.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/18d637f31dd17f0b1e8ebd6b0abed487.cab",
+      "sha256": "65b4093f5fbeb4eb94a3aa0c3df50278e6e4350cee03d3d61616fc5d3498adf6",
+      "bytes": 21232,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/194f8ff6609315c815042887c06aa3f8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/194f8ff6609315c815042887c06aa3f8.cab",
+      "sha256": "1f0c818a3f6f08af0ade13c5243950ae17ddf16bed085e3cc4a518ddd153bc53",
+      "bytes": 18978,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/1bd4f044e271b42b110fe533720c10e9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/1bd4f044e271b42b110fe533720c10e9.cab",
+      "sha256": "a6589eb28b1d649d452effeefdba9ec53c992c70fffbbae2f823373463c02ba2",
+      "bytes": 18678,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/1f90b0f7321fab8dcdedaba3b30415f3.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/1f90b0f7321fab8dcdedaba3b30415f3.cab",
+      "sha256": "c0211959936d06d11389bc53502f32212017cb236a17b605c1d5d57add841b2d",
+      "bytes": 36972,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/205139c72082841bb52dfe6e300d4396.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/205139c72082841bb52dfe6e300d4396.cab",
+      "sha256": "1cc4908ea4ea5b7f84e3091eca397b10b050ba636aa1f9e8a2afd390cbdf9af4",
+      "bytes": 74274,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/20d1600b963d6c4812741ca62bc491e1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/20d1600b963d6c4812741ca62bc491e1.cab",
+      "sha256": "d91cad88dce5ce07b1ecfc8f2ef8f6e7fb8287b2b83101068c1a4800ad2e693d",
+      "bytes": 1764080,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/21adfb7fc4620dc041e09823a2ea9716.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/21adfb7fc4620dc041e09823a2ea9716.cab",
+      "sha256": "c90ebeafa3ede9140bcb255a880c385563b3fcb4dc4ebbff3ef34e7abc2bf19c",
+      "bytes": 370766,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/22e0cfb1ed87bead097f5f1ebc85fa5e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/22e0cfb1ed87bead097f5f1ebc85fa5e.cab",
+      "sha256": "59b78374712648f844f50ee915e5a3e499b9b5cfe577789281929f53bef568da",
+      "bytes": 2869744,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/23ca402f61cda3f672b3081da79dab63.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/23ca402f61cda3f672b3081da79dab63.cab",
+      "sha256": "433be98a0431e6def2594067e54553534398fa0c72f4bdcdd2cb72e2421cc429",
+      "bytes": 2410800,
+      "observed_utc": "2026-10-22T17:59:23.074997+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/24b9e5f1f97c2f05aa95ee1f671fd3cc.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/24b9e5f1f97c2f05aa95ee1f671fd3cc.cab",
+      "sha256": "650bec655f8d398d70753a39c2d08bf493beb8fa137561c04049443061ec98ef",
+      "bytes": 2557216,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2517aec0259281507bfb693d7d136f30.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2517aec0259281507bfb693d7d136f30.cab",
+      "sha256": "2ce322051b852f185b617cec4bf7d335097614de72c5d76f0506bccd63c2a017",
+      "bytes": 47870,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/252751cc5dacf45d8d98d1844e2d4f6c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/252751cc5dacf45d8d98d1844e2d4f6c.cab",
+      "sha256": "db0f4bbe804358c33c2c4c5c695fca115ca3851bcff6b4fd9441d7f11e7b8af2",
+      "bytes": 33616,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/25680084b1f4fc98d88475554cf93f08.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/25680084b1f4fc98d88475554cf93f08.cab",
+      "sha256": "89a2683aa21db84007da65dc0b676e0bfbdad78e5f8830ab5b465fec372d6b38",
+      "bytes": 1956346,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/268b1a41f6bd2906449944b964bf7393.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/268b1a41f6bd2906449944b964bf7393.cab",
+      "sha256": "1dc0b3fd4b5c152983fce56d83b93083723f7b282b61a098670967fb4ddd9b05",
+      "bytes": 161222,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/27c0562eb1efb3ad282cf987ae40e873.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/27c0562eb1efb3ad282cf987ae40e873.cab",
+      "sha256": "77aca500db795a2099af4242a98994febae47e4c212b2daa991fb70b0fcca2ae",
+      "bytes": 550040,
+      "observed_utc": "2026-10-22T17:59:23.090629+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2a6f402a7ff0a4ceccca0a660252167c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2a6f402a7ff0a4ceccca0a660252167c.cab",
+      "sha256": "8f851944b3d93aee41005483b4d0a1ce51ad640a9640aafc8fa308c4c8a290a9",
+      "bytes": 12299318,
+      "observed_utc": "2026-10-22T17:59:23.106248+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2be308a6ad881626820550006ac7e3f6.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2be308a6ad881626820550006ac7e3f6.cab",
+      "sha256": "f6f2e1fc8759cb1ce5cfdf2fa9011c77b11b4fd7b351be6411c35dd13c7b405c",
+      "bytes": 490210,
+      "observed_utc": "2026-10-22T17:59:23.106248+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2e134b026e871c5e8e547b6711578fb3.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2e134b026e871c5e8e547b6711578fb3.cab",
+      "sha256": "53cd1ac14e5d6e17774af78fc664895559030247380e42f32f3bce9d9ff287c8",
+      "bytes": 3569856,
+      "observed_utc": "2026-10-22T17:59:23.106248+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2e82f679c8709f838e7c839f7864ac84.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2e82f679c8709f838e7c839f7864ac84.cab",
+      "sha256": "a6cffb6a8029c1bbdc841b47066afe60abf6b5a9316e811f3c6871dff062ed23",
+      "bytes": 12578052,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/2e841ee6ad808e471f2e298e2679e6fe.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/2e841ee6ad808e471f2e298e2679e6fe.cab",
+      "sha256": "36c04d755506b95903ef4fd8234735caf85465e8aaee521cead3ac6d7c0541bd",
+      "bytes": 490066,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3048e0938ba336678a30618abb5ac970.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3048e0938ba336678a30618abb5ac970.cab",
+      "sha256": "50ae2b380728531e1c38b97fb162e3b2103b470ad754af949b95aa1eef5f9fd3",
+      "bytes": 40560,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/319d37cdfc2364311ae06e2a35924de9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/319d37cdfc2364311ae06e2a35924de9.cab",
+      "sha256": "f79053f0fba1fb7226cba666c9c466c7939743210575747382f762c35c2a6e0e",
+      "bytes": 357690,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/34d7210a1cf17d6ab6dd8fd5b1e3066b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/34d7210a1cf17d6ab6dd8fd5b1e3066b.cab",
+      "sha256": "21d3b9bc8383e52474a99abedbdc8d2a54298f0455be81a9bb5d0799f87d3fb3",
+      "bytes": 1369200,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3584ff4817547e9adefc53b3233a891d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3584ff4817547e9adefc53b3233a891d.cab",
+      "sha256": "66760ab7232c65fe73368e4a76e8ef53aa45a647399fe999c2d60cb9590ad5f0",
+      "bytes": 43736,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3585b51691616d290315769bec85eb6f.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3585b51691616d290315769bec85eb6f.cab",
+      "sha256": "bc9ce088b0fd9c650273e83d0e3ea5927a53702fd09cd5c3c62891aefbd2d725",
+      "bytes": 24282,
+      "observed_utc": "2026-10-22T17:59:23.121873+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/36084f1b92cbfdad07d1fde61975509d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/36084f1b92cbfdad07d1fde61975509d.cab",
+      "sha256": "1a1d3dc69c638ca0b9cb0e3b06bb89a92c5a200e205ed436e8a479ef0b008cb5",
+      "bytes": 15111400,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3611bd81544efa3deb061718f15aee0c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3611bd81544efa3deb061718f15aee0c.cab",
+      "sha256": "0f13ba872f7e3b4dfead79b5d01662006b798ab5c3097fb80fb75be7120016f7",
+      "bytes": 31976,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3631fbcbd3bdce94e2495d17333808e1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3631fbcbd3bdce94e2495d17333808e1.cab",
+      "sha256": "51d30c59a8999eea68dfd67daf0704890289dc5a84e458b2f2c784797b9ad772",
+      "bytes": 47864,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/36e3c2de16bbebad20daec133c22acb1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/36e3c2de16bbebad20daec133c22acb1.cab",
+      "sha256": "87be29b8133f2746b48b243e05df338152ed0704d8912244370dc6a7cbca009c",
+      "bytes": 23318,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/384cef345dd89a98f0fa6a6c7b6b3d3c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/384cef345dd89a98f0fa6a6c7b6b3d3c.cab",
+      "sha256": "09c772c2bdd58ce37072d154fa30be6a711cf665524fa0771c42422870f07b0f",
+      "bytes": 51366,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/38d93b8047d5efb04cf01ab7ec66d090.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/38d93b8047d5efb04cf01ab7ec66d090.cab",
+      "sha256": "9c529f597fff1c3a219771a4e34fa294e52616cf924fb5161b71b417dab4e6c3",
+      "bytes": 36004,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3b71855dfae6a44ab353293c119908b8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3b71855dfae6a44ab353293c119908b8.cab",
+      "sha256": "7103349de1e23761cd2b6737db8980667061e20730c93f4aa51cd6d8edd381c7",
+      "bytes": 1668778,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3c40aa9c4f6ccd875398dcb36e6248da.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3c40aa9c4f6ccd875398dcb36e6248da.cab",
+      "sha256": "6cbc2c4b327d7e481385dd41bcfec0e5a3f3c02adea78a194c0e5254ac913995",
+      "bytes": 339820,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3cb3df171c667e615400eba20d3db073.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3cb3df171c667e615400eba20d3db073.cab",
+      "sha256": "94934a00b3fe0b84e94f40a6367e5ff8ed85aa637d5f5db813dcbca8598585e5",
+      "bytes": 395252,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3e3790b981292706dc3526513cb48323.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3e3790b981292706dc3526513cb48323.cab",
+      "sha256": "4d9892f9afddb6e5a73c8faaa8350814f996f24c9dbfca849a9510491a886dc5",
+      "bytes": 2455514,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3e602662e913edefa58e52e04e900bf8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3e602662e913edefa58e52e04e900bf8.cab",
+      "sha256": "fd263e01f1588d36aa7a400b7e08cfec43f1d3eb5d90b523f5b972431b4a7ac3",
+      "bytes": 6231734,
+      "observed_utc": "2026-10-22T17:59:23.137495+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/3f3a3cff8652b3a9d93409b37e497b42.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/3f3a3cff8652b3a9d93409b37e497b42.cab",
+      "sha256": "6d7a62e5ea49daf283ea7ae3de67faff9a3659f4b009458c1bb3fa666ba7115a",
+      "bytes": 3116560,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/402654f8e2e231133a810bf1d43fa338.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/402654f8e2e231133a810bf1d43fa338.cab",
+      "sha256": "50cc0648dfc41616a8f402f969e50f73cd426387caa120b7b77aa13718bfb1bf",
+      "bytes": 38328,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/413a073d16688e177d7536cd2a64eb43.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/413a073d16688e177d7536cd2a64eb43.cab",
+      "sha256": "8b8f401300f4937d5d4a35d9c9db9fe2b942157e8ccc992404e4215d24edd3d0",
+      "bytes": 206828,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/41a048323a87b792f01dd2a0ecfc9302.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/41a048323a87b792f01dd2a0ecfc9302.cab",
+      "sha256": "38b15b06a3193d76bf5669f8cfc76c20327dced4973a1c504c7049d7a921ca09",
+      "bytes": 19936,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/436a430b58eb0fa6110e8dfb8f07ef56.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/436a430b58eb0fa6110e8dfb8f07ef56.cab",
+      "sha256": "579ab56cc25ac6e06f1190925aca4d1732a9af35153139971e042eb92fe85460",
+      "bytes": 6072742,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/47a5de534a472f7c2b34129a4f237bae.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/47a5de534a472f7c2b34129a4f237bae.cab",
+      "sha256": "407767d2d9c8cfb22d386c5e0ab24e1fb58704bacdbaeeabffb4ca76528b1725",
+      "bytes": 28784,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/4cf60441c7095e39c7a211cc291e7853.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/4cf60441c7095e39c7a211cc291e7853.cab",
+      "sha256": "50d5ceda4278333f6bc899cb01d73baf2f2ed64aee26aadeb9d176e5fa177752",
+      "bytes": 20416,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/4d2878f43060bacefdd6379f2dae89b0.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/4d2878f43060bacefdd6379f2dae89b0.cab",
+      "sha256": "b50667aab40353a3130b45a38df820547bd1ec8597d06bc7dd08b6734f1ccdb9",
+      "bytes": 5976258,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/4e56c6c11e546d4265da4e9ff7686b67.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/4e56c6c11e546d4265da4e9ff7686b67.cab",
+      "sha256": "4210e9315ea4bbc5560426850e4d54128fc8a458d340363932c92bb8a06c995d",
+      "bytes": 69820,
+      "observed_utc": "2026-10-22T17:59:23.153119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/4f1f782affae673d2c9ccef187839f64.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/4f1f782affae673d2c9ccef187839f64.cab",
+      "sha256": "b789d4d488958f991cc46cf7c91dee16c340ed4deb870c2f0ecaa74058b52632",
+      "bytes": 5501482,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/500ae334fea5d8d9c93a16515d993cd5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/500ae334fea5d8d9c93a16515d993cd5.cab",
+      "sha256": "4b1cf28002c1e25b15b45daa0c4c2f37122e643a714416724e151614c83f8cc3",
+      "bytes": 23912,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/500e0afd7cc09e1e1d6daca01bc67430.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/500e0afd7cc09e1e1d6daca01bc67430.cab",
+      "sha256": "32f3fecd4354caf1e0eeb2052b364c331ce946c6f40cb4f3155df508a0843122",
+      "bytes": 24616,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/508826cb1992ae414951fc09c4dd5aa1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/508826cb1992ae414951fc09c4dd5aa1.cab",
+      "sha256": "ec9edaad1351ebe21b61acd51126ecdf8a90933ad5f5d8da473e0abcad3543bf",
+      "bytes": 52296,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/518501e132e499be0132182ce1fa46d1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/518501e132e499be0132182ce1fa46d1.cab",
+      "sha256": "54d51db8dc207cf8650f63269e5521275bf2a6903b9a611a330360cfc7652b83",
+      "bytes": 22308,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/526113b3700d558cc0dd65fb3690ab33.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/526113b3700d558cc0dd65fb3690ab33.cab",
+      "sha256": "f21c171ea395a935ac7cd44bcbd2b261c957a37c645827987ad88d490ca3aa94",
+      "bytes": 4091146,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/54e796616a9b92182c672bce41ccc813.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/54e796616a9b92182c672bce41ccc813.cab",
+      "sha256": "ba1db84add43a2954261d0340701231370426a86ff2494ab48976b048a9bbf8f",
+      "bytes": 2324638,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/56dd07dea070851064af5d29cadfac56.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/56dd07dea070851064af5d29cadfac56.cab",
+      "sha256": "11530b9484b5b86c8c38090d90a58bf357d08bef4cbd190857081cd2aff4746b",
+      "bytes": 249424,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/56e5d88e2c299be31ce4fc4a604cede4.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/56e5d88e2c299be31ce4fc4a604cede4.cab",
+      "sha256": "726678cc623857f78c21dbdad24acab4f3c0e4d054b693f8d0cc405f0e88d9ad",
+      "bytes": 4145218,
+      "observed_utc": "2026-10-22T17:59:23.168748+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5a737ef891d34c14fcb01ab846d0d932.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5a737ef891d34c14fcb01ab846d0d932.cab",
+      "sha256": "a2975c79e3e88c52ebf0059023f4dc8a4477139fdcbbb2f2468fc53e055b5685",
+      "bytes": 2625510,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5ac1863798809c64e85c2535a27a3da6.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5ac1863798809c64e85c2535a27a3da6.cab",
+      "sha256": "ad635299335d45463eca30330a28ee555aaea95977770ba4bcaab35de925e05f",
+      "bytes": 5111790,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5c021c21180094f073528925393bb7f8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5c021c21180094f073528925393bb7f8.cab",
+      "sha256": "a961a8a238f6ca8dc53f0e24c1b5d47e9f37ce4b23a653fd36dd53441ca4673f",
+      "bytes": 490132,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5d984200acbde182fd99cbfbe9bad133.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5d984200acbde182fd99cbfbe9bad133.cab",
+      "sha256": "55654515e6f54e0d757819b3bdddb02d5331a657bb93d59d1e5bc9c97dab710e",
+      "bytes": 75416,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5eea85046f0c2112e2fcd0bac2c2cfc8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5eea85046f0c2112e2fcd0bac2c2cfc8.cab",
+      "sha256": "3af534be4ecb7bd8d9a27b454566fa091e639e6b978d78735720098fe311cbaa",
+      "bytes": 2382928,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/5f502819c0b356ae6ffca93bd200f10d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/5f502819c0b356ae6ffca93bd200f10d.cab",
+      "sha256": "7c28d123691c55a6731fb311a4b7f0b5d674602a79b0273b4ad95dcc90510871",
+      "bytes": 382056,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/625aa8d1c0d2b6e8cf41c50b53868ecd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/625aa8d1c0d2b6e8cf41c50b53868ecd.cab",
+      "sha256": "bc012b08aea165452a23429959f5ad2aaa452bee64760ed4d1206efeab58e2a4",
+      "bytes": 479368,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/62d5cdeca4a33f724898b7fd1c7e828d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/62d5cdeca4a33f724898b7fd1c7e828d.cab",
+      "sha256": "911959a3953577ad8b554ca1724a30bef143954b2143d41fc2b397bc9a96e2c4",
+      "bytes": 634970,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/62e0546124d6356af1cd73f6a39f1a97.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/62e0546124d6356af1cd73f6a39f1a97.cab",
+      "sha256": "94a442aa42b24750406bbe82a53a6562129831f90f78efed3fc781a960081009",
+      "bytes": 349920,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/630e2d20d5f2abcc3403b1d7783db037.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/630e2d20d5f2abcc3403b1d7783db037.cab",
+      "sha256": "2feeff91d0e083c8a4911f5c83dc25fd1159c59e43f665014b3fb276e1385971",
+      "bytes": 299698,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6361319e47039c0d5fc9b61c444f75d1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6361319e47039c0d5fc9b61c444f75d1.cab",
+      "sha256": "3274d8d5888c016a2d31cf9906b9bff406093c20bddfd4d49a433537f52382ff",
+      "bytes": 37456,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6493517a6964895b920bd7842a30f129.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6493517a6964895b920bd7842a30f129.cab",
+      "sha256": "d4d37a8c3d41b4606b1191682c41d902ab592a2b82c61dc8c4952eb4643efc04",
+      "bytes": 84922,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/662ea66cc7061f8b841891eae8e3a67c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/662ea66cc7061f8b841891eae8e3a67c.cab",
+      "sha256": "095ed853aeee8aaeceaa578c93fab3673dc332a3f0c6e5d02d317be679ece107",
+      "bytes": 176314,
+      "observed_utc": "2026-10-22T17:59:23.184370+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/68c79fbd9a119d7870fb398e0cd1b90c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/68c79fbd9a119d7870fb398e0cd1b90c.cab",
+      "sha256": "346a81e05dc59bfe233791302812b82c05b1b09570cceb5fdda838da4064f904",
+      "bytes": 6121038,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/68dfe35cd89ccc6c4d08f1fe66e0961b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/68dfe35cd89ccc6c4d08f1fe66e0961b.cab",
+      "sha256": "a277fb4a96250fde3c6b9e391afa88def8a3ec805fe971dc8cb5a3b874ccc29c",
+      "bytes": 2257426,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/68f184e89129d21f7c7499cd7be36a84.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/68f184e89129d21f7c7499cd7be36a84.cab",
+      "sha256": "98294c3b67de3a3df997e60c6f8a9f24fb5e787ec4875aef1cbc4f805aa39876",
+      "bytes": 2392658,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/69f8595b00cf4081c2ecc89420610cbd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/69f8595b00cf4081c2ecc89420610cbd.cab",
+      "sha256": "a72fe87b7413d0684bb88c518c1b253a7da0ea179030944c50ec92604f27373c",
+      "bytes": 145332,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6a68bedadf2564eeef76c19379aae5ef.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6a68bedadf2564eeef76c19379aae5ef.cab",
+      "sha256": "053d0a677df3b2a1366908245e01fae3756ef4415adb6bf80156e6fb7e5f2d29",
+      "bytes": 18704,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6bdcd388323175da70d836a25654aa92.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6bdcd388323175da70d836a25654aa92.cab",
+      "sha256": "415a53fd8c89ca055fa34db3822104ac236922fe36221a5ddfdd8c70ab9566cd",
+      "bytes": 31752,
+      "observed_utc": "2026-10-22T17:59:23.199999+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6cc7aebd21947dbd8ea4884662780188.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6cc7aebd21947dbd8ea4884662780188.cab",
+      "sha256": "14b97bb1681faff4142a895d15165f5be9de3b120eddb5cd2c489eca7d0175ed",
+      "bytes": 12840480,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6da2af86cb1227e66cf9bc85f2786782.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6da2af86cb1227e66cf9bc85f2786782.cab",
+      "sha256": "cd0ce1586c0261e35ee32f886c65e63800d54e73932d84858917cb219513ca62",
+      "bytes": 519330,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6dc62760f8235e462db8f91f6eaa1d90.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6dc62760f8235e462db8f91f6eaa1d90.cab",
+      "sha256": "36d61dab6fe34a64e19a2c83a12b62c7b8fb2911ef3153a7851782070afc1f32",
+      "bytes": 6139698,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/6e142759ce3a6e36e52e089caffaffe1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/6e142759ce3a6e36e52e089caffaffe1.cab",
+      "sha256": "d33928f7d387eb6b5c9b09f9a88725e8d29d176785fb089b09e567a8b7c18eeb",
+      "bytes": 186076,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/7011bf2f8f7f2df2fdd2ed7c82053d7f.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/7011bf2f8f7f2df2fdd2ed7c82053d7f.cab",
+      "sha256": "3df0bab53e09fa5d11f924a0af01543d6de730a8b8a80329daf54221320e90f1",
+      "bytes": 567628,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/732eefaf52275b7a708311a31c82c814.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/732eefaf52275b7a708311a31c82c814.cab",
+      "sha256": "a104f4c7844512c3008ee8debdb6255589010dfef6c9b8fd93a146eece886b25",
+      "bytes": 1014908,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/7608a6c73562800dd82c513d6d2dcd94.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/7608a6c73562800dd82c513d6d2dcd94.cab",
+      "sha256": "4083a1b1c4a91905867229b086d9a286e7df8eb4b96635576ba952d050e5582f",
+      "bytes": 1169064,
+      "observed_utc": "2026-10-22T17:59:23.215632+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/767acf9ebc7b9e4a87d264eb57bd7ea7.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/767acf9ebc7b9e4a87d264eb57bd7ea7.cab",
+      "sha256": "a992791d9eb700622df85befe8413b1e7e2a755d9ba3040b11f689e80f2c26f8",
+      "bytes": 171206,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/77adc85e5c49bbd36a91bb751dc55b39.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/77adc85e5c49bbd36a91bb751dc55b39.cab",
+      "sha256": "96c18fb6ebcfc5180be5f991500fa699fe4abaca4ef8f4f42a66ce7388c0dc6e",
+      "bytes": 1181736,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/781e7c95c1b6b277057c9b53b7b5a044.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/781e7c95c1b6b277057c9b53b7b5a044.cab",
+      "sha256": "8ec91fa15cc41714644e526d71c3392916b3fa5182a9d7db3c6eefa1e7913368",
+      "bytes": 38086,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/79e66d69e463b9f04d9d2d98da1bdda1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/79e66d69e463b9f04d9d2d98da1bdda1.cab",
+      "sha256": "55b9daab618b70074f4a514622e6c0aa6858c8640631efb15992f652120ecf18",
+      "bytes": 1249908,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/7a2e0aedd6d5e2ffeb7baa69b520ea7e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/7a2e0aedd6d5e2ffeb7baa69b520ea7e.cab",
+      "sha256": "0b7d387c63bd68f7343bdda766477a67d565d901e5e529326555436f0fc97d65",
+      "bytes": 4470170,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/7a8eaeba46cc44d02a9a46fcbb641a12.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/7a8eaeba46cc44d02a9a46fcbb641a12.cab",
+      "sha256": "119159d521bd1e75e6ba16f41f9a9b0b09a4102a8e7c4bc50acd356044c2a6ea",
+      "bytes": 2892470,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/7e6e508fe7702607bff0b24b764e4990.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/7e6e508fe7702607bff0b24b764e4990.cab",
+      "sha256": "56a70d7e9609d84d7fc8c87def6b8159dae01b8edf6fe863229eeb0180ab2af7",
+      "bytes": 22282,
+      "observed_utc": "2026-10-22T17:59:23.231246+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/82ffd11e6716eed0941e144dd5491893.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/82ffd11e6716eed0941e144dd5491893.cab",
+      "sha256": "a32e873f97e813fe37d2b45be3b5cc350f1444be1504cbaffedaec01930b4f4f",
+      "bytes": 14862734,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/831d004a8f355684ab94810176e8d4ec.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/831d004a8f355684ab94810176e8d4ec.cab",
+      "sha256": "d032f933f34435a76fe78ae78e371cb00d89ea616c9f83f1fa9ea5ea3985a8b6",
+      "bytes": 61728,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/84cf100ee76440117226cfb9af196ba3.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/84cf100ee76440117226cfb9af196ba3.cab",
+      "sha256": "2a87c5e57f91ff2dd2300751593793b41abb646cedeb9fe6f868015ee07baef1",
+      "bytes": 47880,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8540fa7f7b5cfd122e540053bd5240a8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8540fa7f7b5cfd122e540053bd5240a8.cab",
+      "sha256": "71ab1c47225445e10ca61af6f5af94d30797d23f3526c2230bc0644a5744044c",
+      "bytes": 411760,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8624feeaa6661d6216b5f27da0e30f65.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8624feeaa6661d6216b5f27da0e30f65.cab",
+      "sha256": "6cd116c305a42ac4375881f9addd4b301dbd314b246c4fcf3922cf64daeadbc8",
+      "bytes": 47850,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/870d7f92116bc55f7f72e7a9f5d5d6e1.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/870d7f92116bc55f7f72e7a9f5d5d6e1.cab",
+      "sha256": "b29fddb3439f0573f72846122163538d02595044d9b5e7aff8ae7150c7ba285f",
+      "bytes": 22310,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8774e9e67bb2b9439999d036462e313b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8774e9e67bb2b9439999d036462e313b.cab",
+      "sha256": "99d95719c23b0a85dfe3db41cc66078bddd19b4cc271d2a673267ab5772b6c63",
+      "bytes": 489628,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/87ac45e9f9fd11d3ee29163848a9a012.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/87ac45e9f9fd11d3ee29163848a9a012.cab",
+      "sha256": "1a844f7037777b90e347defbeedbb00d6e61eabc3ccd086e21d2ba43437a98fd",
+      "bytes": 36086,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/886bc4b159ab474599ddf295528247b9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/886bc4b159ab474599ddf295528247b9.cab",
+      "sha256": "af4c2042be1411e6c30834f331766d46976688e86c3c2ee84671f94802d90e05",
+      "bytes": 74388,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8adae046d03a4d9b36093ab14d781cbe.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8adae046d03a4d9b36093ab14d781cbe.cab",
+      "sha256": "533379541773c070d295d4e006552dfc2f995282be2fbb0326caca3088222c7d",
+      "bytes": 557174,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8ae6e3f2b02bc9aa4d16ce91ff65faf9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8ae6e3f2b02bc9aa4d16ce91ff65faf9.cab",
+      "sha256": "f908a66726f63db66bde87ac5e9b0b0617425382c91c95f66c3b8af1afe0bc7f",
+      "bytes": 1893124,
+      "observed_utc": "2026-10-22T17:59:23.253581+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8c9919a5e8638dd2b352b0a218939370.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8c9919a5e8638dd2b352b0a218939370.cab",
+      "sha256": "ba9f431dd4f66c84fedecb49642253c23c13f16d25a035681a2dd82df9921ec8",
+      "bytes": 5242774,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8d25d56b34194978403f6bba33f419c5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8d25d56b34194978403f6bba33f419c5.cab",
+      "sha256": "fc8c639c5a11a28f85ec618c5cbc6ebbf94acb3b7d01fb9d7776706f0cac30f9",
+      "bytes": 1258740,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8d9784f003a72e4680f33c347cff75d9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8d9784f003a72e4680f33c347cff75d9.cab",
+      "sha256": "a0e1987e63e0f086b640a15b5cee0b8a88a025693ad55326ccb594a2c0526664",
+      "bytes": 142734,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/8f229e5b514b00a3afc0a17397681bde.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/8f229e5b514b00a3afc0a17397681bde.cab",
+      "sha256": "d37b9aebe4ee72dc9d28c9917dcc798244e098e42ef06370f24e7f7f3700faad",
+      "bytes": 699960,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/901b3fca4c41dbd30c3aa1d2b30c6d71.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/901b3fca4c41dbd30c3aa1d2b30c6d71.cab",
+      "sha256": "d7ffe78eab5730b3ab8856dbb2ee0aa99c4fa2dfc54ed68330f8cb38e4b6a56e",
+      "bytes": 55766,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9050f238beb90c3f2db4a387654fec4b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9050f238beb90c3f2db4a387654fec4b.cab",
+      "sha256": "fc018ad85837dd2c778b90c31dbbc7b31a7e249ce39755a2e286c0f9a0b30f05",
+      "bytes": 18672,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/915b9b8c059d8741e901a89f5e1ddc2c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/915b9b8c059d8741e901a89f5e1ddc2c.cab",
+      "sha256": "5281f1f66527a51f8924ca87eec5b4ad2139aecafb1929baacf3ca7f3bbfc0dd",
+      "bytes": 42580,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/93b31c4dee564de581e7a00f1378aeae.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/93b31c4dee564de581e7a00f1378aeae.cab",
+      "sha256": "490a2ef508b8237b4a6a29df5e42ef00b1a1a8fab789fb3f3508d7550d6e2462",
+      "bytes": 164870,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/941dd5f1c32c7cec49703f0dfde8eba5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/941dd5f1c32c7cec49703f0dfde8eba5.cab",
+      "sha256": "84d2b7e4ca9620fb8cfbfbd68dad8ab9f093a80f437106bbc217656e3b244078",
+      "bytes": 494050,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/997e08fa1159d8ef11e6f9e684a964f0.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/997e08fa1159d8ef11e6f9e684a964f0.cab",
+      "sha256": "9925c5be34e81491c9d65a902e29b08add1c263c5c051cb3e2a53132f8d38570",
+      "bytes": 21212,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9adccd836bc489e252549a89a4fa8cc3.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9adccd836bc489e252549a89a4fa8cc3.cab",
+      "sha256": "4eac0b684325f28c9c98015369fe984e1f378d913afe4c412714c61e3b821681",
+      "bytes": 175064,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9d2b092478d6cca70d5ac957368c00ba.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9d2b092478d6cca70d5ac957368c00ba.cab",
+      "sha256": "fed058f8a404506f4b08e23597586ccb6b725bd5059ebd0a5a65a6d33d7cc5b5",
+      "bytes": 71784,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9deaf43e263fecaa37191931b7ff7296.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9deaf43e263fecaa37191931b7ff7296.cab",
+      "sha256": "eff912d23820cdaf21e77b9a19e4be4e6a7380a10b4346092442ea4d7765768d",
+      "bytes": 69118,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9ed16d95c5e6b06761cda7bdc29e71fe.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9ed16d95c5e6b06761cda7bdc29e71fe.cab",
+      "sha256": "e63d1c6a291b6f30bb43dfbc66df769e4dd7263e16726ef1b5e660203372eb5a",
+      "bytes": 6203802,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9f0be655144a0c68c7f087465e1ad4f9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9f0be655144a0c68c7f087465e1ad4f9.cab",
+      "sha256": "4a4c0381c61098f1513346e8b37bd114c7e66865ecb70ca394938b350f300187",
+      "bytes": 19372,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/9f8944e2cc69646284cd07010e7eee99.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/9f8944e2cc69646284cd07010e7eee99.cab",
+      "sha256": "4d4242dfd45cc1ec02fe9de0a3d3bd11d89f5b31db82958489699ade245224cd",
+      "bytes": 145328,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a011a13d3157dae2dbdaa7090daa6acb.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a011a13d3157dae2dbdaa7090daa6acb.cab",
+      "sha256": "99609130e8a061c32a555b523d229c7c1cfaac385d8bfba9dac6918821007417",
+      "bytes": 22208,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a03686381bcfa98a14e9c579f7784def.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a03686381bcfa98a14e9c579f7784def.cab",
+      "sha256": "e836d68776fd11a20e9719474d40dfb212ae2de7ac8850930c6409d822c2af52",
+      "bytes": 46458,
+      "observed_utc": "2026-10-22T17:59:23.262627+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a1d26d38d4197f7873a8da3a26fc351c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a1d26d38d4197f7873a8da3a26fc351c.cab",
+      "sha256": "dd49d4bfe14955da6d05cee05780a7946bf68378d719adb5afdb467731659c81",
+      "bytes": 3726146,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a22d6a2483a921a887070cd800030e47.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a22d6a2483a921a887070cd800030e47.cab",
+      "sha256": "ef5195ef7b76164a2605218e23ce46c755d47dc8ee70cc2222b407164d67e091",
+      "bytes": 1057364,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a29a0c716f903f42aca181dca250f681.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a29a0c716f903f42aca181dca250f681.cab",
+      "sha256": "4f2d61e2aa06ee89f2bee840d99f38653087c8aa8628d907ed31fcb2fdeb3140",
+      "bytes": 28920,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a30d7a714f70ca6aa1a76302010d7914.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a30d7a714f70ca6aa1a76302010d7914.cab",
+      "sha256": "8a89760c39c708224e095e489392acded1946427d8fb57402f959b46540afb25",
+      "bytes": 2009600,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a7eb3390a15bcd2c80a978c75f2dcc4f.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a7eb3390a15bcd2c80a978c75f2dcc4f.cab",
+      "sha256": "ac1ddd9c95613de665f17f779754c263dde1a961450551eecb3f4bf70da95de7",
+      "bytes": 1980814,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a9b2b3a68bb2defdce83b6d56890090b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a9b2b3a68bb2defdce83b6d56890090b.cab",
+      "sha256": "ad1587a1f2720004e3a8ffd3a9666e7bad766dbb94292c1a7e65a12e22b0bef1",
+      "bytes": 111142,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/a9f72fa9efb22bcd45d7a260b1cfea27.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/a9f72fa9efb22bcd45d7a260b1cfea27.cab",
+      "sha256": "d0e89f7741729966acc9a3155595d7362e674345f5626b60e71a9530f70dfd95",
+      "bytes": 1764680,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/abbeaf25720d61b6b6339ada72bdd038.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/abbeaf25720d61b6b6339ada72bdd038.cab",
+      "sha256": "cb414efb400882578716d1475888eb2c95621a6801611e35b0e1f22eb4314759",
+      "bytes": 145318,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/af2fdd5d3e2de65c266eee3cf9872f9d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/af2fdd5d3e2de65c266eee3cf9872f9d.cab",
+      "sha256": "b14ebf8e1931eeff5b15732ca03498c13eb31663bee5598db1064ac25c2c5a40",
+      "bytes": 1605488,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Application Compatibility Toolkit-arm64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Application%20Compatibility%20Toolkit-arm64_en-us.msi",
+      "sha256": "da514d249d240b9a2469925eb9b62aa42539ab24904878353fdd5b8b7595c6db",
+      "bytes": 659456,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Application Compatibility Toolkit-x64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Application%20Compatibility%20Toolkit-x64_en-us.msi",
+      "sha256": "e69a2c9e9023ba80a813fe0cb67d3b1d5a3b2daef31ff24189c50fcdd9200f3d",
+      "bytes": 663552,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Application Compatibility Toolkit-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Application%20Compatibility%20Toolkit-x86_en-us.msi",
+      "sha256": "41999aa6c1f54516ef8d4220f86f8a30ece42bf1c9ad27fccb98b8cff032455b",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Appman Auto Sequencer-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Appman%20Auto%20Sequencer-x86_en-us.msi",
+      "sha256": "c53b5f37149fa832616ddcc428160382ebac147a1d295954fbdbfd01f8a7cdbb",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:23.278323+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Appman Sequencer on amd64-x64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Appman%20Sequencer%20on%20amd64-x64_en-us.msi",
+      "sha256": "eba1b46fa2daa55003bb0e89735ac9b6ff592b2a7164d22483ce2bd719d27a05",
+      "bytes": 692224,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Appman Sequencer on x86-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Appman%20Sequencer%20on%20x86-x86_en-us.msi",
+      "sha256": "873acebf1c53e7afce215e8f2c48ee75d0e61b0483b6afb2b6e6d0874c4700c0",
+      "bytes": 610304,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Assessments on Client (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Assessments%20on%20Client%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "0048c2c3c54a358613a66fbbc7898420207564ce2d072e2ab6fe51120101e0f1",
+      "bytes": 835584,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Assessments on Client (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Assessments%20on%20Client%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "1785b10cf640d06833d469ecd04392f7d2ab233cea7aa26b39152838b85e72c1",
+      "bytes": 626688,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b030a522352ccbbbc2fa88e4016c4b6e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b030a522352ccbbbc2fa88e4016c4b6e.cab",
+      "sha256": "750afaf2c2cd1b2d481cc65c8e2473864cc1fc5b5fd27dac9af5eedd3ebf72a8",
+      "bytes": 2313418,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b1b61a66720e6e45853f71c13c134227.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b1b61a66720e6e45853f71c13c134227.cab",
+      "sha256": "36e6387fb3c0a925265a7ddfe5f427bd528d1e539efa726214325d1b2d02166a",
+      "bytes": 933218,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b205ceed2c8411c13fe9e2e853bd37fc.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b205ceed2c8411c13fe9e2e853bd37fc.cab",
+      "sha256": "53e660c9a5a61380c7c63184dd4effbfe36e3d07d0bbf8937d683e3fc67d57c3",
+      "bytes": 18988,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b2197baac9d94e4eb774ef11bc66233b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b2197baac9d94e4eb774ef11bc66233b.cab",
+      "sha256": "647e70ccfbf64ee67f55fd80816b799abc77794dbe0a2f404df9b0f6b301e597",
+      "bytes": 23938,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b23352a27f081898f997944c1a0f44de.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b23352a27f081898f997944c1a0f44de.cab",
+      "sha256": "7360451090af120e06308d241739a004042647efec558f1b1018b991bceb469a",
+      "bytes": 153596,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b2bff1e6050294112e13849b614acf35.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b2bff1e6050294112e13849b614acf35.cab",
+      "sha256": "229140dad03fc885571e53b9236fb5dd43bb6aa1102e92ba70b961bc7153f1ac",
+      "bytes": 2587160,
+      "observed_utc": "2026-10-22T17:59:23.294070+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b3892d561b571a5b8c81d33fbe2d6d24.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b3892d561b571a5b8c81d33fbe2d6d24.cab",
+      "sha256": "5653240b4d2e60ef422b3179a02a2f5c52e32d0b10e16a46ae2ec1a98f1582c1",
+      "bytes": 105665102,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b38cadba7626a82b25c9defa9877a3be.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b38cadba7626a82b25c9defa9877a3be.cab",
+      "sha256": "6016e603a94464e968347da31156d1f21cb27e13d680d63886f2c0d132591580",
+      "bytes": 625274,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b4687bc42d465256ad1a68aec6886f83.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b4687bc42d465256ad1a68aec6886f83.cab",
+      "sha256": "11d8c9fb239f3a70289bcaa83ba9d6e52d8bdaf8dde92eebc6d9f623a6bc7b7e",
+      "bytes": 1893010,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b50ca418bcca75b45d1b7a32be8ba97b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b50ca418bcca75b45d1b7a32be8ba97b.cab",
+      "sha256": "21dfedd583e0f6a76f284de57e7482d97d34160e14b6359d8c7448ebf559095f",
+      "bytes": 838908,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b50e39502c26b1b66b9636983ed044c5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b50e39502c26b1b66b9636983ed044c5.cab",
+      "sha256": "cf34dc04def53f828485fb58dd0268bb97bef35a98204aa541592947e60e38b1",
+      "bytes": 1723344,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b5e97e57b324181559318a9a2fa2fe80.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b5e97e57b324181559318a9a2fa2fe80.cab",
+      "sha256": "cbfc3b8484130f56e1056586dd7c3d415a40cb90d5e592268c2df67f4ac5c9d6",
+      "bytes": 1033366,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b6758178d78e2a03e1d692660ec642bd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b6758178d78e2a03e1d692660ec642bd.cab",
+      "sha256": "80e5cb356664376f6ea6a5634292e687dbae7c51f24bcf8ee656f5028b390f7a",
+      "bytes": 24858,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b72834f8f22e89676f88009479e1d2de.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b72834f8f22e89676f88009479e1d2de.cab",
+      "sha256": "1c0a4c2249c15247131008216c086e3e5bb63088e85f216cfad1e838b240dd97",
+      "bytes": 32790,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/b80e088c414c41ff73ed611b3c18874f.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/b80e088c414c41ff73ed611b3c18874f.cab",
+      "sha256": "f2be6ea1c490a8511cd53c6fe973690742c97c3720c1000591d84b2cb7b05f95",
+      "bytes": 25156,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ba9a5dbf6956f64bbdb09d01ced5eccd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ba9a5dbf6956f64bbdb09d01ced5eccd.cab",
+      "sha256": "98ac13e0300c1847caac9556d9949b8a8dcab55280a989a50070363e96c006ba",
+      "bytes": 46214,
+      "observed_utc": "2026-10-22T17:59:23.387670+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bb5aa1f1c39269df2835409a8f52b50d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bb5aa1f1c39269df2835409a8f52b50d.cab",
+      "sha256": "8976da6754232e757763d37b3771eb6d2c2f1c40c6ecf3ab22cd2b7277544492",
+      "bytes": 2327842,
+      "observed_utc": "2026-10-22T17:59:23.403329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bba98c61346d05faea37846d4ef28162.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bba98c61346d05faea37846d4ef28162.cab",
+      "sha256": "43bd30bcb7fd87e8ab7bda3c9b8b1669548b3f5244a17aa0c51cc7d4569c566c",
+      "bytes": 558142366,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bbf55224a0290f00676ddc410f004498.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bbf55224a0290f00676ddc410f004498.cab",
+      "sha256": "4f6351fe31ff58aa5ef81e407ef74071b149f0b42e200b4c036398c1068d687b",
+      "bytes": 77696,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/BCD and Boot-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/BCD%20and%20Boot-x86_en-us.msi",
+      "sha256": "d11d0fbfc92ae05c359ab4a0dc200da8fd85620b8929189b0f027be63ac4f6d5",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bd00e61b3056a8aa44b48303f6fa1e62.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bd00e61b3056a8aa44b48303f6fa1e62.cab",
+      "sha256": "e93db215e004a13ab1c6e51f4e9b7ea91a36d8f6db46eee517bc17d3e9f5d6ae",
+      "bytes": 1085424,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bde7112522a3e1f44d7f40bb7a283018.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bde7112522a3e1f44d7f40bb7a283018.cab",
+      "sha256": "0f36c95930fac4eff5fe4af5e6f39720e18b8192282adc3b9dd00d5059d35177",
+      "bytes": 20062,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/be7ebc1ac434ead4ab1cf36e3921b70e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/be7ebc1ac434ead4ab1cf36e3921b70e.cab",
+      "sha256": "1b1eacb08189c2fb6389bbc2f448ebec147a9fd3449987d3d1048b8ae0e31d4c",
+      "bytes": 5224028,
+      "observed_utc": "2026-10-22T17:59:23.872066+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bf20c035f3d1577ab64bdacea9eb011c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bf20c035f3d1577ab64bdacea9eb011c.cab",
+      "sha256": "48883ea6eb74e81965f0a1fe9d7b9de0d5b6fbc8d922b7e6389a8a91b25506f1",
+      "bytes": 2110418,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/bf7b6300431984daf850cc213043c7eb.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/bf7b6300431984daf850cc213043c7eb.cab",
+      "sha256": "d1bd734e075476b424f1bf124b5a5403111bf824e41c2932e957d66aa5c3155d",
+      "bytes": 2172658,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c22f40e58472cada1be3a64d8c202c81.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c22f40e58472cada1be3a64d8c202c81.cab",
+      "sha256": "8f254d1f59c32ac97f483e21f24dd6911e23e3e6503d007d24ea4bc66ad6eaab",
+      "bytes": 313630,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c300c91a497ea70c80a6d0efc9454c35.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c300c91a497ea70c80a6d0efc9454c35.cab",
+      "sha256": "a2b8d4a5d240bb447c4e67c1aac2f98a6c3048d76b28a6417b1ee8450a04d689",
+      "bytes": 269450,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c467051cd4d4b8b82d99724c5e1a3a5d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c467051cd4d4b8b82d99724c5e1a3a5d.cab",
+      "sha256": "6775cd12f663abd8c806065ce3c09b17b52a79996bae522760a5e88b3a5507d5",
+      "bytes": 729366,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c4d98b6a3b4836e72a1159f56cfa20cf.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c4d98b6a3b4836e72a1159f56cfa20cf.cab",
+      "sha256": "96c38abfb0c38f2541d9f129b72d5abd7f89f7d66f390bd5e6f8114a70b38795",
+      "bytes": 711918,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c67e88a62ef1cb6d7b0faf010533f0d7.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c67e88a62ef1cb6d7b0faf010533f0d7.cab",
+      "sha256": "260222c7373f6e7d56d1978b18d221c3133dac577c727150b9e2f4c5e726f462",
+      "bytes": 48012,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c7d6e564ab2de1a5e09434725946ea67.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c7d6e564ab2de1a5e09434725946ea67.cab",
+      "sha256": "be08c7e958e361e7a408f69df8ed7d1ce4588fdc6b3ea3b5fe32ea3732224c6f",
+      "bytes": 19852,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c8a93bbadb2672b45a977d95723a6756.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c8a93bbadb2672b45a977d95723a6756.cab",
+      "sha256": "8af3317dfd67474bd7d2be61bca212676867c9c08133472253dcae7dc93d4ca3",
+      "bytes": 19102,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c98a0a5b63e591b7568b5f66d64dc335.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c98a0a5b63e591b7568b5f66d64dc335.cab",
+      "sha256": "ea22c8280f622728f4f4accdc44d998e8a7ef316cc4547b935fbe5177e07e9f6",
+      "bytes": 214270,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c98f90e94c988845dcc6c939ab54cf24.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c98f90e94c988845dcc6c939ab54cf24.cab",
+      "sha256": "b17c10b62321c6ceb1f39558cc5d8510154bacf9daec6b72f735513e98212a85",
+      "bytes": 176800,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/c997e16c91853657131a2f6958af3cf7.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/c997e16c91853657131a2f6958af3cf7.cab",
+      "sha256": "dee98c2bae3b596d24e49b1103e81a4bf26762078e87653e89d4ae987ff9dd7c",
+      "bytes": 175144,
+      "observed_utc": "2026-10-22T17:59:23.887695+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ca2a0dd24769ecef3f6889a1eb7ecb74.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ca2a0dd24769ecef3f6889a1eb7ecb74.cab",
+      "sha256": "6d0e5d88128cd01c5b49159ced7a7da37460d4b142ae2deb19e0d4e015a7b30a",
+      "bytes": 14365630,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cb43cb685388b3f1f60b2301633c1fa6.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cb43cb685388b3f1f60b2301633c1fa6.cab",
+      "sha256": "3742f83a8dcc9a6c7de295e790edc14ae53a2e424d962302592dfee3a68cae6e",
+      "bytes": 38416,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cc14030de775eaeb8dbde9c6be04be40.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cc14030de775eaeb8dbde9c6be04be40.cab",
+      "sha256": "97afcadec1903ff3e95d8d2e9752494ea927c46494091e51b71c760b89e93d62",
+      "bytes": 1018362,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cd23bfdfd9e3dfa8475bf59c2c5d6901.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cd23bfdfd9e3dfa8475bf59c2c5d6901.cab",
+      "sha256": "c1f6382956cc9607c67aa0bf4b3db1a7f695c7ee0381f42fef8190b054557433",
+      "bytes": 1261986,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cd4fecfb8f7f082db3cec8b7c5455e9b.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cd4fecfb8f7f082db3cec8b7c5455e9b.cab",
+      "sha256": "59e7638f5a5afbaead456da61d0fbe1420f5179c402a527ad7e3160c3fd21b4f",
+      "bytes": 50794,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ce699cafe1192161c5e6a00c4b16c535.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ce699cafe1192161c5e6a00c4b16c535.cab",
+      "sha256": "264487e20bd17b259f2235af27e2e1486f0708f6f8d8fde6588b36636abb2974",
+      "bytes": 19926,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cee2f676661a3a238eedf6153d46cb1e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cee2f676661a3a238eedf6153d46cb1e.cab",
+      "sha256": "85250d60d483b856208ffdf191030400ccde75cbe36d2c2ceaf925a4f9212fe3",
+      "bytes": 1890766,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cfb8342932e6752026b63046a8d93845.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cfb8342932e6752026b63046a8d93845.cab",
+      "sha256": "91b24663bb4b4546eba1a4a6072f0b34c2c0e063d23c47d5386c00350861996a",
+      "bytes": 927106,
+      "observed_utc": "2026-10-22T17:59:23.903329+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/cfd1e9bfbfa2edfd547c63b8d86630ff.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/cfd1e9bfbfa2edfd547c63b8d86630ff.cab",
+      "sha256": "df16dfc2c711819ebee52d4addcd26be9616718f1150de819bb0c2971488d850",
+      "bytes": 6120004,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d15a84c48db1f6aba47403c9b5068c39.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d15a84c48db1f6aba47403c9b5068c39.cab",
+      "sha256": "57d276a67b27e1a008335d05c2db748c82530e0d666e7e2dc7068a8c13e5037b",
+      "bytes": 1759812,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d2611745022d67cf9a7703eb131ca487.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d2611745022d67cf9a7703eb131ca487.cab",
+      "sha256": "a74e6adf3a47b6dcfd4d3b1276f2f5e9337f589769f422db4f2e3bd94f439759",
+      "bytes": 1090790,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d2854d845dccc9ef888738dacbd8f707.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d2854d845dccc9ef888738dacbd8f707.cab",
+      "sha256": "861ba6c3147238d1578b13192f5e4c8e799c797c9a78f90e816a9a2ebddfde14",
+      "bytes": 2932340,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d344672ad340db2b98b706ff06350843.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d344672ad340db2b98b706ff06350843.cab",
+      "sha256": "b2ee8e271338e8e7f0ba75a736607fdb5a7ab1c52df61e5e087f854a225014c2",
+      "bytes": 189880,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d3cf4d885932e92fada0675dc52d6752.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d3cf4d885932e92fada0675dc52d6752.cab",
+      "sha256": "03d4f729f7ec3ded04b49b7aabc3cf0593d4787496c61e8be8970830ccf1334f",
+      "bytes": 4646740,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d519967dbb262c80060d9efb5079aa23.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d519967dbb262c80060d9efb5079aa23.cab",
+      "sha256": "0ddbd432448084457b1fcd27afed8f1168cf601540b708c7b348af9c79084573",
+      "bytes": 1249794,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d562ae79e25b943d03fc6aa7a65f9b81.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d562ae79e25b943d03fc6aa7a65f9b81.cab",
+      "sha256": "3569f68534420cd8d9937aece8a3fabf18ad7b9c93e72d150e330a83015918a6",
+      "bytes": 27788,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d63b8dffc336f21acdc0f97850bb5963.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d63b8dffc336f21acdc0f97850bb5963.cab",
+      "sha256": "b1d1d98c7eb0b0c43b5266530fb3ab45549d9721ef523389980b809d0e309c9f",
+      "bytes": 2214686,
+      "observed_utc": "2026-10-22T17:59:23.918954+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/d727e5c6c8037b1f6c628fa2227d0bd6.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/d727e5c6c8037b1f6c628fa2227d0bd6.cab",
+      "sha256": "5a766679ebaf6574462bd24757cc8aa28e485b88cccbc104b955ead3a5780c05",
+      "bytes": 3538328,
+      "observed_utc": "2026-10-22T17:59:23.934596+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/dd0ca1bac89d99ecd29f764f8ba00ceb.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/dd0ca1bac89d99ecd29f764f8ba00ceb.cab",
+      "sha256": "d1b876a9d66ba1f422c9cfe0232c44a6a8c75562011ea0ff1555f796bc01414a",
+      "bytes": 3214892,
+      "observed_utc": "2026-10-22T17:59:23.934596+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/dd6d04846f4eb5095edef870d4ae408e.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/dd6d04846f4eb5095edef870d4ae408e.cab",
+      "sha256": "fb97ac2f4332d35ea43ffbf0aa833c75612c0090048ff2526dfe1e0f4c13d44b",
+      "bytes": 8098970,
+      "observed_utc": "2026-10-22T17:59:23.934596+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/dfbb743df86debc6e33cdd2000cafeb8.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/dfbb743df86debc6e33cdd2000cafeb8.cab",
+      "sha256": "a0faa5c78ee7f58778299967ff947ee57eb718ea7b8011eff4635c8d6b0acbfd",
+      "bytes": 2711302,
+      "observed_utc": "2026-10-22T17:59:23.950213+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/dotNetFx45_Full_x86_x64.exe",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/dotNetFx45_Full_x86_x64.exe",
+      "sha256": "a04d40e217b97326d46117d961ec4eda455e087b90637cb33dd6cc4a2c228d83",
+      "bytes": 50352408,
+      "observed_utc": "2026-10-22T17:59:23.987545+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e2616196812aa14bec761a56d6567ac9.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e2616196812aa14bec761a56d6567ac9.cab",
+      "sha256": "5620008ec201dc2edb67b8d6ce46704caf438309efe476d47cc8409d813ff6f3",
+      "bytes": 659374,
+      "observed_utc": "2026-10-22T17:59:23.987545+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e39af06f3e2cea568cf3e47dc590d9de.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e39af06f3e2cea568cf3e47dc590d9de.cab",
+      "sha256": "136d786458d16e822b550f6f28e8a3fe784b09a01cb6d39de79919877ebfc2f5",
+      "bytes": 6119748,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e4dc2b54abac1a0455a410f7cf84d419.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e4dc2b54abac1a0455a410f7cf84d419.cab",
+      "sha256": "230845c75367aa5182a1370cd1ce32cdaf956c13d4ca433f4eca1a1d315d4b67",
+      "bytes": 22298,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e5f4f4dc519b35948be4500a7dfeab14.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e5f4f4dc519b35948be4500a7dfeab14.cab",
+      "sha256": "e6c4d96fc25b837f667937301c6433204de7c11aedff15e938648cbbbc5fd461",
+      "bytes": 19368,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e6349cc7301cf9d9a6a3a673b6b7c10f.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e6349cc7301cf9d9a6a3a673b6b7c10f.cab",
+      "sha256": "ce4581698712473ccd762c92acf96f6122f6ad56e90a23a732edb833afb5fb9a",
+      "bytes": 6109872,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e680c0b9ab0c101fcc71698257990785.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e680c0b9ab0c101fcc71698257990785.cab",
+      "sha256": "82e3f3155dfbf3b108888f1ceb9bee6d140cf64907f6db93974c1ee9e0121757",
+      "bytes": 1607192,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e718eb532fa17fd014ec933dd4f131e0.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e718eb532fa17fd014ec933dd4f131e0.cab",
+      "sha256": "f03d59032b89d71cea654e0f88965de594bdd86df9a4bf317aa0861eb3d3994c",
+      "bytes": 32236,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e739764d2d7f0babe3f10beef7348fa3.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e739764d2d7f0babe3f10beef7348fa3.cab",
+      "sha256": "4c38ee2dd2e6e43ccdde754d04ab36abd15c6a3eb8371c99c3c0195189d6a96c",
+      "bytes": 84948,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e7455452ef22c741911f241c6778b85d.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e7455452ef22c741911f241c6778b85d.cab",
+      "sha256": "54d994ddcc4fd522d7dcc5720bc0e325fcecc2aaa5d7e2a6cc1b8798ba57b26c",
+      "bytes": 19090,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e7f61a72b469092c67b45ae4c5e59c38.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e7f61a72b469092c67b45ae4c5e59c38.cab",
+      "sha256": "b21d94d27b80681c9b283bded3fcc761a56717d803fea1f7c46853d43a305ec2",
+      "bytes": 28712,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/e8171d0204e37ce7144ae09197584c79.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/e8171d0204e37ce7144ae09197584c79.cab",
+      "sha256": "181830b272520c234752cf360e21e700f3af41a4ab5112ce443c33d1712fe3b0",
+      "bytes": 162810,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ea9c0c38594fd7df374ddfc620f4a1fd.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ea9c0c38594fd7df374ddfc620f4a1fd.cab",
+      "sha256": "f8ce91033bab2843a1b3be1c40a1b27165270cb54c57855250e2b5af777985f6",
+      "bytes": 24228,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/eacac0698d5fa03569c86b25f90113b5.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/eacac0698d5fa03569c86b25f90113b5.cab",
+      "sha256": "0a294c90df9ddd16a1f24a5be5c7f2d27f9b28b94ab58d4237575f8e677824bd",
+      "bytes": 926976,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ec093852a41cbd9d167b714e4f4a2648.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ec093852a41cbd9d167b714e4f4a2648.cab",
+      "sha256": "31bd88211d65d0ebbe500fa1d47d31118b1ceeacd80b8cd1755f8c56fe6b6cb2",
+      "bytes": 24596,
+      "observed_utc": "2026-10-22T17:59:23.997453+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ed711e0a0102f1716cc073671804eb4c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ed711e0a0102f1716cc073671804eb4c.cab",
+      "sha256": "d096e203d5ad52521267d21e0937cff91d4ae6c71c4de7479d33c60ca00c48fc",
+      "bytes": 1010144,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/ee415288dc17f6f29b3dda43d57e4281.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/ee415288dc17f6f29b3dda43d57e4281.cab",
+      "sha256": "89e3203e846b3c199cda674ceb4e18502ca1e87ebb2e08c774bc6217bd978949",
+      "bytes": 43758,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f051f100a86ad4c94057a1d5280d9283.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f051f100a86ad4c94057a1d5280d9283.cab",
+      "sha256": "df2dc94d2f36fc23ddf3f2c5bb48ad718965e3f04d7c26f397e529e55f0d0da1",
+      "bytes": 1151048,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f2a850bce4500b85f37a8aaa71cbb674.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f2a850bce4500b85f37a8aaa71cbb674.cab",
+      "sha256": "eb72cd2c50abc57fa7a6d18bd1b068ca1f0a867271b05bf4c8adc4268e1acfcc",
+      "bytes": 18682,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f480ed0b7d2f1676b4c1d5fc82dd7420.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f480ed0b7d2f1676b4c1d5fc82dd7420.cab",
+      "sha256": "622358ba67194131ebbbfa9a7ad62df6bc7384ecf07b7abcacb5844e2b39f59f",
+      "bytes": 49236,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f4e72c453e36ce0795c8c9fcaae2b190.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f4e72c453e36ce0795c8c9fcaae2b190.cab",
+      "sha256": "eaf5c5c5a9d9890f0ff19a93690b56d551f46d1c83b3bc26b5a9784e42d57deb",
+      "bytes": 49260,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f7699e5a82dcf6476e5ed2d8a3507ace.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f7699e5a82dcf6476e5ed2d8a3507ace.cab",
+      "sha256": "1c54853725d5b53f3e13b0a4ceecea76326068f2b0e7fb1eec900572652c93b3",
+      "bytes": 645368,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/f987bcc2423899313229c1052361a8db.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/f987bcc2423899313229c1052361a8db.cab",
+      "sha256": "b01a117198fc254d936090cbcf399afee99f43395002d6433e5bbe1d684d069e",
+      "bytes": 4958386,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fa7c072a4c8f9cf0f901146213ebbce7.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fa7c072a4c8f9cf0f901146213ebbce7.cab",
+      "sha256": "421f2d8efb47878c408d3fdd45280cd2cdbe3cf6a52e28ba0d1e7255579d5d7b",
+      "bytes": 1592230,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fb4caf9acea1e5ab8349e1f22377438c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fb4caf9acea1e5ab8349e1f22377438c.cab",
+      "sha256": "09262ac4ad0e150e5463f1dedd3421861b46688e19dd8acc946ec5f5efd2c0d1",
+      "bytes": 60946,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fbf606008559f00f1d8c4cc19888d744.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fbf606008559f00f1d8c4cc19888d744.cab",
+      "sha256": "85b5afb7df3485e79f3477f1d98a57bdf3e97cced545cbde7ef5b6f02baef93e",
+      "bytes": 19938,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fcc051e0d61320c78cac9fe4ad56a2a2.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fcc051e0d61320c78cac9fe4ad56a2a2.cab",
+      "sha256": "24c29f0ee8597869e73d03e6f9584c0e90b201cf43ba73f287b2dcd01522462f",
+      "bytes": 48992,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fdfb8cfc2e4d170431fb6b8c67210672.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fdfb8cfc2e4d170431fb6b8c67210672.cab",
+      "sha256": "03d871d6efd9550d975165fcb8ffa0a4cc34cbff647c49c1753e19d20d42ee97",
+      "bytes": 626870,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/fe43ba83b8d1e88cc4f4bfeac0850c6c.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/fe43ba83b8d1e88cc4f4bfeac0850c6c.cab",
+      "sha256": "0a8ac67a41e1d2941b2d9f59fced1a527b324640275e806790da2b0824d5761b",
+      "bytes": 1871786,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/feadf48e9bf92b4650615d9195774178.cab",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/feadf48e9bf92b4650615d9195774178.cab",
+      "sha256": "2e0ba802325afb3221aaad52f91f2178800beb0a5103eeaa45490210a9f4f8df",
+      "bytes": 2210624,
+      "observed_utc": "2026-10-22T17:59:24.013063+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging And Configuration Designer (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20And%20Configuration%20Designer%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "26731f96db3096457c08e30ef33454e552c4f76f6eded964431068194ff34df8",
+      "bytes": 589824,
+      "observed_utc": "2026-10-22T17:59:24.028661+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging And Configuration Designer (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20And%20Configuration%20Designer%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "1c528c6d8ab582e4fa481814b317c073e5861789d851af63606eaaf4d29f9211",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.028661+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging Designer (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20Designer%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "3fe3803e8e6b93b84a55572e89c547a326a8de60290fce8027464c640fcb2300",
+      "bytes": 598016,
+      "observed_utc": "2026-10-22T17:59:24.028661+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging Designer (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20Designer%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "2e00f958c49f300c41d4aff90292b0247e01f421f925908d0d1a5ea0d738b443",
+      "bytes": 602112,
+      "observed_utc": "2026-10-22T17:59:24.028661+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging Tools Support (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20Tools%20Support%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "3ccef5aa20c8717c512a9e62c0186251d7ad9e0ed5ebdbd18ab7f6c0a2c8cc24",
+      "bytes": 6144000,
+      "observed_utc": "2026-10-22T17:59:24.028661+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Imaging Tools Support (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Imaging%20Tools%20Support%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "43d6e1fd3a4d6f26da7f9e24ff51874c8b71f3c7a0a9d93cabf31af4b5a1954c",
+      "bytes": 18239488,
+      "observed_utc": "2026-10-22T17:59:24.044282+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Kits Configuration Installer-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Kits%20Configuration%20Installer-x86_en-us.msi",
+      "sha256": "f74e3d01a674db476404014e80f6ec197181f0795458a605542dadd9bc6526d3",
+      "bytes": 446464,
+      "observed_utc": "2026-10-22T17:59:24.044282+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Modern Standby Cycle Utility (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Modern%20Standby%20Cycle%20Utility%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "30fca0a61fa16558ffadd286a379a9264f2d53ed93c4ca8f46c35c8dd3291b1a",
+      "bytes": 634880,
+      "observed_utc": "2026-10-22T17:59:24.044282+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Modern Standby Cycle Utility (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Modern%20Standby%20Cycle%20Utility%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "372bd2ebfc6838b1a7cb42ff941d2100ec9cc6340b6f100ef9cf86a1c284d53e",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.044282+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/MXAx64 (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/MXAx64%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "57888adaa8fbb22b9a349c805bbf387a5baf6f53883982e0cb471d5ff06e68c7",
+      "bytes": 14274560,
+      "observed_utc": "2026-10-22T17:59:24.059933+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/MXAx64 (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/MXAx64%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "b8816dc787b4d589b9bf035cb6f8d6cb52c6b7e3e3194b8b3590b7e61713c265",
+      "bytes": 2854912,
+      "observed_utc": "2026-10-22T17:59:24.059933+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/MXAx86 (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/MXAx86%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "345dcbc8f9516e27f8733ae7bba32c7531cf610955d8d2f06bbe4de45099d9d1",
+      "bytes": 11960320,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/MXAx86 (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/MXAx86%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "eaf18f182c5b99008a6233e15cf646b6bf61667e5205344bb9f933eee128bf33",
+      "bytes": 2478080,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/OA3Tool-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/OA3Tool-x86_en-us.msi",
+      "sha256": "9a02d2aed7c664a0d5054aad04cfad857d0541232d8467652cc85ca8997fe06d",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/OACheck-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/OACheck-x86_en-us.msi",
+      "sha256": "65ee8d80e0b5203a5f476d5ac0ba08f8520b6e33663d548cff2a732c10bf16fc",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/OATool-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/OATool-x86_en-us.msi",
+      "sha256": "b88b81bdc74628650e04a390ad6c3d9c3d0340f66a2fc88799f660dec9d755f7",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/OEM Test Certificates (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/OEM%20Test%20Certificates%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "06a9875d5e54acadd63045f6d2f65135a340e81ecc35d786613d4d82a7a44096",
+      "bytes": 688128,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Oscdimg (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Oscdimg%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "2a6d603b51bfac8fdcb28a8db3fb474b1f7e54df0b14a6662b958a401bb178e3",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Oscdimg (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Oscdimg%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "0a23af3f9d433160d1002cf39167a9f6161e2a490819aed6b3609c159a86bae9",
+      "bytes": 585728,
+      "observed_utc": "2026-10-22T17:59:24.075565+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Supply Chain Trust Tools ADK-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Supply%20Chain%20Trust%20Tools%20ADK-x86_en-us.msi",
+      "sha256": "defb7f3198276071cf0ea0b41d38dd15efed61271bd511eb92463ed9a17a7d5f",
+      "bytes": 63918080,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Toolkit Documentation-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Toolkit%20Documentation-x86_en-us.msi",
+      "sha256": "5fad5f210f9094f2845ff86b440fd0c99cd78b3464180e4d63abf9fde19fb10f",
+      "bytes": 585728,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/UEV Tools on amd64-x64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/UEV%20Tools%20on%20amd64-x64_en-us.msi",
+      "sha256": "7d11251195f7b3c0548b474e4d8ac5f57316319ee1bd8b018277b548da03fb06",
+      "bytes": 667648,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/UEV Tools on x86-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/UEV%20Tools%20on%20x86-x86_en-us.msi",
+      "sha256": "bef8277e82dd01b692778673ef08ca03f4298e78b13c98b9073a34327c0071e3",
+      "bytes": 585728,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/User State Migration Tool (ClientCore)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/User%20State%20Migration%20Tool%20%28ClientCore%29-x86_en-us.msi",
+      "sha256": "99eb612086e1f3d85995795aa5d56b4823f2f37ba48b12135864037212335157",
+      "bytes": 585728,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/User State Migration Tool (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/User%20State%20Migration%20Tool%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "aafb7c3cf720f1a27b3159664a0b4d75da7ce475e99e4619f715d5ac2d7bb611",
+      "bytes": 667648,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/User State Migration Tool (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/User%20State%20Migration%20Tool%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "f2d6b354b5bcee742c64665fd617736267e97e5240587151275333a1a1e9c66c",
+      "bytes": 610304,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Volume Activation Management Tool-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Volume%20Activation%20Management%20Tool-x86_en-us.msi",
+      "sha256": "cad0dc80b22c88d0b6b79d2585b777a10621ecaf7246b7b31d805e6a19c3385b",
+      "bytes": 598016,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WimMountAdkSetupAmd64.exe",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WimMountAdkSetupAmd64.exe",
+      "sha256": "9f44baac92fb76b1c1aac994f926bc915212ba7f264bb75ccd554b35ee1a2799",
+      "bytes": 96680,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WimMountAdkSetupArm64.exe",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WimMountAdkSetupArm64.exe",
+      "sha256": "771b13bb2219c32768a1f6ff6a8da6c9324fdcae593cf97c25e7b1aa74ce9b15",
+      "bytes": 79792,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WimMountAdkSetupX86.exe",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WimMountAdkSetupX86.exe",
+      "sha256": "279c4b05e2ae2a3974b474bad5aebed0282e5ef78ee21417c9d974f1ca8e537a",
+      "bytes": 60328,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Assessment Toolkit (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Assessment%20Toolkit%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "0557b32c0c6196772c365bf0b04e69c1aecabf3a1dbd731411b4a7c8fd8b1db3",
+      "bytes": 774144,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Assessment Toolkit (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Assessment%20Toolkit%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "7d6306ea6c834f1a282f3e70878f32cbb69b7aa94b0683c0538b864b0cd8ae03",
+      "bytes": 622592,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Customizations-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Customizations-x86_en-us.msi",
+      "sha256": "55c6158566f488da91bac7252d6b061bd9ce25d385401a201b4bc483f17ad925",
+      "bytes": 573440,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Image Servicing and Management - Headers and Libraries-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Image%20Servicing%20and%20Management%20-%20Headers%20and%20Libraries-x86_en-us.msi",
+      "sha256": "072ee01ff3027a98f99e8bd0fde021e24b64e4fa4dd5d3c80d99080d8a15dbd6",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Image Servicing and Management Tools (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Image%20Servicing%20and%20Management%20Tools%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "b372e4b26eee66132f8517ebe4c7f3dc38b3b40985bcf6fe45a969e7a726c232",
+      "bytes": 589824,
+      "observed_utc": "2026-10-22T17:59:24.138048+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Image Servicing and Management Tools (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Image%20Servicing%20and%20Management%20Tools%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "d3fbd6b9d70635d45b0d295c5e4b2124de8f38c35888c64fd89cccf158eee18d",
+      "bytes": 679936,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Tools Environment-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Tools%20Environment-x86_en-us.msi",
+      "sha256": "24d8182bbe92dffd13eb7c4b876e0aee5acc7e4ff29be486ed3d8f6d7da69b02",
+      "bytes": 581632,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Deployment Tools-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Deployment%20Tools-x86_en-us.msi",
+      "sha256": "b38ea57c03fb4778d5eb314e6677395162963f9f80e2f4c3843cdcb8fca9e7c1",
+      "bytes": 585728,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Setup Files (ClientCore)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Setup%20Files%20%28ClientCore%29-x86_en-us.msi",
+      "sha256": "7a539c088784679cb3c58aebcc72130cf2cd136ccf09b8aae7b53399190137c1",
+      "bytes": 606208,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Setup Files (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Setup%20Files%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "a33fde0d39f95f99eea39b300276080744ffa2a77bc414cad2079a7cbbf4f25d",
+      "bytes": 925696,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Setup Files (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Setup%20Files%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "6831a8a18e714f5b4840e4a942caa70e9cef98c875cb69dccccbf2742058b6e1",
+      "bytes": 827392,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows Setup Files (ShellCommon)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20Setup%20Files%20%28ShellCommon%29-x86_en-us.msi",
+      "sha256": "7de8e4fad70f21ea717058e5ab9a13518208e8cadf0a04ef0587ec5996bae6e2",
+      "bytes": 598016,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/Windows System Image Manager-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/Windows%20System%20Image%20Manager-x86_en-us.msi",
+      "sha256": "66f18dcaeccd3c6c30a4ef7a014a5da542eae5b8f877e337867136305064a052",
+      "bytes": 6610944,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPT Redistributables-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPT%20Redistributables-x86_en-us.msi",
+      "sha256": "6ad00a4b105f1c4d5228363f4f98feb40a3f1c4a81a91d6763834157adac6faf",
+      "bytes": 450560,
+      "observed_utc": "2026-10-22T17:59:24.153687+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTarm64 (DesktopEditions)-arm64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTarm64%20%28DesktopEditions%29-arm64_en-us.msi",
+      "sha256": "9f479dfd861e9dda759f7efa49ed6d17799f020e2e43167465e4c9323223eac3",
+      "bytes": 80637952,
+      "observed_utc": "2026-10-22T17:59:24.231787+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTarm64 (OnecoreUAP)-arm64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTarm64%20%28OnecoreUAP%29-arm64_en-us.msi",
+      "sha256": "37f44657800df3d24b3439449de2fdfef9babbcda2f5b6e5432d8e7d0acd2d94",
+      "bytes": 2990080,
+      "observed_utc": "2026-10-22T17:59:24.231787+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx64 (DesktopEditions)-x64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx64%20%28DesktopEditions%29-x64_en-us.msi",
+      "sha256": "cdf238d8b82e0823f8c6ee25f83d2e09becffe37e3fab5ebf0f7e781d8b29e08",
+      "bytes": 84946944,
+      "observed_utc": "2026-10-22T17:59:24.310075+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx64 (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx64%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "c7a946c355addf66e2bb375fe2e74fe5c54d0a7dd8beb3e0a114f5b7deda39f7",
+      "bytes": 84946944,
+      "observed_utc": "2026-10-22T17:59:24.372579+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx64 (OnecoreUAP)-x64_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx64%20%28OnecoreUAP%29-x64_en-us.msi",
+      "sha256": "dbe3c6ace7c1a9754f745e44dce608dffb14236932d931185d8f353f067a9344",
+      "bytes": 2695168,
+      "observed_utc": "2026-10-22T17:59:24.372579+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx64 (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx64%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "cd56c51abc8a4dde49450e7ab5cc001e6b50c1422545a882292e276ba95c000b",
+      "bytes": 2699264,
+      "observed_utc": "2026-10-22T17:59:24.372579+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx86 (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx86%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "2379c5ceaf7e5d5d37f69c0061ce3533f118057d86a733b312e2710c4cbd495f",
+      "bytes": 77185024,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "adk/Installers/WPTx86 (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/8e0c0f5a-abb5-4358-a51b-168eb40b1590/adk/Installers/WPTx86%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "08d3ef0f2a008674e06e027df21e4156e42114318f36d20e704a40bfe465848e",
+      "bytes": 2347008,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/0b63b7c537782729483bff2d64a620fa.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/0b63b7c537782729483bff2d64a620fa.cab",
+      "sha256": "e016d309d0932d0196b386e743bc9d8109b85163bd4b9dcaecd0ffcef6189d9e",
+      "bytes": 23830,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/13334584cdbf659a8dd105fc34851ea3.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/13334584cdbf659a8dd105fc34851ea3.cab",
+      "sha256": "9373cdbf85d192437b2b7f8fd003ba5e97c9c4265b568d26ef63a2d94034abfb",
+      "bytes": 21048,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/24ab0f36f991590c112d8f31215bfe53.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/24ab0f36f991590c112d8f31215bfe53.cab",
+      "sha256": "6a7664cf03ee2dc07b25f975e5bb57980f12d2ee7589fa6238f5a93645265243",
+      "bytes": 22250,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/3b8aa90b3015bd30b59330184cbbb275.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/3b8aa90b3015bd30b59330184cbbb275.cab",
+      "sha256": "2c50bfd347d365e40de3397b03afd3310c36244ee483629070066edd9b141edf",
+      "bytes": 393826,
+      "observed_utc": "2026-10-22T17:59:24.450705+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/3ffff92a2c7e8b2f1a6e85afeaa027ca.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/3ffff92a2c7e8b2f1a6e85afeaa027ca.cab",
+      "sha256": "c357fd789c2c6d74a403ee37ee4959bb8c3f1f78ef320464741aa898eb6c0e87",
+      "bytes": 320142846,
+      "observed_utc": "2026-10-22T17:59:24.716305+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/755a8f59ce4582d52bc4c91761db7935.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/755a8f59ce4582d52bc4c91761db7935.cab",
+      "sha256": "5123f8619419b4e7d5deeb0876d1d960f93edd0fad9bc2695d0ed132bce9bcb0",
+      "bytes": 337414222,
+      "observed_utc": "2026-10-22T17:59:25.013317+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/856a378483a6c7e8068c4f52cb49227c.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/856a378483a6c7e8068c4f52cb49227c.cab",
+      "sha256": "b1a49cca773c379349f500fba83646358f4bf5303ca8baea1e341b4fa6350731",
+      "bytes": 502514,
+      "observed_utc": "2026-10-22T17:59:25.013317+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/8686aa39453398c3a04c1edaac29ca7a.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/8686aa39453398c3a04c1edaac29ca7a.cab",
+      "sha256": "bcf2d10a27af94c98d1ebce25121cfbf39ae35cc629c71396f94730f813bb48a",
+      "bytes": 326737448,
+      "observed_utc": "2026-10-22T17:59:25.279119+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/9722214af0ab8aa9dffb6cfdafd937b7.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/9722214af0ab8aa9dffb6cfdafd937b7.cab",
+      "sha256": "4c613a18788a9c860ec7cbe6a58e1a842731b02ecc99189568f68c036cb5a4e1",
+      "bytes": 334509606,
+      "observed_utc": "2026-10-22T17:59:25.560378+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/a6296c5a6eec9ca02b431ed0461b952d.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/a6296c5a6eec9ca02b431ed0461b952d.cab",
+      "sha256": "ab8b67280b8183165f659ffbeb2ddf729b1a2e8666953ad808abfc51d49b7529",
+      "bytes": 338097556,
+      "observed_utc": "2026-10-22T17:59:25.857262+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/bfdbb113d9d5201e5897ed28d0a47f42.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/bfdbb113d9d5201e5897ed28d0a47f42.cab",
+      "sha256": "8449630a8e65dbb17e2e60eca5e08bcb363f250cddc37cc5b3e4cd5ac61f1a8e",
+      "bytes": 18909594,
+      "observed_utc": "2026-10-22T17:59:25.872907+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/e4ef343897232361feeab2810591d8ae.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/e4ef343897232361feeab2810591d8ae.cab",
+      "sha256": "b2cda6e142ec4729d07c648e02b764df4163614c1366987e472b774a0b1e7007",
+      "bytes": 9873900,
+      "observed_utc": "2026-10-22T17:59:25.888631+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/e7a23bd4ab45aa717a3e0b2fa877dce9.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/e7a23bd4ab45aa717a3e0b2fa877dce9.cab",
+      "sha256": "500032ccd2a12db6da1963e0bcb7d0848cb3465dd32cda014aa5ca6aee0a1a84",
+      "bytes": 420290,
+      "observed_utc": "2026-10-22T17:59:25.888631+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/f493bb83bbe844f5cd3610b0847bc113.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/f493bb83bbe844f5cd3610b0847bc113.cab",
+      "sha256": "e7f2c3fd671b8eea07931fdecb3e331b56276624b152ee9b01095dd3d97c30dd",
+      "bytes": 292601594,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/f53c2cdf2f5aeeaef4ca19d4b3344930.cab",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/f53c2cdf2f5aeeaef4ca19d4b3344930.cab",
+      "sha256": "3c566c534a0e070f199d42e84a59231db432b6d8be55282415d707029e621717",
+      "bytes": 1094498,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Kits Configuration Installer-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Kits%20Configuration%20Installer-x86_en-us.msi",
+      "sha256": "f74e3d01a674db476404014e80f6ec197181f0795458a605542dadd9bc6526d3",
+      "bytes": 446464,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Windows PE Boot Files (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Boot%20Files%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "2f55b596e8be41600c8605e651a1d863d964379b10965c2e7adff90f9ac69a19",
+      "bytes": 638976,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Windows PE Boot Files (OnecoreUAP)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Boot%20Files%20%28OnecoreUAP%29-x86_en-us.msi",
+      "sha256": "66297a3cd792183d2203b527bc5d0ddf92fe2a5e2584774851ced26548976bcf",
+      "bytes": 602112,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Windows PE Optional Packages (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Optional%20Packages%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "b9d2795963bf518a1ac8c7a3fbb44a6ea7b1fb2a71dd1941291210899f6918af",
+      "bytes": 1015808,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Windows PE Scripts-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20Scripts-x86_en-us.msi",
+      "sha256": "d5124d8e2a8abc1c2ae8f167cfad0009de207acc846a64040a12ba70ec227cc3",
+      "bytes": 573440,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    },
+    {
+      "path": "winpe/Installers/Windows PE wims (DesktopEditions)-x86_en-us.msi",
+      "url": "https://download.microsoft.com/download/a4a79e7a-f085-41c4-aebf-2538fd000790/adkwinpeaddons/Installers/Windows%20PE%20wims%20%28DesktopEditions%29-x86_en-us.msi",
+      "sha256": "fd347e8dfba6e38f9652e01a946e70b6d24cad6298b4bd7520a2edc7f5728787",
+      "bytes": 589824,
+      "observed_utc": "2026-10-22T17:59:26.154364+00:00",
+      "observation": "First-use ADK layout on Windows runner"
+    }
   ]
 }

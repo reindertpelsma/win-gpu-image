@@ -3,7 +3,30 @@
 A standalone recipe for a Windows PE ISO with an offline-serviced NVIDIA display
 driver, GPU probes, and a serial boot test. A minimal Windows disk image is future
 work. The public repository contains source and recipes only. The private release
-store holds a convenience copy; licence review of that copy is open.
+store holds a convenience copy so **rented Vast.ai test boxes** can download a
+prebuilt image for GPU tests and sweeps, whether CI-triggered or manual. Licence
+review of that copy is open. Workflow steps use files on the same runner; the
+store is not used to transfer data between CI jobs.
+
+## Purpose and intended use
+
+This repository builds a throwaway Windows PE environment used only to test GPU
+drivers and GPU virtualization stacks: boot it in a VM, load a GPU driver, run
+small compute and graphics probes, and report pass or fail over serial. It is a
+test environment, not a general-purpose operating system, not a deployment or
+production image, and not a desktop. Images are rebuilt from vendor downloads
+whenever the recipe or inputs change and are not meant to be kept or used for
+anything else. Downstream projects (for example GPU virtualization tools) may run
+the resulting image in CI and test sweeps on rented machines. Pass or fail here
+says only that these probes ran. It makes no performance claim and no compatibility
+guarantee.
+
+Non-goals: running real workloads, hosting services, daily use, redistributing the
+image or any vendor file.
+
+Any future minimal-Windows disk image has the same testing-only purpose. Licence
+review is open; this repository makes no claim that this use complies with
+Microsoft or NVIDIA terms.
 
 **Bootstrap in progress:** no successful build or GPU compatibility claim yet.
 See [measured results](notes/measurements.md) for evidence and run links.
@@ -18,8 +41,9 @@ vendor files is implied by this recipe. See [SECURITY.md](SECURITY.md).
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
 at least 30 GiB free disk and 8 GiB RAM. Install Git, Python 3.11+, 7-Zip, and
 Visual Studio 2022 Build Tools with the x64 C++ toolchain and Windows SDK. CI uses
-the corresponding tools from `windows-2022`. Installing ADK tools changes the
-local machine; read Microsoft's licence terms before using its silent installer.
+the corresponding tools from `windows-2022`. ADK files are extracted from pinned
+offline MSI packages, independently of any installed ADK. QEMU uses a silent
+installer under `work/`. Read the vendors' licence terms before running the recipe.
 
 ```powershell
 git clone https://github.com/reindertpelsma/win-gpu-image.git
@@ -97,14 +121,20 @@ code. It does **not** prove NVIDIA binding, CUDA, D3D, performance, or hardware 
 Those need a separate real GPU run. Hypotheses and falsifiers appear in test headers.
 
 The final job computes the image SHA-256, verifies release-part reconstruction,
-creates GitHub build provenance for the ISO digest, then publishes only to the
-private store. Public provenance contains the digest and build identity, no image
+creates GitHub build provenance for the ISO digest, prints the digest and input
+hashes in the job summary, then publishes only to the private store. The attestation
+is the sole public record. Public provenance contains the digest and build identity, no image
 content. Releases use `img-<first 16 hex of SHA-256>` and parts below 1.9 GiB,
-plus `manifest.json` and `SHA256SUMS`. Reassemble parts in manifest order and verify:
+plus `manifest.json` and `SHA256SUMS`. Those files in the store are convenience
+copies: a writer could replace both a blob and its checksums. Obtain the expected
+SHA-256 from the consumer's **reviewed lock file**, never from the store. Reassemble
+parts in manifest order, verify transport consistency, check that independent pin,
+and verify public provenance:
 
 ```bash
 ./scripts/verify-release.sh /path/to/downloaded-release
-gh attestation verify /path/to/reassembled/image.iso --repo reindertpelsma/win-gpu-image
+echo '<expected SHA-256 from consumer lock file>  /path/to/downloaded-release/image.iso' | sha256sum -c -
+gh attestation verify /path/to/downloaded-release/image.iso --repo reindertpelsma/win-gpu-image
 ```
 
 Input pins detect byte changes after first use. Attestation links a digest to the

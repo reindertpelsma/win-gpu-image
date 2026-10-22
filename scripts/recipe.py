@@ -4,6 +4,7 @@ import csv
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -159,6 +160,8 @@ def main():
         manifest = {"schema": 1, "image_sha256": sha256_file(image), "image_bytes": image.stat().st_size,
                     "repo_commit": args.commit, "run_url": args.run_url,
                     "build_date": datetime.now(timezone.utc).isoformat(), "input_hashes": lock["files"],
+                    "purpose": "Prebuilt GPU tests and sweeps on rented Vast.ai test boxes, CI-triggered or manual",
+                    "trust_anchor": "Public GitHub build attestation plus expected SHA-256 in consumer reviewed lock file; store metadata is convenience only",
                     "parts": [{"name": x.name, "bytes": x.stat().st_size, "sha256": sha256_file(x)} for x in parts],
                     "sizes": json.loads(Path("out/sizes.json").read_text())}
         verify_manifest(manifest, d)
@@ -167,6 +170,18 @@ def main():
         (d / "SHA256SUMS").write_text("".join(f"{sha256_file(x)}  {x.name}\n" for x in assets))
         print(f"IMAGE_SHA256={manifest['image_sha256']} IMAGE_BYTES={manifest['image_bytes']}")
         print(f"RELEASE_TAG=img-{manifest['image_sha256'][:16]}")
+        if os.environ.get("GITHUB_STEP_SUMMARY"):
+            lines = ["## Windows PE build", "", f"Image SHA-256: `{manifest['image_sha256']}`",
+                     f"Image bytes: {manifest['image_bytes']}", "",
+                     "Expected SHA-256 must come from the consumer's reviewed lock file.",
+                     "The public attestation is the provenance record; the store is a convenience copy.", "",
+                     "| Input | SHA-256 |", "| --- | --- |"]
+            lines += [f"| `{row['path']}` | `{row['sha256']}` |" for row in lock["files"]]
+            lines += ["", "| Component | Bytes | MiB |", "| --- | ---: | ---: |"]
+            lines += [f"| {name} | {size} | {size / 1048576:.3f} |"
+                      for name, size in manifest["sizes"]["components_bytes"].items()]
+            with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+                summary.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

@@ -29,7 +29,11 @@ and test output. The workflow does not read or print token values. Store release
 notes contain only hashes and links. Failed runs publish nothing.
 
 Build provenance proves that GitHub signed a statement linking an image digest to
-the recorded workflow context. It does not prove the inputs are legitimate,
+the recorded workflow context. This is the sole public record; image and input hashes
+also appear as text in the job summary. The private store serves rented Vast.ai
+test boxes for CI-triggered or manual GPU tests and sweeps. Its checksum and
+manifest copies are conveniences, not a trust anchor: expected SHA-256 comes from
+the consumer's reviewed lock file. Provenance does not prove the inputs are legitimate,
 licences permit use, a runner was uncompromised, the build is deterministic, or an
 NVIDIA GPU binds and works. Hash validation and real hardware tests serve different
 purposes. Report recipe vulnerabilities privately to the repository owner.
