@@ -106,3 +106,12 @@ tests 6144 then 4096 MiB, stopping at the first lower-size failure. INFERRED: th
 provisional Vast GPU-test allocation is at least 8192 MiB; it remains unmeasured
 because no rented box or GPU is authorized in this lane. Boot-only memory and host
 QEMU working set will be reported separately from GPU workload requirements.
+
+MEASURED, 2026-10-22, [run 6](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39833982265):
+the complete 2,692,847,387-byte source package was copied and hash-verified with
+zero files removed. Offline `/Add-Driver` and `/Get-Drivers` passed (NVIDIA Display,
+32.0.15.8088); scratch was set/read back as 512 MiB. The size-measurement query
+then failed because wildcard directory enumeration with `-File` produced no files
+and `Measure-Object` had no `Sum` property. The image was discarded before export.
+Run 7 corrects that query using resolved literal directories and adds a regression
+check covering nested NVIDIA files and exclusion of unrelated driver repositories.

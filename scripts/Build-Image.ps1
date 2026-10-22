@@ -96,8 +96,9 @@ try {
     foreach ($driver in @('serial.sys','serenum.sys')) {
         if (!(Test-Path "$system32/drivers/$driver")) { throw "PE missing $driver" }
     }
-    $repoBytes = (Get-ChildItem "$system32/DriverStore/FileRepository/nv_dispi*" -File -Recurse | Measure-Object Length -Sum).Sum
-    Write-Host "MEASURED OFFLINE_DRIVERSTORE_BYTES=$repoBytes"
+    $repoMetrics = Get-NvidiaDriverStoreMetrics "$system32/DriverStore/FileRepository"
+    $repoBytes = $repoMetrics.bytes
+    Write-Host "MEASURED OFFLINE_DRIVERSTORE_BYTES=$repoBytes FILES=$($repoMetrics.files)"
     Dism @('/Unmount-Image',"/MountDir:$root/work/mount",'/Commit')
     $committed = $true
 } finally {
@@ -114,6 +115,7 @@ Write-Host "MEASURED BOOT_WIM_BYTES=$((Get-Item work/media/sources/boot.wim).Len
 @{
     base_wim_bytes = $pe[0].Length
     offline_driverstore_bytes = $repoBytes
+    offline_driverstore_files = $repoMetrics.files
     boot_wim_bytes = (Get-Item work/media/sources/boot.wim).Length
     image_bytes = (Get-Item out/image.iso).Length
     scratch_mib = 512

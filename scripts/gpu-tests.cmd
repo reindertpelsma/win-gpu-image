@@ -20,6 +20,8 @@ set WGI_TEST_DISK=
 for %%D in (C D E F G H I J K L M N O P Q R S T U V W Y Z) do if exist %%D:\WGI_TESTS.TAG set WGI_TEST_DISK=%%D:
 if not defined WGI_TEST_DISK goto bundled
 echo WGI_SECOND_DISK=%WGI_TEST_DISK%
+if not exist "%WGI_TEST_DISK%\programs\d3d11-offscreen.exe" set WGI_FAILED=1
+if not exist "%WGI_TEST_DISK%\programs\cuda-query.exe" set WGI_FAILED=1
 if exist "%WGI_TEST_DISK%\programs\d3d11-offscreen.exe" call :run "%WGI_TEST_DISK%\programs\d3d11-offscreen.exe"
 if exist "%WGI_TEST_DISK%\programs\cuda-query.exe" call :run "%WGI_TEST_DISK%\programs\cuda-query.exe"
 goto done

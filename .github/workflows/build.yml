@@ -26,7 +26,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Test recipe contracts
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { throw 'Recipe tests failed' }
+          ./tests/Test-DriverMetrics.ps1
       - name: Measure runner
         run: ./scripts/Measure-Runner.ps1
       - name: Fetch pinned inputs
