@@ -31,6 +31,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Recipe tests failed' }
           ./tests/Test-DriverMetrics.ps1
           ./tests/Test-ResultMarker.ps1
+          ./tests/Test-StoreReleases.ps1
       - name: Measure runner
         run: ./scripts/Measure-Runner.ps1
       - name: Fetch pinned inputs

@@ -5,9 +5,9 @@ $manifest = Get-Content release/manifest.json -Raw | ConvertFrom-Json
 $tag = 'img-' + $manifest.image_sha256.Substring(0,16)
 Invoke-Checked python @('scripts/recipe.py','verify','release')
 # List failures are fatal; a network/authorization error is not treated as absent.
-$releases = & gh api --paginate --slurp "repos/$store/releases?per_page=100" --jq 'add | map({tag_name,draft})'
+$releases = & gh api --paginate --slurp "repos/$store/releases?per_page=100"
 if ($LASTEXITCODE -ne 0) { throw 'Cannot list private-store releases' }
-$existing = @($releases | ConvertFrom-Json | Where-Object tag_name -eq $tag)
+$existing = @(Get-StoreReleaseForTag ($releases -join "`n") $tag)
 if ($existing.Count) {
     if ($existing[0].draft) { throw "Release $tag is an incomplete draft; owner must inspect it before retrying" }
     Write-Host "Release $tag already exists; skipping"

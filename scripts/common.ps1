@@ -1,6 +1,17 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $PSNativeCommandUseErrorActionPreference = $true
+
+function Get-StoreReleaseForTag([string]$Json, [string]$Tag) {
+    # gh --paginate --slurp returns one array per page. Flatten explicitly:
+    # --slurp cannot be combined with --jq on the hosted runner's gh CLI.
+    $pages = ConvertFrom-Json -InputObject $Json -NoEnumerate
+    foreach ($page in $pages) {
+        foreach ($release in $page) {
+            if ($release.tag_name -eq $Tag) { $release }
+        }
+    }
+}
 function Invoke-Checked([string]$File, [string[]]$Arguments) {
     & $File @Arguments
     if ($LASTEXITCODE -ne 0) { throw "$File exited $LASTEXITCODE" }
