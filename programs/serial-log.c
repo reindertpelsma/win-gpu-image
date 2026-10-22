@@ -12,6 +12,7 @@ static void emit(const char* bytes, DWORD n) {
 }
 int main(int argc, char** argv) {
     serial = CreateFileA("\\\\.\\COM1", GENERIC_WRITE | GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+    DWORD serial_error = serial == INVALID_HANDLE_VALUE ? GetLastError() : 0;
     if (serial != INVALID_HANDLE_VALUE) {
         DCB dcb = {0}; dcb.DCBlength = sizeof(dcb);
         if (GetCommState(serial, &dcb)) {
@@ -23,7 +24,7 @@ int main(int argc, char** argv) {
         }
         COMMTIMEOUTS timeout = {0}; timeout.WriteTotalTimeoutConstant = 2000;
         SetCommTimeouts(serial, &timeout);
-    } else { fprintf(stderr, "COM1_OPEN_FAILED error=%lu\n", GetLastError()); }
+    }
     for (char drive = 'C'; drive <= 'Z'; ++drive) {
         if (drive == 'X') continue;
         char tag[] = "C:\\WGI_RESULTS.TAG"; tag[0] = drive;
@@ -32,6 +33,11 @@ int main(int argc, char** argv) {
             result = CreateFileA(path, FILE_APPEND_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
             break;
         }
+    }
+    if (serial_error) {
+        char text[96];
+        int n = snprintf(text, sizeof(text), "COM1_OPEN_FAILED error=%lu\r\n", serial_error);
+        if (n > 0 && n < (int)sizeof(text)) emit(text, (DWORD)n);
     }
     MEMORYSTATUSEX memory = {0}; memory.dwLength = sizeof(memory);
     if (GlobalMemoryStatusEx(&memory)) {

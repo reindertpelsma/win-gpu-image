@@ -22,6 +22,8 @@ $pe = @(Get-ChildItem work/adk -Recurse -Filter winpe.wim | Where-Object FullNam
 if ($pe.Count -ne 1) { throw 'Pinned amd64 en-us WinPE WIM not found' }
 $peRoot = Split-Path (Split-Path $pe[0].FullName -Parent) -Parent
 Copy-Item "$peRoot/Media/*" work/media -Recurse -Force
+# Omit the optional BIOS CD "press any key" shim for unattended boot with a data disk.
+[IO.File]::Delete("$root/work/media/Boot/bootfix.bin")
 New-Item -ItemType Directory -Force work/media/sources | Out-Null
 Copy-Item $pe[0].FullName work/base.wim
 (Get-Item work/base.wim).IsReadOnly = $false
@@ -104,7 +106,8 @@ try {
 } finally {
     if (!$committed) { Dism @('/Unmount-Image',"/MountDir:$root/work/mount",'/Discard') }
 }
-Dism @('/Export-Image',"/SourceImageFile:$root/work/base.wim",'/SourceIndex:1',"/DestinationImageFile:$root/work/media/sources/boot.wim",'/Compress:max','/CheckIntegrity')
+Dism @('/Export-Image',"/SourceImageFile:$root/work/base.wim",'/SourceIndex:1',"/DestinationImageFile:$root/work/media/sources/boot.wim",'/Compress:max','/Bootable','/CheckIntegrity')
+Invoke-Checked python @('scripts/recipe.py','verify-wim','work/media/sources/boot.wim')
 $oscdimg = @(Get-ChildItem work/adk -Recurse -Filter oscdimg.exe | Where-Object FullName -match '[\\/]amd64[\\/]') | Select-Object -First 1
 $etfs = @(Get-ChildItem work/adk -Recurse -Filter etfsboot.com | Where-Object FullName -match '[\\/]amd64[\\/]') | Select-Object -First 1
 $efi = @(Get-ChildItem work/adk -Recurse -Filter efisys_noprompt.bin | Where-Object FullName -match '[\\/]amd64[\\/]') | Select-Object -First 1
@@ -117,6 +120,7 @@ Write-Host "MEASURED BOOT_WIM_BYTES=$((Get-Item work/media/sources/boot.wim).Len
     offline_driverstore_bytes = $repoBytes
     offline_driverstore_files = $repoMetrics.files
     boot_wim_bytes = (Get-Item work/media/sources/boot.wim).Length
+    boot_wim_boot_index = 1
     image_bytes = (Get-Item out/image.iso).Length
     scratch_mib = 512
     driver_policy = 'Complete signed Display.Driver; no INF-referenced files removed'

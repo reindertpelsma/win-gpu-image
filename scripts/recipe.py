@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import struct
 
 PART_LIMIT = 2_040_000_000  # Below 1.9 GiB and GitHub's 2 GiB asset limit.
 
@@ -22,6 +23,23 @@ def verify_file(path, expected):
         raise ValueError(f"Missing/invalid SHA-256 pin: {path}")
     if sha256_file(path) != expected:
         raise ValueError(f"SHA-256 mismatch: {path}")
+
+
+def verify_boot_wim(path):
+    """Check the WinPE boot image index/resource in the standard WIM header."""
+    path = Path(path)
+    with path.open("rb") as f:
+        header = f.read(208)
+    if len(header) < 208 or header[:8] != b"MSWIM\0\0\0":
+        raise ValueError("Invalid/truncated WIM header")
+    images = struct.unpack_from("<I", header, 44)[0]
+    boot_index = struct.unpack_from("<I", header, 120)[0]
+    resource_size_flags, resource_offset = struct.unpack_from("<QQ", header, 96)
+    resource_size = resource_size_flags & ((1 << 56) - 1)
+    if images != 1 or boot_index != 1 or not resource_size or resource_offset + resource_size > path.stat().st_size:
+        raise ValueError(f"WinPE WIM is not marked bootable: images={images} boot_index={boot_index}")
+    return {"images": images, "boot_index": boot_index, "boot_metadata_bytes": resource_size,
+            "image_bytes": path.stat().st_size}
 
 
 def split_file(source, directory, limit=PART_LIMIT):
@@ -175,9 +193,13 @@ def main():
     p.add_argument("directory")
     p = sub.add_parser("driver-closure")
     p.add_argument("source"); p.add_argument("staged")
+    p = sub.add_parser("verify-wim")
+    p.add_argument("image")
     args = parser.parse_args()
     if args.command == "stage-driver":
         stage_driver(args.source, args.destination, args.sizes)
+    elif args.command == "verify-wim":
+        print("WIM_BOOT_METADATA_OK " + json.dumps(verify_boot_wim(args.image), sort_keys=True))
     elif args.command == "driver-closure":
         missing = missing_inf_sources(Path(args.source) / "nv_dispi.inf", args.source, args.staged)
         print("REMOVED_INF_SOURCE_FILES " + json.dumps(missing, separators=(",", ":")))

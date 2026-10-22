@@ -115,3 +115,20 @@ then failed because wildcard directory enumeration with `-File` produced no file
 and `Measure-Object` had no `Sum` property. The image was discarded before export.
 Run 7 corrects that query using resolved literal directories and adds a regression
 check covering nested NVIDIA files and exclusion of unrelated driver repositories.
+
+MEASURED, 2026-10-22, [run 7](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39835048860):
+the size-query correction passed. Imported NVIDIA DriverStore: 202 files,
+2,631,764,223 bytes. Compressed WIM: 1,493,575,908 bytes; ISO: 1,549,445,120 bytes.
+QEMU 11.1.0 TCG at 8192 MiB did not emit the serial marker in 901.84 seconds.
+Peak QEMU working set: 8,640,118,784 bytes; peak sampled private bytes:
+10,107,531,264; minimum host free physical memory: 6,057,200 KiB. These are process
+and host counters, not unique physical memory or a successful boot minimum.
+Attestation and publication were skipped; no image hash was recorded by packaging.
+
+CODE READ: run 8 explicitly uses DISM `/Export-Image /Bootable`, validates the WIM
+boot index/resource before ISO creation, and omits the optional BIOS CD key prompt.
+Microsoft [documents the export boot flag](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/dism-image-management-command-line-options-s14#export-image).
+Startup explicitly loads the stock serial-port INF. A fresh 64 MiB VHD provides
+diagnostic guest logs; the host still requires the COM1 marker, never accepts a
+disk-only marker as success, and uploads no result disk or vendor-containing file.
+This is the second candidate QEMU boot attempt after run 7's serial timeout.

@@ -23,8 +23,9 @@ probe; this combination remains experimental rather than a supported OS.
 | Complete Display.Driver source | 2,692,847,387 | MEASURED source inventory in run 4; now all retained |
 | Formerly stripped subset | 1,929,774,713 | Historical, rejected by DISM |
 | Files restored by the owner decision | 763,072,674 | Includes 702,161,478 bytes referenced by the INF |
-| Imported DriverStore payload | Pending run 6 | About 2.6 GB expected; measure before WIM commit |
-| Compressed WIM and bootable ISO | Pending run 6 | Final sizes/hashes are recorded by the build |
+| Imported DriverStore payload | 2,631,764,223 | MEASURED run 7; 202 files |
+| Compressed WIM | 1,493,575,908 | MEASURED run 7; before explicit boot-metadata correction |
+| Bootable ISO candidate | 1,549,445,120 | MEASURED run 7; failed serial boot test, never published |
 
 The roughly 2.6 GB driver payload makes the PE WIM/ramdisk large. CI starts at
 8192 MiB guest RAM and tests lower allocations; the smallest successful tested
@@ -32,6 +33,9 @@ boot size will be recorded in the manifest and evidence log. INFERRED: start Vas
 GPU tests with at least 8192 MiB guest RAM; a GPU-test minimum is not measured here.
 See [build and memory instructions](BUILD.md#vm-ram). The [evidence log](../notes/measurements.md)
 retains the earlier component table and will record the full-package measurements.
+MEASURED: run 7 timed out at 8192 MiB without a serial marker, so no successful
+boot minimum is established yet. Run 8 validates boot metadata and captures a
+guest result disk as diagnostics; COM1 remains the mandatory success criterion.
 
 At startup PE initializes PnP, emits `WGI_PE_BOOT_OK_V1` to COM1 (115200 8N1),
 loads the offline driver, prints `nvidia-smi`, and runs GPU probes from a second

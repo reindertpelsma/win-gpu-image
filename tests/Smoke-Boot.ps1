@@ -4,6 +4,7 @@
 # No NVIDIA device is emulated: GPU binding and Vast test RAM remain unmeasured.
 param([int]$TimeoutSeconds = 900, [int]$MemoryMiB = 8192, [switch]$MeasureMemoryFloor)
 . "$PSScriptRoot/../scripts/common.ps1"
+. "$PSScriptRoot/../scripts/Result-Disk.ps1"
 $root = (Get-Location).Path
 $qemuRoot = [IO.Path]::GetFullPath("$root/work/qemu")
 New-Item -ItemType Directory -Force $qemuRoot | Out-Null
@@ -17,10 +18,14 @@ function Test-BootAtMemory([int]$RamMiB) {
     $errlog = "$root/work/qemu-stderr-$RamMiB.log"
     $outlog = "$root/work/qemu-stdout-$RamMiB.log"
     if (Test-Path $serial) { Clear-Content $serial }
+    $resultDisk = $null
+    try { $resultDisk = New-SmokeResultDisk "$root/work/results-$RamMiB.vhd" }
+    catch { Write-Host "RESULT_DISK_CREATION_UNAVAILABLE $($_.Exception.Message)" }
     $watch = [Diagnostics.Stopwatch]::StartNew()
     $arguments = @('-machine','q35','-accel','tcg,thread=multi','-cpu','max','-smp','2','-m',"$RamMiB",
         '-display','none','-monitor','none','-serial',"file:$serial",'-nic','none',
         '-no-reboot','-boot','d','-cdrom',$iso)
+    if ($resultDisk) { $arguments += @('-drive',"file=$resultDisk,format=vpc,if=ide,index=0") }
     # Start-Process joins arguments: quote each argument for local paths with spaces.
     $quoted = @($arguments | ForEach-Object { '"' + $_ + '"' })
     $process = Start-Process -FilePath $qemu -PassThru -RedirectStandardError $errlog -RedirectStandardOutput $outlog -ArgumentList $quoted
@@ -29,6 +34,7 @@ function Test-BootAtMemory([int]$RamMiB) {
     $peakWorkingSet = 0L
     $peakPrivateBytes = 0L
     $minimumHostFreeKiB = [long]::MaxValue
+    $diskLogCaptured = $false
     try {
         while ($watch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
             $process.Refresh()
@@ -43,9 +49,11 @@ function Test-BootAtMemory([int]$RamMiB) {
             Start-Sleep -Seconds 2
         }
     } finally {
+        $watch.Stop()
         if (!$process.HasExited) { Stop-Process -Id $process.Id -Force; $process.WaitForExit() }
         if (Test-Path $errlog) { Get-Content $errlog -Tail 40 | Write-Host }
         if (Test-Path $serial) { Get-Content $serial -Tail 80 | Write-Host }
+        if ($resultDisk) { $diskLogCaptured = Read-SmokeResultDisk $resultDisk }
     }
     $result = [pscustomobject]@{
         memory_mib = $RamMiB; boot_pass = $passed; reason = $reason
@@ -54,6 +62,7 @@ function Test-BootAtMemory([int]$RamMiB) {
         peak_sampled_qemu_private_bytes = $peakPrivateBytes
         minimum_host_free_kib = $minimumHostFreeKiB
         accelerator = 'TCG'; gpu_present = $false
+        result_disk_log_captured = $diskLogCaptured
     }
     Write-Host ('MEASURED QEMU_BOOT ' + ($result | ConvertTo-Json -Compress))
     return $result

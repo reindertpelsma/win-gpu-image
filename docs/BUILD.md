@@ -4,7 +4,7 @@ CODE READ: the owner resumed the build with the complete signed display package.
 The earlier stripping failure and subsequent results are in [the evidence log](../notes/measurements.md).
 
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
-at least 30 GiB free disk and 16 GiB host RAM for the default 8 GiB guest. Install Git, Python 3.11+, 7-Zip, and
+50 GiB free disk (INFERRED recommendation) and 16 GiB host RAM for the default 8 GiB guest. Install Git, Python 3.11+, 7-Zip, and
 Visual Studio 2022 Build Tools with the x64 C++ toolchain and Windows SDK. CI uses
 the corresponding tools from `windows-2022`. ADK files are extracted from pinned
 offline MSI packages, independently of any installed ADK. QEMU uses a silent
@@ -47,7 +47,8 @@ See [measured results](../notes/measurements.md) for the current build status.
 CODE READ: CI first requires an 8192 MiB guest to reach the serial boot marker,
 then measures 6144 and 4096 MiB until a lower size fails. `out/smoke.json`, the
 manifest, and the job summary record the smallest successful tested allocation,
-boot times, guest available RAM, and peak QEMU working set. This is a boot-only
+boot times and peak QEMU working set; guest available RAM is printed in the serial
+log. This is a boot-only
 minimum among tested sizes; it does not measure NVIDIA binding or GPU workloads.
 
 INFERRED: provision at least 8192 MiB guest RAM for rented Vast GPU tests initially,
@@ -56,3 +57,9 @@ That GPU test minimum is not measured in this lane: no rented machine or GPU is
 used. The full driver, compressed WIM, boot memory, 512 MiB scratch, and runtime
 copies make the RAM requirement larger than stock PE. See the [image sizes](IMAGE.md)
 and [measured memory results](../notes/measurements.md).
+
+CODE READ: WIM export explicitly sets `/Bootable` and verifies boot index 1 plus
+the boot metadata resource before ISO creation. The optional BIOS CD key prompt
+is omitted for unattended boot. CI also attaches a fresh 64 MiB FAT result VHD;
+only guest text logs are printed, and the VHD is never uploaded. A result-disk
+marker cannot substitute for the required serial marker.
