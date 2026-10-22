@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from recipe import classify_driver, sha256_file, split_file, verify_file, verify_manifest
+from recipe import classify_driver, missing_inf_sources, sha256_file, split_file, verify_file, verify_manifest
 
 
 class RecipeTests(unittest.TestCase):
@@ -64,6 +64,19 @@ class RecipeTests(unittest.TestCase):
                      "setup.exe", "libnvidia.so", "PhysX/a.dll", "HDAudio/a.dll",
                      "GFExperience/a.dll", "localization/en-us/a.dll"]:
             self.assertFalse(classify_driver(name)[0], name)
+
+    def test_missing_inf_source_diagnostics_include_subdirectories(self):
+        with tempfile.TemporaryDirectory() as d:
+            source, staged = Path(d) / "source", Path(d) / "staged"
+            (source / "NvCamera").mkdir(parents=True)
+            staged.mkdir()
+            inf = source / "nv_dispi.inf"
+            inf.write_text('[SourceDisksFiles]\nNvCamera64.dll = 1,NvCamera\nnvcuda.dll = 1\n')
+            (source / "NvCamera/NvCamera64.dll").write_bytes(b"camera")
+            (source / "nvcuda.dll").write_bytes(b"cuda")
+            (staged / "nvcuda.dll").write_bytes(b"cuda")
+            self.assertEqual(missing_inf_sources(inf, source, staged),
+                             [{"file": "NvCamera/NvCamera64.dll", "bytes": 6}])
 
 
 if __name__ == "__main__":

@@ -62,7 +62,21 @@ try {
 Dism @('/Mount-Image',"/ImageFile:$root/work/base.wim",'/Index:1',"/MountDir:$root/work/mount")
 $committed = $false
 try {
-    Dism @("/Image:$root/work/mount",'/Add-Driver',"/Driver:$root/work/driver/nv_dispi.inf")
+    try {
+        Dism @("/Image:$root/work/mount",'/Add-Driver',"/Driver:$root/work/driver/nv_dispi.inf")
+    } catch {
+        Write-Host 'STRIPPED_DRIVER_FAILED: capture evidence before one full-package diagnostic control.'
+        foreach ($log in @('work/dism.log','work/mount/Windows/inf/setupapi.offline.log','work/mount/Windows/inf/setupapi.dev.log')) {
+            if (Test-Path $log) { Write-Host "DIAGNOSTIC_LOG $log"; Get-Content $log -Tail 100 | Write-Host }
+        }
+        Invoke-Checked python @('scripts/recipe.py','driver-closure','work/nvidia/Display.Driver','work/driver')
+        # Control only: a successful full package does not relax the stripping rule.
+        # Never export, attest, or publish this diagnostic image.
+        Dism @("/Image:$root/work/mount",'/Add-Driver',"/Driver:$root/work/nvidia/Display.Driver/nv_dispi.inf")
+        Write-Host 'FULL_SIGNED_PACKAGE_CONTROL_PASSED'
+        Dism @("/Image:$root/work/mount",'/Get-Drivers','/Format:List')
+        throw 'DRIVER_STRIPPING_BLOCKER: stripped signed INF package failed; full source control passed. Stop after two candidate servicing attempts. No image will be published.'
+    }
     $listing = & $script:DismExe "/Image:$root/work/mount" /Get-Drivers /Format:List /English
     if ($LASTEXITCODE -ne 0) { throw 'DISM get-drivers failed' }
     $listing | Set-Content out/drivers.txt

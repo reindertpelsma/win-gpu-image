@@ -136,6 +136,28 @@ def stage_driver(source, destination, sizes):
     print(json.dumps({k: v for k, v in value.items() if k != "files"}, sort_keys=True))
 
 
+def missing_inf_sources(inf, source, staged):
+    """Report original SourceDisksFiles entries excluded by the stripping recipe."""
+    source, staged = Path(source), Path(staged)
+    originals = {p.relative_to(source).as_posix().lower(): p for p in source.rglob("*") if p.is_file()}
+    kept = {p.relative_to(staged).as_posix().lower() for p in staged.rglob("*") if p.is_file()}
+    section = ""
+    missing = []
+    for line in Path(inf).read_text(encoding="utf-8-sig").splitlines():
+        line = line.split(";", 1)[0].strip()
+        if line.startswith("["):
+            section = line.lower()
+        elif section.startswith("[sourcedisksfiles") and "=" in line:
+            name, value = line.split("=", 1)
+            fields = next(csv.reader([value], skipinitialspace=True))
+            subdir = fields[1].strip().replace("\\", "/") if len(fields) > 1 else ""
+            relative = (Path(subdir) / name.strip()).as_posix().lower()
+            if relative in originals and relative not in kept:
+                p = originals[relative]
+                missing.append({"file": p.relative_to(source).as_posix(), "bytes": p.stat().st_size})
+    return missing
+
+
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -145,9 +167,15 @@ def main():
     p.add_argument("image"); p.add_argument("directory"); p.add_argument("commit"); p.add_argument("run_url")
     p = sub.add_parser("verify")
     p.add_argument("directory")
+    p = sub.add_parser("driver-closure")
+    p.add_argument("source"); p.add_argument("staged")
     args = parser.parse_args()
     if args.command == "stage-driver":
         stage_driver(args.source, args.destination, args.sizes)
+    elif args.command == "driver-closure":
+        missing = missing_inf_sources(Path(args.source) / "nv_dispi.inf", args.source, args.staged)
+        print("REMOVED_INF_SOURCE_FILES " + json.dumps(missing, separators=(",", ":")))
+        print(f"REMOVED_INF_SOURCE_COUNT={len(missing)} BYTES={sum(x['bytes'] for x in missing)}")
     elif args.command == "verify":
         d = Path(args.directory)
         verify_manifest(json.loads((d / "manifest.json").read_text()), d)
