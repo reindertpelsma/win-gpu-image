@@ -32,11 +32,10 @@ probe; this combination remains experimental rather than a supported OS.
 
 The roughly 2.6 GB driver payload makes the PE WIM/ramdisk large. CI uses
 **8192 MiB guest RAM as its tested default, not a minimum**. Run 10's
-result disk proves startup at 8192 MiB, with 8,589,393,920 guest physical bytes
-reported and 6,647,599,104 bytes available at startup. That is an observed
-allocation, **not a measured minimum**. No 6144/4096 MiB trials ran, and none are
-scheduled. QEMU exited 0 after 101.32 seconds, including probes and shutdown;
-this is not an exact boot-time measurement.
+result disk proves startup at that allocation, **not a measured minimum**. No
+lower-RAM trials ran, and none are scheduled. QEMU reached the startup marker and
+shut down after probes; this is a pass/fail boot check. Runtime observations are
+kept only in the operational evidence log, with no performance claim.
 
 INFERRED: start Vast GPU tests with 8192 MiB guest RAM provisionally;
 the GPU-test minimum remains unmeasured. No rented machine or GPU was used.

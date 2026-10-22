@@ -35,5 +35,5 @@ test boxes for CI-triggered or manual GPU tests and sweeps. Its checksum and
 manifest copies are conveniences, not a trust anchor: expected SHA-256 comes from
 the consumer's reviewed lock file. Provenance does not prove the inputs are legitimate,
 licences permit use, a runner was uncompromised, the build is deterministic, or an
-NVIDIA GPU binds and works. Hash validation and real hardware tests serve different
+NVIDIA GPU binds and works. Hash verification and real hardware tests serve different
 purposes. Report recipe vulnerabilities privately to the repository owner.

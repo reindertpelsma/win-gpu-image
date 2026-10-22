@@ -1,6 +1,6 @@
 # win-gpu-image
 
-A standalone recipe for a throwaway Windows PE ISO for GPU validation.
+A standalone recipe for a throwaway Windows PE ISO for GPU driver tests and probes.
 The images contain Microsoft and NVIDIA binaries that copyright does not
 allow us to publish, so the **build is public** but the **output stays in a private
 store** (a convenience copy for rented Vast.ai test boxes); anyone else rebuilds
@@ -28,10 +28,10 @@ Microsoft or NVIDIA terms.
 
 ## Why a PE instead of a full Windows install
 
-Full installation/setup can take about an hour (**estimate**); PE boot was about
-50–70 s (**MEASURED in downstream testing**, in a VM on a different host).
-PE starts clean from RAM without activation/OOBE/accounts; the complete signed driver adds about 2.6 GB.
-NVIDIA-in-PE remains unproven; it complements full Windows. [Full comparison and planned middle option](docs/WHY-PE.md).
+PE starts each test clean from RAM without activation/OOBE/accounts.
+The base is small; the complete signed driver adds about 2.6 GB.
+PE lacks DWM, a shell and a desktop; NVIDIA-in-PE remains unproven.
+It complements full Windows. [Full comparison and planned middle option](docs/WHY-PE.md).
 
 ## Build it yourself
 

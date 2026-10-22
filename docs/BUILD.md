@@ -67,14 +67,14 @@ only guest text logs are printed, and the VHD is never uploaded. The host seeds
 `WGI_RESULTS.TAG` and `WGI_SMOKE.TAG`, never the boot marker. After `wpeinit`,
 `startnet.cmd` writes `WGI_PE_BOOT_OK_V1` into `wgi-boot.txt` on the result disk.
 The CI sentinel requests shutdown after probes; ordinary test boots still idle.
-After QEMU exits or the 900-second deadline stops it, the runner mounts the disk
+After QEMU exits or the configured test deadline stops it, the runner mounts the disk
 and requires the exact marker plus the offline DISM NVIDIA display-driver listing.
 COM1 is best-effort logging and never determines pass/fail.
 
 MEASURED, run 8: startup at 8192 MiB is confirmed by the result disk; COM1 open
 failed with error 2 (`COM1_OPEN_FAILED error=2`). No lower-RAM trials ran, so no
-minimum is established. The 900.36-second value is
-the failed serial-test deadline, not the PE boot duration. NVIDIA binding and Vast
-GPU workload RAM remain unmeasured. Run 8 still required serial, so its attestation
-and publishing did not run. The owner subsequently replaced that gate with the
+minimum is established. Serial timeout details remain in the operational evidence
+log. NVIDIA binding and Vast GPU workload RAM remain unmeasured. Run 8 still
+required serial, so its attestation and publishing did not run. The owner
+subsequently replaced that gate with the
 result-disk marker; further COM enumeration experiments are out of scope.
