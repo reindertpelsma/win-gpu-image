@@ -4,14 +4,14 @@ $root = (Get-Location).Path
 $seven = "$env:ProgramFiles/7-Zip/7z.exe"
 if (!(Test-Path $seven)) { throw 'Install 7-Zip first' }
 
-# Administrative extraction uses only the pinned offline MSI/cabinet layout.
-# It avoids changing/reusing an unknown preinstalled ADK version.
+# Read-only MSI table + CAB extraction uses only pinned offline files.
+# It avoids executing MSI custom actions or reusing the preinstalled ADK version.
 $msis = @(Get-ChildItem cache/adk/Installers -Filter '*.msi' | Where-Object Name -match '^(Windows Deployment Image Servicing and Management Tools|Oscdimg) \(')
 $msis += @(Get-ChildItem cache/winpe/Installers -Filter '*.msi' | Where-Object Name -match '^Windows PE (Boot Files|wims) \(')
 if ($msis.Count -ne 7) { throw "Expected seven ADK/PE MSI packages, found $($msis.Count)" }
 foreach ($msi in $msis) {
-    Write-Host "ADMIN_EXTRACT $($msi.Name)"
-    Invoke-Installer msiexec.exe "/a `"$($msi.FullName)`" /qn TARGETDIR=`"$root/work/adk`" /l*v `"$root/work/msi.log`""
+    Write-Host "CAB_EXTRACT $($msi.Name)"
+    & "$PSScriptRoot/Extract-Adk.ps1" -MsiPath $msi.FullName -Destination "$root/work/adk" -SevenZip $seven
 }
 $dism = @(Get-ChildItem work/adk -Recurse -Filter dism.exe | Where-Object FullName -match '[\\/]amd64[\\/]DISM[\\/]dism.exe$')
 if ($dism.Count -ne 1) { throw "Expected one pinned x64 DISM, found $($dism.Count)" }
