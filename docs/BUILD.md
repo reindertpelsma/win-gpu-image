@@ -1,7 +1,8 @@
 # Build on Windows
 
-CODE READ: the owner resumed the build with the complete signed display package.
-The earlier stripping failure and subsequent results are in [the evidence log](../notes/measurements.md).
+MEASURED: the complete signed package builds, and PE starts at 8192 MiB via its
+result disk, but the required COM1 test failed twice. The lane stopped at that
+wall; see [the evidence log](../notes/measurements.md) before rebuilding.
 
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
 50 GiB free disk (INFERRED recommendation) and 16 GiB host RAM for the default 8 GiB guest. Install Git, Python 3.11+, 7-Zip, and
@@ -63,3 +64,10 @@ the boot metadata resource before ISO creation. The optional BIOS CD key prompt
 is omitted for unattended boot. CI also attaches a fresh 64 MiB FAT result VHD;
 only guest text logs are printed, and the VHD is never uploaded. A result-disk
 marker cannot substitute for the required serial marker.
+
+MEASURED, run 8: startup at 8192 MiB is confirmed by the result disk; COM1 open
+failed with error 2. The 6144/4096 MiB trials were not reached, so neither an exact
+minimum nor a serial-qualified minimum is established. The 900.36-second value is
+the failed serial-test deadline, not the PE boot duration. NVIDIA binding and Vast
+GPU workload RAM remain unmeasured. The result-disk marker did not override the
+serial assertion; attestation and publishing did not run.

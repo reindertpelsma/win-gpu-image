@@ -1,7 +1,7 @@
 # win-gpu-image
 
 A standalone recipe for a throwaway Windows PE ISO for GPU validation.
-The images contain modified Microsoft and NVIDIA binaries that copyright does not
+The images contain Microsoft and NVIDIA binaries that copyright does not
 allow us to publish, so the **build is public** but the **output stays in a private
 store** (a convenience copy for rented Vast.ai test boxes); anyone else rebuilds
 from the recipe.
@@ -51,5 +51,5 @@ cd win-gpu-image
 - [Workflow security and owner environment setup](SECURITY.md)
 - [Measured results and run URLs](notes/measurements.md)
 
-**Build resumed:** keep the complete signed display package; [sizes and RAM requirements](docs/IMAGE.md).
+**Build blocked:** PE starts at 8 GiB, but COM1 is missing; [measured sizes and RAM limits](docs/IMAGE.md).
 Do not open pull requests that add binaries.

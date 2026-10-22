@@ -132,3 +132,52 @@ Startup explicitly loads the stock serial-port INF. A fresh 64 MiB VHD provides
 diagnostic guest logs; the host still requires the COM1 marker, never accepts a
 disk-only marker as success, and uploads no result disk or vendor-containing file.
 This is the second candidate QEMU boot attempt after run 7's serial timeout.
+
+MEASURED, 2026-10-22, [run 8](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39839169848):
+WIM boot index 1 and 965,212-byte boot metadata resource passed the new gate.
+Compressed WIM: 1,493,573,555 bytes; ISO: 1,549,436,928 bytes. The complete NVIDIA
+source remains 2,692,847,387 bytes, and DISM imported 202 files / 2,631,764,223 bytes.
+The fresh 64 MiB FAT VHD was created, attached to QEMU, and read back successfully.
+It contained `WGI_PE_BOOT_OK_V1` and the GPU probe log, proving PE reached startup.
+
+MEASURED: COM1 open returned Win32 error 2 (file not found); loading stock
+`msports.inf` returned `0x80070103`. The mandatory serial marker remained absent
+for 900.36 seconds at 8192 MiB, so the job failed. That duration is the serial
+assertion deadline, not a measured boot duration: startup time was not timestamped.
+No lower-RAM trial ran. No image SHA-256, attestation, or store release was created
+because those stages follow the required serial test. The store secret step was
+never reached. No image/result disk/vendor file was uploaded as a public artifact.
+
+| Run 8 memory observation | Value | Scope |
+| --- | ---: | --- |
+| Configured guest RAM | 8192 MiB | PE startup observed via disk; serial gate failed |
+| Guest total physical bytes | 8,589,393,920 | Native guest API at startup |
+| Guest available physical bytes | 6,651,428,864 | First startup log, before probes |
+| Peak QEMU working set bytes | 8,643,964,928 | Host process counter; not unique physical memory |
+| Peak sampled QEMU private bytes | 10,133,381,120 | Host process counter |
+| Minimum host free physical memory | 5,905,160 KiB | Sampled on the Windows runner |
+| Smallest successful serial allocation | Not established | Primary serial assertion failed |
+| Actual lowest PE startup allocation | Not established | Only 8192 MiB tried |
+| Vast GPU-test RAM minimum | Not measured | No rented box/GPU used |
+
+MEASURED: the guest loaded the NVIDIA INF with return code 0. SMI returned 9;
+DXGI enumerated Microsoft adapters (`0x1414`), and the D3D11 probe rejected them
+with its `0x10DE` assertion (return code 2). The CUDA query returned 1 after
+`LoadLibrary` error 126. These are not NVIDIA binding or GPU-compatibility results.
+
+CODE READ: the pinned stock PE SYSTEM hive has Serial/Serenum services present,
+with `Start=3` (demand start). The exact missing-port enumeration/mapping cause
+is unresolved; the available drivers and a valid WIM do not establish a COM1 device.
+INFERRED: continuing requires a separately authorized serial-port enumeration/init
+fix or an owner change to the boot-test contract. The test was not weakened.
+
+MEASURED: eight workflow runs total; runs 7 and 8 both failed the COM1 assertion.
+Work stopped at that two-attempt wall under AGENTS.md, within the original six-hour
+and twelve-run ceilings. The final documentation-only commit uses `[skip ci]`;
+no ninth run is requested. README remains 55 lines, with the full signed-package
+policy and measured sizes documented. All eight Python tests, the PowerShell
+DriverStore regression, and PowerShell syntax checks pass locally.
+
+MEASURED read-only environment API recheck, 2026-10-22: deployment branch policy
+remains null and protection rules remain empty. Owner must configure `main`-only
+environment deployment and complete the licence review; no settings were changed.

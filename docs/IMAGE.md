@@ -1,7 +1,8 @@
 # Image and probes
 
-CODE READ: this section describes the implemented recipe and probes. Image startup
-and GPU behavior remain unverified; see [the evidence log](../notes/measurements.md).
+MEASURED: PE startup was observed at 8192 MiB through its result disk in run 8.
+The mandatory COM1 assertion failed; NVIDIA GPU behavior remains unverified.
+See [the evidence log](../notes/measurements.md).
 
 The build preserves **the entire unmodified `Display.Driver` directory**, including
 all files referenced by the signed INF/catalog. Control-panel, Ansel, localization,
@@ -24,24 +25,32 @@ probe; this combination remains experimental rather than a supported OS.
 | Formerly stripped subset | 1,929,774,713 | Historical, rejected by DISM |
 | Files restored by the owner decision | 763,072,674 | Includes 702,161,478 bytes referenced by the INF |
 | Imported DriverStore payload | 2,631,764,223 | MEASURED run 7; 202 files |
-| Compressed WIM | 1,493,575,908 | MEASURED run 7; before explicit boot-metadata correction |
-| Bootable ISO candidate | 1,549,445,120 | MEASURED run 7; failed serial boot test, never published |
+| Compressed WIM | 1,493,573,555 | MEASURED run 8; boot index 1 verified |
+| ISO candidate | 1,549,436,928 | MEASURED run 8; PE starts, serial gate fails; never published |
 
 The roughly 2.6 GB driver payload makes the PE WIM/ramdisk large. CI starts at
-8192 MiB guest RAM and tests lower allocations; the smallest successful tested
-boot size will be recorded in the manifest and evidence log. INFERRED: start Vast
-GPU tests with at least 8192 MiB guest RAM; a GPU-test minimum is not measured here.
-See [build and memory instructions](BUILD.md#vm-ram). The [evidence log](../notes/measurements.md)
-retains the earlier component table and will record the full-package measurements.
-MEASURED: run 7 timed out at 8192 MiB without a serial marker, so no successful
-boot minimum is established yet. Run 8 validates boot metadata and captures a
-guest result disk as diagnostics; COM1 remains the mandatory success criterion.
+8192 MiB guest RAM and attempts lower sizes only after serial success. Run 8's
+result disk proves startup at 8192 MiB, with 8,589,393,920 guest physical bytes
+reported and 6,651,428,864 bytes available at startup. That is an observed
+allocation, **not a measured minimum**; 6144/4096 MiB were not tried because COM1
+was unavailable. A serial-qualified boot minimum has not been established.
 
-At startup PE initializes PnP, emits `WGI_PE_BOOT_OK_V1` to COM1 (115200 8N1),
-loads the offline driver, prints `nvidia-smi`, and runs GPU probes from a second
-disk when `WGI_TESTS.TAG` is present. A writable disk with `WGI_RESULTS.TAG` receives
-`wgi-results.txt`; output also goes to serial. PE then idles. This supports a
-physical GPU test without treating CI's emulated display as an NVIDIA adapter.
+INFERRED: start Vast GPU tests with at least 8192 MiB guest RAM provisionally;
+the GPU-test minimum remains unmeasured. No rented machine or GPU was used.
+See [build and memory instructions](BUILD.md#vm-ram) and the complete component
+and process-memory tables in [the evidence log](../notes/measurements.md).
+
+CODE READ: startup initializes PnP, loads the stock serial INF, and attempts to
+emit `WGI_PE_BOOT_OK_V1` to COM1 (115200 8N1). A writable disk with
+`WGI_RESULTS.TAG` receives `wgi-results.txt`; this path was verified in run 8.
+COM1 open returned error 2 and the stock serial INF load returned `0x80070103`,
+so the serial test remains red despite the result-disk boot marker.
+
+Startup loads the offline NVIDIA INF, prints `nvidia-smi`, and runs bundled probes
+or probes on a second disk with `WGI_TESTS.TAG`, then idles. Run 8 captured NVIDIA
+INF load return code 0, SMI return code 9, the D3D11 NVIDIA-vendor assertion failure,
+and CUDA `LoadLibrary` error 126. There is no NVIDIA GPU in CI: these results do
+not establish binding, CUDA execution, or graphics rendering on NVIDIA hardware.
 
 The D3D11 probe asserts VendorId `0x10DE` and renders/reads an offscreen texture.
 Probes use MSVC `/MT` for a static CRT. An original CUDA driver-API query loads
