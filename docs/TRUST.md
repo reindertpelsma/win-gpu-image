@@ -1,8 +1,10 @@
 # Verification and trust
 
 The QEMU TCG smoke test boots the freshly built ISO without a GPU or network and
-requires a fixed serial marker within a deadline. It proves PE reached its startup
-code. It does **not** prove NVIDIA binding, CUDA, D3D, performance, or hardware support.
+requires the exact guest-written `WGI_PE_BOOT_OK_V1` result-disk marker within a
+deadline plus the offline DISM NVIDIA display-driver check. COM1 is best-effort
+logging only. This proves PE reached its startup code and the package was serviced
+offline. It does **not** prove NVIDIA binding, CUDA, D3D, performance, or hardware support.
 Those need a separate real GPU run. Hypotheses and falsifiers appear in test headers.
 
 The final job computes the image SHA-256, verifies release-part reconstruction,
@@ -30,10 +32,14 @@ bit-for-bit reproducibility is not established. Trust includes Microsoft, NVIDIA
 QEMU's Windows distributor, hosted runner/toolchain, GitHub, action commits, and
 reviewed recipe changes. See [SECURITY.md](../SECURITY.md) for owner configuration.
 
+An attestation can exist even if the later store-publish step fails (as in run 9).
+It records the build digest/context, not the overall job's final conclusion or
+successful availability in the store. Review the linked workflow run as well.
+
 ## The private store
 
 A standalone recipe for a Windows PE ISO with an offline-serviced NVIDIA display
-driver, GPU probes, and a serial boot test. A minimal Windows disk image is future
+driver, GPU probes, and a result-disk boot test. A minimal Windows disk image is future
 work. The public repository contains source and recipes only. The private release
 store holds a convenience copy so **rented Vast.ai test boxes** can download a
 prebuilt image for GPU tests and sweeps, whether CI-triggered or manual. Licence

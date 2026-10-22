@@ -181,3 +181,96 @@ DriverStore regression, and PowerShell syntax checks pass locally.
 MEASURED read-only environment API recheck, 2026-10-22: deployment branch policy
 remains null and protection rules remain empty. Owner must configure `main`-only
 environment deployment and complete the licence review; no settings were changed.
+
+## Owner-approved result-disk gate (after run 8)
+
+CODE READ: the owner superseded the serial requirement: CI now requires the exact
+`WGI_PE_BOOT_OK_V1` in guest-written `wgi-boot.txt` on the result disk, plus the
+offline DISM NVIDIA display-driver check. The fresh host-created disk contains
+only `WGI_RESULTS.TAG` and `WGI_SMOKE.TAG`, never the boot marker. The CI sentinel
+requests guest shutdown after probe logging so the runner can detach QEMU and read
+the disk; ordinary test boots still idle. Serial/COM1 is best-effort only.
+
+MEASURED in run 8: `COM1_OPEN_FAILED error=2`; no further msports/COM enumeration
+experiments are scheduled. CODE READ: the owner approved continuing to hash,
+attestation, and store publishing, with four runs remaining. The 8192 MiB guest
+allocation is the tested default, not a minimum; no lower-RAM trials are scheduled.
+Vast/GPU workload memory remains unmeasured, and no rented box is used.
+
+CODE READ: source change `7d2813de323fe9f0e83167c08862a0dabb04e23c` starts
+[run 9](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39845846088).
+Eight Python tests, both PowerShell fixture tests (including absent/corrupt marker
+rejection), and PowerShell syntax checks passed locally before pushing.
+
+### Run 9: boot, hash consistency, and attestation pass; publisher CLI flag error
+
+MEASURED: the exact guest-written result-disk marker and offline NVIDIA display
+check passed at 8192 MiB. QEMU exited 0 after 95.19 seconds, including probes and
+shutdown; this is not an exact boot duration or a minimum RAM measurement. Peak
+QEMU working set was 8,645,144,576 bytes, peak sampled private bytes 10,127,003,648,
+and minimum host free memory 6,042,052 KiB. The first guest API report gave
+8,589,393,920 total physical bytes and 6,645,489,664 available bytes.
+
+MEASURED: WIM 1,493,573,721 bytes; ISO 1,549,438,976 bytes; offline DriverStore
+2,631,764,223 bytes/202 files. Hash/part-manifest consistency passed. The digest and
+all 316 input hashes are in the job summary. Public
+[attestation 58805308](https://github.com/reindertpelsma/win-gpu-image/attestations/58805308)
+was created, without uploading image content. Publishing then failed before
+release creation: `gh api` rejects combining `--slurp` with `--jq`.
+
+CODE READ: publishing now uses `--paginate --slurp` alone and flattens pages in
+PowerShell. MEASURED: the real read-only private-store list call succeeds; empty
+and later-page fixture cases preserve exact tag/draft state. Eight Python tests,
+three PowerShell fixture tests, and syntax checks pass locally. Commit
+`320f7f83309eddfff8d557feb0c385232f675412` starts the tenth workflow run to retry
+the full gated path; no serial/RAM experiment is added.
+
+## Run 10: first green, attested image published to the private store
+
+MEASURED: [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657)
+is green on `main` at `320f7f83309eddfff8d557feb0c385232f675412`. The freshly built
+ISO passed the exact guest-written result-disk boot marker and offline NVIDIA
+display-driver check, hash/manifest consistency, public provenance attestation,
+and the final private-store publish. Ten of twelve allowed workflow runs were
+used; work remained within the original six-hour ceiling. No lower-RAM trial or
+additional serial-device experiment was run.
+
+MEASURED: public [attestation 58809172](https://github.com/reindertpelsma/win-gpu-image/attestations/58809172)
+records the ISO digest. The private store release is `img-a650252c82f1c09a` with
+`image.iso.part00`, `manifest.json`, and `SHA256SUMS`, all uploaded and non-draft.
+The image is 1,549,436,928 bytes; the WIM is 1,493,573,627 bytes; imported NVIDIA
+DriverStore payload is 2,631,764,223 bytes/202 files. All 264 source display-package
+files (2,692,847,387 bytes) are staged byte-for-byte; separate packages are omitted.
+
+| Run 10 memory observation | Value | Scope |
+| --- | ---: | --- |
+| Configured guest RAM | 8192 MiB | Tested default, not a minimum |
+| Guest total physical bytes | 8,589,393,920 | Native guest API at startup |
+| Guest available physical bytes | 6,647,599,104 | First startup log, before probes |
+| Peak QEMU working set bytes | 8,646,565,888 | Host process counter, not unique physical memory |
+| Peak sampled QEMU private bytes | 10,122,506,240 | Host process counter |
+| Minimum host free physical memory | 5,864,124 KiB | Sampled on the Windows runner |
+| Observation duration | 101.32 seconds | Through probe execution and clean QEMU exit 0; not exact boot time |
+| Lowest boot allocation / Vast GPU RAM | Not measured | No lower-RAM or real GPU trials |
+
+MEASURED: `COM1_OPEN_FAILED error=2` remains visible in the result log and does
+not fail CI. NVIDIA INF load returns 0; SMI returns 9, D3D11 rejects the Microsoft
+adapter, and CUDA DLL loading fails without an NVIDIA GPU. CODE READ: the green
+boot gate proves startup and offline package inclusion, not NVIDIA binding,
+compute/graphics execution, performance, or compatibility.
+
+MEASURED read-only owner-setup recheck: environment deployment branch policy is
+still null and protection rules are empty; owner must configure `main`-only
+deployment and complete licence review. Public releases and Actions artifacts
+remain zero. Repository files are source/recipe/metadata only; no vendor binary
+extension or tracked file larger than 1 MiB is present. No settings were changed.
+
+MEASURED: downloaded all three private release assets with the existing human
+read login. `verify-release.sh` passed part/manifest checks and reassembly. The
+reassembled image SHA-256 matches the public run output; manifest commit, all 316
+input records, and boot evidence match the recipe/run. `gh attestation verify
+<image> --repo reindertpelsma/win-gpu-image` exited 0; JSON output confirms one
+verified SLSA provenance attestation for the same digest. Downloaded vendor/image
+bytes remain private and are removed after verification; only evidence metadata
+is retained locally. This final documentation change is separate, docs-only, and
+uses `[skip ci]` through a branch/PR after the first green run.
