@@ -26,7 +26,8 @@ New-Item -ItemType Directory -Force work/media/sources | Out-Null
 Copy-Item $pe[0].FullName work/base.wim
 (Get-Item work/base.wim).IsReadOnly = $false
 
-# Extract only display files. Never run the vendor installer.
+# Preserve all of Display.Driver, including every signed INF source file.
+# Separate archive packages are not extracted. Never run the vendor installer.
 Invoke-Checked $seven @('x','-y','-bd',"-o$root/work/nvidia",'cache/nvidia.exe','Display.Driver/*')
 Invoke-Checked python @('scripts/recipe.py','stage-driver','work/nvidia/Display.Driver','work/driver','out/sizes.json')
 
@@ -46,7 +47,7 @@ if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /EHsc /std:c++17 /Fe:work/programs/d3d11-offscreen.exe /Fo:work/programs/d3d11-offscreen.obj programs/d3d11-offscreen.cpp /link d3d11.lib dxgi.lib
 exit /b %errorlevel%
 "@
-[IO.File]::WriteAllText("$root/work/compile.cmd", $compile.Replace("`n","`r`n"))
+[IO.File]::WriteAllText("$root/work/compile.cmd", $compile.Replace("`r`n","`n").Replace("`n","`r`n"))
 Invoke-Checked cmd.exe @('/d','/c',"$root/work/compile.cmd")
 
 # Obtain Microsoft graphics runtime DLLs directly from the pinned evaluation ISO.
@@ -65,17 +66,12 @@ try {
     try {
         Dism @("/Image:$root/work/mount",'/Add-Driver',"/Driver:$root/work/driver/nv_dispi.inf")
     } catch {
-        Write-Host 'STRIPPED_DRIVER_FAILED: capture evidence before one full-package diagnostic control.'
+        Write-Host 'FULL_SIGNED_DRIVER_FAILED: capture servicing evidence.'
         foreach ($log in @('work/dism.log','work/mount/Windows/inf/setupapi.offline.log','work/mount/Windows/inf/setupapi.dev.log')) {
             if (Test-Path $log) { Write-Host "DIAGNOSTIC_LOG $log"; Get-Content $log -Tail 100 | Write-Host }
         }
         Invoke-Checked python @('scripts/recipe.py','driver-closure','work/nvidia/Display.Driver','work/driver')
-        # Control only: a successful full package does not relax the stripping rule.
-        # Never export, attest, or publish this diagnostic image.
-        Dism @("/Image:$root/work/mount",'/Add-Driver',"/Driver:$root/work/nvidia/Display.Driver/nv_dispi.inf")
-        Write-Host 'FULL_SIGNED_PACKAGE_CONTROL_PASSED'
-        Dism @("/Image:$root/work/mount",'/Get-Drivers','/Format:List')
-        throw 'DRIVER_STRIPPING_BLOCKER: stripped signed INF package failed; full source control passed. Stop after two candidate servicing attempts. No image will be published.'
+        throw
     }
     $listing = & $script:DismExe "/Image:$root/work/mount" /Get-Drivers /Format:List /English
     if ($LASTEXITCODE -ne 0) { throw 'DISM get-drivers failed' }
@@ -115,3 +111,11 @@ if (!$oscdimg -or !$etfs -or !$efi) { throw 'Pinned boot ISO tooling not found' 
 $boot = "-bootdata:2#p0,e,b$($etfs.FullName)#pEF,e,b$($efi.FullName)"
 Invoke-Checked $oscdimg.FullName @('-m','-o','-u2','-udfver102','-h',$boot,"$root/work/media","$root/out/image.iso")
 Write-Host "MEASURED BOOT_WIM_BYTES=$((Get-Item work/media/sources/boot.wim).Length) IMAGE_BYTES=$((Get-Item out/image.iso).Length)"
+@{
+    base_wim_bytes = $pe[0].Length
+    offline_driverstore_bytes = $repoBytes
+    boot_wim_bytes = (Get-Item work/media/sources/boot.wim).Length
+    image_bytes = (Get-Item out/image.iso).Length
+    scratch_mib = 512
+    driver_policy = 'Complete signed Display.Driver; no INF-referenced files removed'
+} | ConvertTo-Json | Set-Content out/build-metrics.json -Encoding utf8

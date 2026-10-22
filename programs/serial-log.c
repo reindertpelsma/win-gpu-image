@@ -33,6 +33,13 @@ int main(int argc, char** argv) {
             break;
         }
     }
+    MEMORYSTATUSEX memory = {0}; memory.dwLength = sizeof(memory);
+    if (GlobalMemoryStatusEx(&memory)) {
+        char text[160];
+        int n = snprintf(text, sizeof(text), "MEMORY_GUEST total_bytes=%llu available_bytes=%llu\r\n",
+                         (unsigned long long)memory.ullTotalPhys, (unsigned long long)memory.ullAvailPhys);
+        if (n > 0 && n < (int)sizeof(text)) emit(text, (DWORD)n);
+    }
     if (argc > 1) {
         for (int i = 1; i < argc; ++i) { if (i > 1) emit(" ", 1); emit(argv[i], (DWORD)strlen(argv[i])); }
         emit("\r\n", 2);

@@ -30,7 +30,7 @@ Microsoft or NVIDIA terms.
 
 Full installation/setup can take about an hour (**estimate**); PE boot was about
 50–70 s (**MEASURED in downstream testing**, in a VM on a different host).
-PE starts clean from RAM without activation/OOBE/accounts; its base is a few hundred MB plus the driver.
+PE starts clean from RAM without activation/OOBE/accounts; the complete signed driver adds about 2.6 GB.
 NVIDIA-in-PE remains unproven; it complements full Windows. [Full comparison and planned middle option](docs/WHY-PE.md).
 
 ## Build it yourself
@@ -41,7 +41,7 @@ Use an elevated Windows PowerShell 7 terminal; tools, exact local commands,
 ```powershell
 git clone https://github.com/reindertpelsma/win-gpu-image.git
 cd win-gpu-image
-# Follow docs/BUILD.md, including the current measured blocker.
+# Follow docs/BUILD.md, including VM RAM requirements and measured results.
 ```
 
 ## Details and status
@@ -51,5 +51,5 @@ cd win-gpu-image
 - [Workflow security and owner environment setup](SECURITY.md)
 - [Measured results and run URLs](notes/measurements.md)
 
-**Build blocked:** stripped signed NVIDIA package fails DISM; [evidence](notes/measurements.md).
+**Build resumed:** keep the complete signed display package; [sizes and RAM requirements](docs/IMAGE.md).
 Do not open pull requests that add binaries.

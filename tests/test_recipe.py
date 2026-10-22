@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from recipe import classify_driver, missing_inf_sources, sha256_file, split_file, verify_file, verify_manifest
+from recipe import missing_inf_sources, sha256_file, split_file, stage_driver, verify_file, verify_manifest
 
 
 class RecipeTests(unittest.TestCase):
@@ -55,15 +55,24 @@ class RecipeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 verify_manifest(m, Path(d))
 
-    def test_display_stripping_keeps_gpu_components(self):
-        for name in ["nvlddmkm.sys", "gsp_ga10x.bin", "nvcuda64.dll", "nvml.dll",
-                     "nvidia-smi.exe", "nvwgf2umx.dll", "nvoglv64.dll",
-                     "vulkan-1.dll", "nv_dispi.inf", "nv_disp.cat"]:
-            self.assertTrue(classify_driver(name)[0], name)
-        for name in ["NVCPL/nvcpl.dll", "NvCamera/camera.dll", "nv_other.inf",
-                     "setup.exe", "libnvidia.so", "PhysX/a.dll", "HDAudio/a.dll",
-                     "GFExperience/a.dll", "localization/en-us/a.dll"]:
-            self.assertFalse(classify_driver(name)[0], name)
+    def test_display_package_is_preserved_byte_for_byte(self):
+        with tempfile.TemporaryDirectory() as d:
+            source, staged = Path(d) / "source", Path(d) / "staged"
+            source.mkdir()
+            files = {"nv_dispi.inf": b'[SourceDisksFiles]\nnvcpl.dll=1\nlibnvidia.so=1\n',
+                     "nv_disp.cat": b"signed catalog", "nvcpl.dll": b"control panel",
+                     "libnvidia.so": b"referenced Linux payload", "NvCamera/camera.dll": b"Ansel",
+                     "nv_other.inf": b"other unmodified INF", "setup.exe": b"included metadata"}
+            for name, value in files.items():
+                p = source / name; p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(value)
+            sizes = Path(d) / "sizes.json"
+            stage_driver(source, staged, sizes)
+            self.assertEqual({p.relative_to(staged).as_posix(): p.read_bytes()
+                              for p in staged.rglob("*") if p.is_file()}, files)
+            data = json.loads(sizes.read_text())
+            self.assertEqual(data["removed_bytes"], 0)
+            self.assertEqual(data["retained_bytes"], sum(map(len, files.values())))
+            self.assertTrue(all(x["keep"] and x["sha256"] for x in data["files"]))
 
     def test_missing_inf_source_diagnostics_include_subdirectories(self):
         with tempfile.TemporaryDirectory() as d:

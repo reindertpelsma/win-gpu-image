@@ -93,3 +93,16 @@ CODE READ: the final documentation-only commit uses `[skip ci]`, as requested by
 the owner after the servicing wall. README is 55 lines; detailed sections moved
 verbatim into `docs/BUILD.md`, `docs/IMAGE.md`, `docs/TRUST.md`, and `docs/WHY-PE.md`,
 with relative-link corrections. No workflow or build code changed in that commit.
+
+CODE READ, 2026-10-22, owner decision after run 5: retain the complete unmodified
+signed display package and resume. Only whole unrelated packages outside the
+display directory may be excluded. The previous stripping blocker is superseded;
+its measured failure remains part of the record. Run 6 will measure complete
+source/DriverStore/WIM/ISO sizes, boot, and RAM. The original six-hour/12-run ceiling
+continues (five runs used before resuming).
+
+CODE READ: smoke memory sweep starts at 8192 MiB and, after a successful boot,
+tests 6144 then 4096 MiB, stopping at the first lower-size failure. INFERRED: the
+provisional Vast GPU-test allocation is at least 8192 MiB; it remains unmeasured
+because no rented box or GPU is authorized in this lane. Boot-only memory and host
+QEMU working set will be reported separately from GPU workload requirements.

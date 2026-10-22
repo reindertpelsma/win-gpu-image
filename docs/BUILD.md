@@ -1,10 +1,10 @@
 # Build on Windows
 
-MEASURED: offline NVIDIA servicing of the stripped package fails; see
-[the evidence log](../notes/measurements.md) before running these commands.
+CODE READ: the owner resumed the build with the complete signed display package.
+The earlier stripping failure and subsequent results are in [the evidence log](../notes/measurements.md).
 
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
-at least 30 GiB free disk and 8 GiB RAM. Install Git, Python 3.11+, 7-Zip, and
+at least 30 GiB free disk and 16 GiB host RAM for the default 8 GiB guest. Install Git, Python 3.11+, 7-Zip, and
 Visual Studio 2022 Build Tools with the x64 C++ toolchain and Windows SDK. CI uses
 the corresponding tools from `windows-2022`. ADK files are extracted from pinned
 offline MSI packages, independently of any installed ADK. QEMU uses a silent
@@ -17,7 +17,7 @@ python -m unittest discover -s tests -v
 ./scripts/Measure-Runner.ps1
 ./scripts/Fetch-Inputs.ps1
 ./scripts/Build-Image.ps1
-./tests/Smoke-Boot.ps1
+./tests/Smoke-Boot.ps1 -MemoryMiB 8192 -MeasureMemoryFloor
 python scripts/recipe.py package out/image.iso release (git rev-parse HEAD) local
 python scripts/recipe.py verify release
 ```
@@ -41,3 +41,18 @@ DISM scratch is explicitly 512 MiB, the largest
 [supported setting](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/dism-windows-pe-servicing-command-line-options).
 
 See [measured results](../notes/measurements.md) for the current build status.
+
+## VM RAM
+
+CODE READ: CI first requires an 8192 MiB guest to reach the serial boot marker,
+then measures 6144 and 4096 MiB until a lower size fails. `out/smoke.json`, the
+manifest, and the job summary record the smallest successful tested allocation,
+boot times, guest available RAM, and peak QEMU working set. This is a boot-only
+minimum among tested sizes; it does not measure NVIDIA binding or GPU workloads.
+
+INFERRED: provision at least 8192 MiB guest RAM for rented Vast GPU tests initially,
+and leave additional host RAM for QEMU, the host OS, and the virtualization stack.
+That GPU test minimum is not measured in this lane: no rented machine or GPU is
+used. The full driver, compressed WIM, boot memory, 512 MiB scratch, and runtime
+copies make the RAM requirement larger than stock PE. See the [image sizes](IMAGE.md)
+and [measured memory results](../notes/measurements.md).

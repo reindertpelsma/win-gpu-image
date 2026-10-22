@@ -3,29 +3,35 @@
 CODE READ: this section describes the implemented recipe and probes. Image startup
 and GPU behavior remain unverified; see [the evidence log](../notes/measurements.md).
 
-The build stages only `Display.Driver`, keeps CUDA, NVML/SMI, D3D, OpenGL, Vulkan,
-kernel and firmware dependencies, and excludes control panel, Ansel, PhysX, audio,
-experience/installer, localization, Linux files and unrelated OEM INFs. INF and
-catalog bytes stay unchanged. `dism /Add-Driver` services the WIM offline; a separate
-`/Get-Drivers` check must identify the NVIDIA display package before commit.
-The Windows evaluation ISO supplies matching Microsoft graphics DLLs for the
-offscreen probe; this combination remains experimental rather than a supported OS.
+The build preserves **the entire unmodified `Display.Driver` directory**, including
+all files referenced by the signed INF/catalog. Control-panel, Ansel, localization,
+and Linux/WSL files inside that directory remain present. Every staged file is
+checked against its source SHA-256. No INF, catalog, driver, or user-mode binary is
+patched. `dism /Add-Driver` services the WIM offline; `/Get-Drivers` must identify
+the NVIDIA display package before commit.
 
-Historical WP1 source measurements (MiB, 1 MiB = 1,048,576 bytes):
+Whole separate archive packages outside `Display.Driver` are not extracted. This
+can exclude standalone HDAudio, PhysX, experience, and control-panel installers;
+it never removes dependencies referenced from inside the display package. This
+policy supersedes the unsuccessful stripping experiment in runs 4 and 5.
 
-| Retained | MiB | Removed | MiB |
-| --- | ---: | --- | ---: |
-| D3D/compiler | 759.388 | NVCPL | 148.506 |
-| CUDA/OpenCL | 433.021 | Ansel | 59.321 |
-| GL/Vulkan | 84.401 | Linux | 466.645 |
-| Kernel | 105.385 | OEM INFs | 51.303 |
-| GSP | 100.159 | Installer | 1.948 |
-| NVML/SMI | 5.907 | Total | 727.723 |
-| Other + INF/catalog | 352.114 | PhysX/audio/experience | Not extracted |
-| Total | 1840.377 | | |
+The Windows evaluation ISO supplies Microsoft graphics DLLs for the offscreen
+probe; this combination remains experimental rather than a supported OS.
 
-Those are historical package measurements, not this build's image size. Each new
-build prints its own component counts and byte sizes and places them in its manifest.
+| Payload | Bytes | Status |
+| --- | ---: | --- |
+| Complete Display.Driver source | 2,692,847,387 | MEASURED source inventory in run 4; now all retained |
+| Formerly stripped subset | 1,929,774,713 | Historical, rejected by DISM |
+| Files restored by the owner decision | 763,072,674 | Includes 702,161,478 bytes referenced by the INF |
+| Imported DriverStore payload | Pending run 6 | About 2.6 GB expected; measure before WIM commit |
+| Compressed WIM and bootable ISO | Pending run 6 | Final sizes/hashes are recorded by the build |
+
+The roughly 2.6 GB driver payload makes the PE WIM/ramdisk large. CI starts at
+8192 MiB guest RAM and tests lower allocations; the smallest successful tested
+boot size will be recorded in the manifest and evidence log. INFERRED: start Vast
+GPU tests with at least 8192 MiB guest RAM; a GPU-test minimum is not measured here.
+See [build and memory instructions](BUILD.md#vm-ram). The [evidence log](../notes/measurements.md)
+retains the earlier component table and will record the full-package measurements.
 
 At startup PE initializes PnP, emits `WGI_PE_BOOT_OK_V1` to COM1 (115200 8N1),
 loads the offline driver, prints `nvidia-smi`, and runs GPU probes from a second

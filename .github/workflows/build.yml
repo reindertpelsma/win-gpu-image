@@ -34,7 +34,7 @@ jobs:
       - name: Build offline image
         run: ./scripts/Build-Image.ps1
       - name: QEMU serial boot smoke test
-        run: ./tests/Smoke-Boot.ps1
+        run: ./tests/Smoke-Boot.ps1 -MemoryMiB 8192 -MeasureMemoryFloor
       - name: Compute and verify manifest and SHA-256
         env:
           BUILD_COMMIT: ${{ github.sha }}

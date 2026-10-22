@@ -76,35 +76,36 @@ def verify_manifest(manifest, directory):
         raise ValueError("Reconstructed image differs from manifest")
 
 
-def classify_driver(relative, cpl_files=()):
+def driver_component(relative, cpl_files=()):
     name = Path(relative).name.lower()
     parts = [x.lower() for x in Path(relative).parts]
     if name.endswith(".inf") and name != "nv_dispi.inf":
-        return False, "other OEM INFs"
+        return "other OEM INFs"
     if any(x in parts for x in ("nvcpl", "nvcamera", "localization")) or name in cpl_files:
-        return False, "control panel/Ansel/localization"
+        return "control panel/Ansel/localization"
     if (name.startswith("lib") and ".so" in name) or name in ("nvidia-smi", "nvidia-ngx-updater"):
-        return False, "Linux/WSL"
+        return "Linux/WSL"
     if name.endswith(".nvi") or name in ("setup.exe", "displaydriverext.dll"):
-        return False, "installer"
+        return "installer"
     if re.search(r"physx|hdaudio|gfexperience|geforceexperience", str(relative), re.I):
-        return False, "PhysX/audio/experience"
+        return "PhysX/audio/experience"
     if name.endswith(".sys"):
-        return True, "kernel"
+        return "kernel"
     if name.startswith("gsp_"):
-        return True, "GSP firmware"
+        return "GSP firmware"
     if any(x in name for x in ("cuda", "ptx")) or name.startswith(("nvvm", "nvcubin", "nvopencl")):
-        return True, "CUDA/OpenCL"
+        return "CUDA/OpenCL"
     if name.startswith(("nvml", "nvidia-smi")):
-        return True, "NVML/SMI"
+        return "NVML/SMI"
     if name.startswith(("nvoglv", "vulkan", "nv-vk", "nvvksc")):
-        return True, "GL/Vulkan"
+        return "GL/Vulkan"
     if name.startswith(("nvd3d", "nvwgf", "nvdx", "nvgpucomp", "nvldumd", "nvpresent", "nvrtum", "nvdirectsr", "nvdlpp")):
-        return True, "D3D/compiler"
-    return True, "INF/catalog/other dependencies"
+        return "D3D/compiler"
+    return "INF/catalog/other dependencies"
 
 
 def stage_driver(source, destination, sizes):
+    """Preserve every byte in Display.Driver; component names are accounting only."""
     source, destination = Path(source), Path(destination)
     cpl = set()
     section = ""
@@ -121,15 +122,20 @@ def stage_driver(source, destination, sizes):
         if not p.is_file():
             continue
         rel = p.relative_to(source)
-        keep, group = classify_driver(rel, cpl)
-        key = ("KEEP " if keep else "DROP ") + group
+        group = driver_component(rel, cpl)
+        key = "KEEP " + group
         groups[key] = groups.get(key, 0) + p.stat().st_size
-        records.append({"file": rel.as_posix(), "bytes": p.stat().st_size, "keep": keep, "group": group})
-        if keep:
-            dest = destination / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(p, dest)
-    value = {"components_bytes": groups, "files": records,
+        digest = sha256_file(p)
+        dest = destination / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(p, dest)
+        verify_file(dest, digest)
+        records.append({"file": rel.as_posix(), "bytes": p.stat().st_size, "keep": True, "group": group, "sha256": digest})
+    missing = missing_inf_sources(source / "nv_dispi.inf", source, destination)
+    if missing:
+        raise ValueError("Unmodified display package lost INF-referenced source files")
+    value = {"policy": "Complete unmodified Display.Driver; separate archive packages not extracted",
+             "components_bytes": groups, "files": records,
              "retained_bytes": sum(x["bytes"] for x in records if x["keep"]),
              "removed_bytes": sum(x["bytes"] for x in records if not x["keep"])}
     Path(sizes).write_text(json.dumps(value, indent=2) + "\n")
@@ -137,7 +143,7 @@ def stage_driver(source, destination, sizes):
 
 
 def missing_inf_sources(inf, source, staged):
-    """Report original SourceDisksFiles entries excluded by the stripping recipe."""
+    """Report original SourceDisksFiles entries absent from the staged package."""
     source, staged = Path(source), Path(staged)
     originals = {p.relative_to(source).as_posix().lower(): p for p in source.rglob("*") if p.is_file()}
     kept = {p.relative_to(staged).as_posix().lower() for p in staged.rglob("*") if p.is_file()}
@@ -190,6 +196,8 @@ def main():
                     "build_date": datetime.now(timezone.utc).isoformat(), "input_hashes": lock["files"],
                     "purpose": "Prebuilt GPU tests and sweeps on rented Vast.ai test boxes, CI-triggered or manual",
                     "trust_anchor": "Public GitHub build attestation plus expected SHA-256 in consumer reviewed lock file; store metadata is convenience only",
+                    "memory_measurements": json.loads(Path("out/smoke.json").read_text()),
+                    "build_measurements": json.loads(Path("out/build-metrics.json").read_text()),
                     "parts": [{"name": x.name, "bytes": x.stat().st_size, "sha256": sha256_file(x)} for x in parts],
                     "sizes": json.loads(Path("out/sizes.json").read_text())}
         verify_manifest(manifest, d)
