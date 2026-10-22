@@ -30,14 +30,15 @@ jobs:
           python -m unittest discover -s tests -v
           if ($LASTEXITCODE -ne 0) { throw 'Recipe tests failed' }
           ./tests/Test-DriverMetrics.ps1
+          ./tests/Test-ResultMarker.ps1
       - name: Measure runner
         run: ./scripts/Measure-Runner.ps1
       - name: Fetch pinned inputs
         run: ./scripts/Fetch-Inputs.ps1
       - name: Build offline image
         run: ./scripts/Build-Image.ps1
-      - name: QEMU serial boot smoke test
-        run: ./tests/Smoke-Boot.ps1 -MemoryMiB 8192 -MeasureMemoryFloor
+      - name: QEMU result-disk boot smoke test
+        run: ./tests/Smoke-Boot.ps1 -MemoryMiB 8192
       - name: Compute and verify manifest and SHA-256
         env:
           BUILD_COMMIT: ${{ github.sha }}

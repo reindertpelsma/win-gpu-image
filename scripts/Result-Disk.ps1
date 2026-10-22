@@ -1,5 +1,9 @@
-# Diagnostic data disk only. All disk operations select a new task-owned VHD file.
+# Boot evidence and diagnostics. Disk operations select a new task-owned VHD only.
 . "$PSScriptRoot/common.ps1"
+function Test-PeBootMarkerFile([string]$Path) {
+    if (!(Test-Path -LiteralPath $Path -PathType Leaf)) { return $false }
+    return [IO.File]::ReadAllText($Path) -cmatch '\AWGI_PE_BOOT_OK_V1(?:\r?\n)?\z'
+}
 function New-SmokeResultDisk([string]$Path) {
     $diskPath = [IO.Path]::GetFullPath($Path)
     if (Test-Path -LiteralPath $diskPath) { throw 'Result VHD already exists; refuse to reuse it' }
@@ -18,6 +22,8 @@ function New-SmokeResultDisk([string]$Path) {
         $driveRoot = $letter + ':\'
         if (!(Test-Path -LiteralPath $driveRoot)) { throw 'Own result VHD did not receive its drive letter' }
         [IO.File]::WriteAllText((Join-Path $driveRoot 'WGI_RESULTS.TAG'), "WGI smoke result disk`r`n")
+        # Only sentinels are seeded here; wgi-boot.txt must be written by the guest.
+        [IO.File]::WriteAllText((Join-Path $driveRoot 'WGI_SMOKE.TAG'), "Shut down after CI probes`r`n")
     } finally {
         $image = Get-DiskImage -ImagePath $diskPath -ErrorAction SilentlyContinue
         if ($image -and $image.Attached) { Dismount-DiskImage -ImagePath $diskPath | Out-Null }
@@ -26,10 +32,14 @@ function New-SmokeResultDisk([string]$Path) {
 }
 function Read-SmokeResultDisk([string]$Path) {
     $captured = $false
+    $marker = $false
+    $readError = $null
     try {
         Mount-DiskImage -ImagePath $Path | Out-Null
         $volumes = @(Get-DiskImage -ImagePath $Path | Get-Disk | Get-Partition | Get-Volume | Where-Object DriveLetter)
         foreach ($volume in $volumes) {
+            $markerPath = $volume.DriveLetter + ':\wgi-boot.txt'
+            if (Test-PeBootMarkerFile $markerPath) { $marker = $true }
             $log = ($volume.DriveLetter + ':\wgi-results.txt')
             if (Test-Path -LiteralPath $log) {
                 Write-Host 'GUEST_RESULT_DISK_LOG_BEGIN'
@@ -38,10 +48,13 @@ function Read-SmokeResultDisk([string]$Path) {
                 $captured = $true
             }
         }
-    } catch { Write-Host "RESULT_DISK_DIAGNOSTIC_UNAVAILABLE $($_.Exception.Message)" }
+    } catch {
+        $readError = $_.Exception.Message
+        Write-Host "RESULT_DISK_READ_FAILED $readError"
+    }
     finally {
         $image = Get-DiskImage -ImagePath $Path -ErrorAction SilentlyContinue
         if ($image -and $image.Attached) { Dismount-DiskImage -ImagePath $Path | Out-Null }
     }
-    return $captured
+    return [pscustomobject]@{ boot_marker_found = $marker; log_captured = $captured; read_error = $readError }
 }

@@ -1,95 +1,85 @@
-# Hypothesis: this ISO boots through wpeinit/startnet at the selected VM RAM size.
-# Falsifier: QEMU exits or COM1 lacks WGI_PE_BOOT_OK_V1 within the deadline.
-# Lower-memory trials measure the smallest tested boot size, not GPU sufficiency.
+# Hypothesis: this ISO reaches wpeinit/startnet and has the offline NVIDIA package.
+# Falsifier: no exact guest-written result-disk marker by the deadline, or the
+# offline DISM listing lacks the NVIDIA display driver. COM1 is optional logging.
 # No NVIDIA device is emulated: GPU binding and Vast test RAM remain unmeasured.
-param([int]$TimeoutSeconds = 900, [int]$MemoryMiB = 8192, [switch]$MeasureMemoryFloor)
+param([int]$TimeoutSeconds = 900, [int]$MemoryMiB = 8192)
 . "$PSScriptRoot/../scripts/common.ps1"
 . "$PSScriptRoot/../scripts/Result-Disk.ps1"
 $root = (Get-Location).Path
+$driverListing = Get-Content "$root/out/drivers.txt" -Raw
+if ($driverListing -notmatch 'Original File Name\s*:\s*nv_dispi\.inf' -or
+    $driverListing -notmatch 'Class Name\s*:\s*Display' -or
+    $driverListing -notmatch 'Provider Name\s*:\s*NVIDIA') {
+    throw 'Offline DISM NVIDIA display driver assertion failed'
+}
 $qemuRoot = [IO.Path]::GetFullPath("$root/work/qemu")
 New-Item -ItemType Directory -Force $qemuRoot | Out-Null
 Invoke-Installer "$root/cache/qemu.exe" "/S /D=$qemuRoot"
 $qemu = "$qemuRoot/qemu-system-x86_64.exe"
 Invoke-Checked $qemu @('--version')
-$iso = "$root/out/image.iso"
-
-function Test-BootAtMemory([int]$RamMiB) {
-    $serial = "$root/work/serial-$RamMiB.log"
-    $errlog = "$root/work/qemu-stderr-$RamMiB.log"
-    $outlog = "$root/work/qemu-stdout-$RamMiB.log"
-    if (Test-Path $serial) { Clear-Content $serial }
-    $resultDisk = $null
-    try { $resultDisk = New-SmokeResultDisk "$root/work/results-$RamMiB.vhd" }
-    catch { Write-Host "RESULT_DISK_CREATION_UNAVAILABLE $($_.Exception.Message)" }
-    $watch = [Diagnostics.Stopwatch]::StartNew()
-    $arguments = @('-machine','q35','-accel','tcg,thread=multi','-cpu','max','-smp','2','-m',"$RamMiB",
-        '-display','none','-monitor','none','-serial',"file:$serial",'-nic','none',
-        '-no-reboot','-boot','d','-cdrom',$iso)
-    if ($resultDisk) { $arguments += @('-drive',"file=$resultDisk,format=vpc,if=ide,index=0") }
-    # Start-Process joins arguments: quote each argument for local paths with spaces.
-    $quoted = @($arguments | ForEach-Object { '"' + $_ + '"' })
-    $process = Start-Process -FilePath $qemu -PassThru -RedirectStandardError $errlog -RedirectStandardOutput $outlog -ArgumentList $quoted
-    $passed = $false
-    $reason = 'serial marker deadline'
-    $peakWorkingSet = 0L
-    $peakPrivateBytes = 0L
-    $minimumHostFreeKiB = [long]::MaxValue
-    $diskLogCaptured = $false
-    try {
-        while ($watch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
-            $process.Refresh()
-            if ($process.HasExited) { $reason = "QEMU exit $($process.ExitCode)"; break }
-            $peakWorkingSet = [math]::Max($peakWorkingSet, $process.PeakWorkingSet64)
-            $peakPrivateBytes = [math]::Max($peakPrivateBytes, $process.PrivateMemorySize64)
-            $freeKiB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory
-            $minimumHostFreeKiB = [math]::Min($minimumHostFreeKiB, [long]$freeKiB)
-            if ((Test-Path $serial) -and (Get-Content $serial -Raw) -match 'WGI_PE_BOOT_OK_V1') {
-                $passed = $true; $reason = 'guest serial marker'; break
-            }
-            Start-Sleep -Seconds 2
-        }
-    } finally {
-        $watch.Stop()
-        if (!$process.HasExited) { Stop-Process -Id $process.Id -Force; $process.WaitForExit() }
-        if (Test-Path $errlog) { Get-Content $errlog -Tail 40 | Write-Host }
-        if (Test-Path $serial) { Get-Content $serial -Tail 80 | Write-Host }
-        if ($resultDisk) { $diskLogCaptured = Read-SmokeResultDisk $resultDisk }
+$serial = "$root/work/serial-$MemoryMiB.log"
+$errlog = "$root/work/qemu-stderr-$MemoryMiB.log"
+$outlog = "$root/work/qemu-stdout-$MemoryMiB.log"
+if (Test-Path $serial) { Clear-Content $serial }
+# A fresh disk is mandatory. The host never seeds wgi-boot.txt.
+$resultDisk = New-SmokeResultDisk "$root/work/results-$MemoryMiB.vhd"
+$arguments = @('-machine','q35','-accel','tcg,thread=multi','-cpu','max','-smp','2','-m',"$MemoryMiB",
+    '-display','none','-monitor','none','-serial',"file:$serial",'-nic','none',
+    '-no-reboot','-boot','d','-cdrom',"$root/out/image.iso",
+    '-drive',"file=$resultDisk,format=vpc,if=ide,index=0")
+# Start-Process joins arguments: quote each argument for local paths with spaces.
+$quoted = @($arguments | ForEach-Object { '"' + $_ + '"' })
+$watch = [Diagnostics.Stopwatch]::StartNew()
+$process = Start-Process -FilePath $qemu -PassThru -RedirectStandardError $errlog -RedirectStandardOutput $outlog -ArgumentList $quoted
+$endReason = 'observation deadline; host stopped QEMU'
+$peakWorkingSet = 0L
+$peakPrivateBytes = 0L
+$minimumHostFreeKiB = [long]::MaxValue
+$diskEvidence = $null
+try {
+    while ($watch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
+        $process.Refresh()
+        if ($process.HasExited) { $endReason = "QEMU exit $($process.ExitCode)"; break }
+        $peakWorkingSet = [math]::Max($peakWorkingSet, $process.PeakWorkingSet64)
+        $peakPrivateBytes = [math]::Max($peakPrivateBytes, $process.PrivateMemorySize64)
+        $freeKiB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory
+        $minimumHostFreeKiB = [math]::Min($minimumHostFreeKiB, [long]$freeKiB)
+        Start-Sleep -Seconds 2
     }
-    $result = [pscustomobject]@{
-        memory_mib = $RamMiB; boot_pass = $passed; reason = $reason
-        seconds = [math]::Round($watch.Elapsed.TotalSeconds,2)
-        peak_qemu_working_set_bytes = $peakWorkingSet
-        peak_sampled_qemu_private_bytes = $peakPrivateBytes
-        minimum_host_free_kib = $minimumHostFreeKiB
-        accelerator = 'TCG'; gpu_present = $false
-        result_disk_log_captured = $diskLogCaptured
-    }
-    Write-Host ('MEASURED QEMU_BOOT ' + ($result | ConvertTo-Json -Compress))
-    return $result
+} finally {
+    $watch.Stop()
+    if (!$process.HasExited) { Stop-Process -Id $process.Id -Force; $process.WaitForExit() }
+    if (Test-Path $errlog) { Get-Content $errlog -Tail 40 | Write-Host }
+    if (Test-Path $serial) { Get-Content $serial -Tail 80 | Write-Host }
+    # Never mount the VHD while QEMU has it open. Guest shutdown flushes the disk.
+    $diskEvidence = Read-SmokeResultDisk $resultDisk
 }
-
-$results = @()
-$results += Test-BootAtMemory $MemoryMiB
-if ($results[0].boot_pass -and $MeasureMemoryFloor) {
-    foreach ($candidate in @(6144,4096) | Where-Object { $_ -lt $MemoryMiB }) {
-        $results += Test-BootAtMemory $candidate
-        if (!$results[-1].boot_pass) { break }
-    }
+$passed = $diskEvidence.boot_marker_found -and !$diskEvidence.read_error
+$reason = if ($passed) { 'exact guest result-disk marker and offline DISM driver check' } else { 'missing/invalid result-disk boot marker or disk read failure' }
+$result = [pscustomobject]@{
+    memory_mib = $MemoryMiB; boot_pass = $passed; reason = $reason
+    observation_seconds = [math]::Round($watch.Elapsed.TotalSeconds,2)
+    observation_end = $endReason; offline_nvidia_display_driver = $true
+    peak_qemu_working_set_bytes = $peakWorkingSet
+    peak_sampled_qemu_private_bytes = $peakPrivateBytes
+    minimum_host_free_kib = $minimumHostFreeKiB
+    accelerator = 'TCG'; gpu_present = $false
+    result_disk_boot_marker_found = $diskEvidence.boot_marker_found
+    result_disk_log_captured = $diskEvidence.log_captured
+    serial_required = $false
 }
-$successes = @($results | Where-Object boot_pass)
-$minimum = if ($successes.Count) { ($successes.memory_mib | Measure-Object -Minimum).Minimum } else { $null }
 $measurements = @{
-    trials = $results; minimum_tested_boot_memory_mib = $minimum
-    gpu_test_memory_measured = $false
+    trials = @($result); tested_boot_memory_mib = $MemoryMiB
+    minimum_boot_memory_measured = $false; gpu_test_memory_measured = $false
     vast_test_memory_mib_recommendation = 8192
-    vast_recommendation_classification = 'INFERRED provisional lower bound; GPU driver binding/workload RAM unmeasured; no rented box used'
-    limits = 'Boot-only minimum among tested sizes, not an exact hardware/GPU minimum; working set is not unique physical memory'
+    vast_recommendation_classification = 'INFERRED starting allocation, not a minimum; GPU driver/workload RAM unmeasured; no rented box used'
+    limits = '8192 MiB is the tested default, not a minimum. Observation includes probe execution/shutdown, not exact boot time; host counters are not unique physical memory.'
 }
 $measurements | ConvertTo-Json -Depth 8 | Set-Content out/smoke.json -Encoding utf8
-Write-Host ('MEASURED QEMU_MEMORY_FLOOR ' + ($measurements | ConvertTo-Json -Depth 8 -Compress))
+Write-Host ('MEASURED QEMU_BOOT ' + ($result | ConvertTo-Json -Compress))
 if ($env:GITHUB_STEP_SUMMARY) {
-    @('', '## QEMU memory measurements', '', '| VM RAM MiB | Boot | Seconds | Peak QEMU working set bytes |', '| ---: | --- | ---: | ---: |') | Add-Content $env:GITHUB_STEP_SUMMARY
-    $results | ForEach-Object { "| $($_.memory_mib) | $($_.boot_pass) | $($_.seconds) | $($_.peak_qemu_working_set_bytes) |" } | Add-Content $env:GITHUB_STEP_SUMMARY
-    "`nSmallest successful tested boot allocation: $minimum MiB. Vast GPU test memory is unmeasured; provision at least 8192 MiB provisionally (INFERRED)." | Add-Content $env:GITHUB_STEP_SUMMARY
+    @('', '## QEMU boot and memory observations', '', '| VM RAM MiB | Result-disk boot gate | Observation seconds | Peak QEMU working set bytes |', '| ---: | --- | ---: | ---: |',
+        "| $MemoryMiB | $passed | $($result.observation_seconds) | $peakWorkingSet |", '',
+        '8192 MiB is the tested default, not a minimum. COM1 is best-effort only. Offline DISM NVIDIA display check passed. Observation includes probes/shutdown, not exact boot time. Vast GPU test RAM is unmeasured; 8192 MiB is an INFERRED starting allocation.') | Add-Content $env:GITHUB_STEP_SUMMARY
 }
-if (!$results[0].boot_pass) { throw "Primary QEMU smoke test failed at $MemoryMiB MiB: $($results[0].reason)" }
+if (!$passed) { throw "QEMU result-disk smoke test failed at $MemoryMiB MiB: $reason ($endReason)" }
