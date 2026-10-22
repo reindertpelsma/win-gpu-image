@@ -7,6 +7,8 @@ logging only. This proves PE reached its startup code and the package was servic
 offline. It does **not** prove NVIDIA binding, CUDA, D3D, performance, or hardware support.
 Those need a separate real GPU run. Hypotheses and falsifiers appear in test headers.
 
+Microsoft Validation OS (a test-oriented Windows image) is a possible alternative base to evaluate; WinPE is used here only because it is small.
+
 The final job computes the image SHA-256, verifies release-part reconstruction,
 creates GitHub build provenance for the ISO digest, prints the digest and input
 hashes in the job summary, then publishes only to the private store. The attestation
@@ -88,5 +90,5 @@ test boxes for CI-triggered or manual GPU tests and sweeps. Its checksum and
 manifest copies are conveniences, not a trust anchor: expected SHA-256 comes from
 the consumer's reviewed lock file. Provenance does not prove the inputs are legitimate,
 licences permit use, a runner was uncompromised, the build is deterministic, or an
-NVIDIA GPU binds and works. Hash validation and real hardware tests serve different
+NVIDIA GPU binds and works. Hash verification and real hardware tests serve different
 purposes. Report recipe vulnerabilities privately to the repository owner.

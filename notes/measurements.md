@@ -1,5 +1,12 @@
 # Evidence
 
+This log retains operational debugging evidence for bounded pass/fail CI checks.
+Timeout durations and QEMU observation windows include startup, probes and
+shutdown or a failed assertion deadline; they are not PE boot-time benchmarks,
+performance claims, or comparisons between hosts or operating systems. Memory
+counters describe the test setup and resource observations, not throughput or
+performance. No comparative boot-time figures are retained here.
+
 MEASURED, 2026-10-22, [run 1](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39826412920):
 Windows Server 2022 10.0.20348; visible RAM 16,771,836 KiB, free RAM 14,554,572 KiB;
 C: free 88,783,802,368 bytes, D: free 157,854,121,984 bytes. ADK directory present,
