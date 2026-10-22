@@ -51,5 +51,5 @@ cd win-gpu-image
 - [Workflow security and owner environment setup](SECURITY.md)
 - [Measured results and run URLs](notes/measurements.md)
 
-**Build blocked:** PE starts at 8 GiB, but COM1 is missing; [measured sizes and RAM limits](docs/IMAGE.md).
+**CI green:** [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657), 8192 MiB tested (not a minimum); [sizes and limits](docs/IMAGE.md).
 Do not open pull requests that add binaries.

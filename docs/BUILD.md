@@ -1,8 +1,10 @@
 # Build on Windows
 
-MEASURED: the complete signed package builds, and PE starts at 8192 MiB via its
-result disk, but the required COM1 test failed twice. The lane stopped at that
-wall; see [the evidence log](../notes/measurements.md) before rebuilding.
+MEASURED: [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657)
+passed the result-disk boot marker and offline driver check at 8192 MiB, then
+attested and published the image to the private store. COM1 returned error 2;
+it is best-effort logging only. The full signed display package is preserved.
+See [the evidence log](../notes/measurements.md) for run results.
 
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
 50 GiB free disk (INFERRED recommendation) and 16 GiB host RAM for the default 8 GiB guest. Install Git, Python 3.11+, 7-Zip, and
@@ -18,7 +20,7 @@ python -m unittest discover -s tests -v
 ./scripts/Measure-Runner.ps1
 ./scripts/Fetch-Inputs.ps1
 ./scripts/Build-Image.ps1
-./tests/Smoke-Boot.ps1 -MemoryMiB 8192 -MeasureMemoryFloor
+./tests/Smoke-Boot.ps1 -MemoryMiB 8192
 python scripts/recipe.py package out/image.iso release (git rev-parse HEAD) local
 python scripts/recipe.py verify release
 ```
@@ -45,14 +47,13 @@ See [measured results](../notes/measurements.md) for the current build status.
 
 ## VM RAM
 
-CODE READ: CI first requires an 8192 MiB guest to reach the serial boot marker,
-then measures 6144 and 4096 MiB until a lower size fails. `out/smoke.json`, the
-manifest, and the job summary record the smallest successful tested allocation,
-boot times and peak QEMU working set; guest available RAM is printed in the serial
-log. This is a boot-only
-minimum among tested sizes; it does not measure NVIDIA binding or GPU workloads.
+CODE READ: CI uses **8192 MiB as the tested default, not a minimum**. No lower-RAM
+trials run. `out/smoke.json`, the manifest, and the job summary record the allocation,
+total observation time (including probes/shutdown), and peak QEMU working set;
+guest available RAM is printed in the result log. Exact boot time, lowest boot
+allocation, NVIDIA binding, and GPU workload memory are not measured by this test.
 
-INFERRED: provision at least 8192 MiB guest RAM for rented Vast GPU tests initially,
+INFERRED: start with 8192 MiB guest RAM for rented Vast GPU tests,
 and leave additional host RAM for QEMU, the host OS, and the virtualization stack.
 That GPU test minimum is not measured in this lane: no rented machine or GPU is
 used. The full driver, compressed WIM, boot memory, 512 MiB scratch, and runtime
@@ -62,12 +63,18 @@ and [measured memory results](../notes/measurements.md).
 CODE READ: WIM export explicitly sets `/Bootable` and verifies boot index 1 plus
 the boot metadata resource before ISO creation. The optional BIOS CD key prompt
 is omitted for unattended boot. CI also attaches a fresh 64 MiB FAT result VHD;
-only guest text logs are printed, and the VHD is never uploaded. A result-disk
-marker cannot substitute for the required serial marker.
+only guest text logs are printed, and the VHD is never uploaded. The host seeds
+`WGI_RESULTS.TAG` and `WGI_SMOKE.TAG`, never the boot marker. After `wpeinit`,
+`startnet.cmd` writes `WGI_PE_BOOT_OK_V1` into `wgi-boot.txt` on the result disk.
+The CI sentinel requests shutdown after probes; ordinary test boots still idle.
+After QEMU exits or the 900-second deadline stops it, the runner mounts the disk
+and requires the exact marker plus the offline DISM NVIDIA display-driver listing.
+COM1 is best-effort logging and never determines pass/fail.
 
 MEASURED, run 8: startup at 8192 MiB is confirmed by the result disk; COM1 open
-failed with error 2. The 6144/4096 MiB trials were not reached, so neither an exact
-minimum nor a serial-qualified minimum is established. The 900.36-second value is
+failed with error 2 (`COM1_OPEN_FAILED error=2`). No lower-RAM trials ran, so no
+minimum is established. The 900.36-second value is
 the failed serial-test deadline, not the PE boot duration. NVIDIA binding and Vast
-GPU workload RAM remain unmeasured. The result-disk marker did not override the
-serial assertion; attestation and publishing did not run.
+GPU workload RAM remain unmeasured. Run 8 still required serial, so its attestation
+and publishing did not run. The owner subsequently replaced that gate with the
+result-disk marker; further COM enumeration experiments are out of scope.
