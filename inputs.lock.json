@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "trust": "Trust on first use; missing pins deliberately stop before building. Existing WP1 observations retained.",
+  "files": [
+    {"path":"adk/adksetup.exe","url":"https://go.microsoft.com/fwlink/?linkid=2289980","sha256":null},
+    {"path":"winpe/adkwinpesetup.exe","url":"https://go.microsoft.com/fwlink/?linkid=2289981","sha256":null},
+    {"path":"nvidia.exe","url":"https://us.download.nvidia.com/Windows/580.88/580.88-desktop-win10-win11-64bit-international-dch-whql.exe","sha256":"90c49f925b41ee062e02cc8094a16b6d057abfde4e85235a76d63ffe267f63a9","observed_utc":"2026-10-22","observation":"WP1 reproduction record"},
+    {"path":"win11-ltsc-eval.iso","url":"https://go.microsoft.com/fwlink/?linkid=2289029&clcid=0x409&culture=en-us&country=us","sha256":"67cec5865eaa037a72ddc633a717a10a2bed50778862267223ddb9c60ef5da68","observed_utc":"2026-10-22","observation":"WP1 reproduction record"},
+    {"path":"qemu.exe","url":"https://qemu.weilnetz.de/w64/qemu-w64-setup-20260811.exe","sha256":null}
+  ]
+}

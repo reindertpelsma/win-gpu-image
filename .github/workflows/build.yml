@@ -1,0 +1,54 @@
+name: Build and validate Windows PE
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: win-gpu-image-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-2022
+    timeout-minutes: 120
+    environment: push_to_image_store
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout recipe
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Test recipe contracts
+        run: python -m unittest discover -s tests -v
+      - name: Measure runner
+        run: ./scripts/Measure-Runner.ps1
+      - name: Fetch pinned inputs
+        run: ./scripts/Fetch-Inputs.ps1
+      - name: Build offline image
+        run: ./scripts/Build-Image.ps1
+      - name: QEMU serial boot smoke test
+        run: ./tests/Smoke-Boot.ps1
+      - name: Compute and verify manifest and SHA-256
+        env:
+          BUILD_COMMIT: ${{ github.sha }}
+          BUILD_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python scripts/recipe.py package out/image.iso release $env:BUILD_COMMIT $env:BUILD_RUN_URL
+          if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }
+          python scripts/recipe.py verify release
+          if ($LASTEXITCODE -ne 0) { throw 'Manifest consistency failed' }
+      - name: Attest image digest
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: out/image.iso
+      - name: Publish to private store
+        env:
+          GH_TOKEN: ${{ secrets.STORE_GITHUB_PUSH_TOKEN }}
+        run: ./scripts/Publish-Image.ps1

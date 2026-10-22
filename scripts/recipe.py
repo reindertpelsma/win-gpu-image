@@ -1,0 +1,173 @@
+"""Small, standard-library-only helpers shared by local builds and CI."""
+import argparse
+import csv
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+
+PART_LIMIT = 2_040_000_000  # Below 1.9 GiB and GitHub's 2 GiB asset limit.
+
+
+def sha256_file(path):
+    with Path(path).open("rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest()
+
+
+def verify_file(path, expected):
+    if not re.fullmatch(r"[a-f0-9]{64}", expected or ""):
+        raise ValueError(f"Missing/invalid SHA-256 pin: {path}")
+    if sha256_file(path) != expected:
+        raise ValueError(f"SHA-256 mismatch: {path}")
+
+
+def split_file(source, directory, limit=PART_LIMIT):
+    if not 0 < limit <= PART_LIMIT:
+        raise ValueError("Invalid part limit")
+    source, directory = Path(source), Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    parts = []
+    with source.open("rb") as src:
+        index = 0
+        while True:
+            first = src.read(min(limit, 8 * 1024**2))
+            if not first:
+                break
+            p = directory / f"{source.name}.part{index:02d}"
+            with p.open("wb") as dst:
+                dst.write(first)
+                left = limit - len(first)
+                while left:
+                    block = src.read(min(left, 8 * 1024**2))
+                    if not block:
+                        break
+                    dst.write(block)
+                    left -= len(block)
+            parts.append(p)
+            index += 1
+    if not parts:
+        raise ValueError("Empty image")
+    return parts
+
+
+def verify_manifest(manifest, directory):
+    h = hashlib.sha256()
+    total = 0
+    names = set()
+    if not manifest.get("parts"):
+        raise ValueError("No image parts")
+    for part in manifest["parts"]:
+        name = part["name"]
+        if not re.fullmatch(r"image\.[a-z0-9]+(?:\.part[0-9]{2,})?", name) or name in names:
+            raise ValueError("Unsafe or duplicate image part name")
+        names.add(name)
+        path = Path(directory) / name
+        if path.stat().st_size != part["bytes"] or part["bytes"] > PART_LIMIT:
+            raise ValueError("Part size mismatch")
+        verify_file(path, part["sha256"])
+        with path.open("rb") as f:
+            while block := f.read(8 * 1024**2):
+                h.update(block)
+                total += len(block)
+    if total != manifest["image_bytes"] or h.hexdigest() != manifest["image_sha256"]:
+        raise ValueError("Reconstructed image differs from manifest")
+
+
+def classify_driver(relative, cpl_files=()):
+    name = Path(relative).name.lower()
+    parts = [x.lower() for x in Path(relative).parts]
+    if name.endswith(".inf") and name != "nv_dispi.inf":
+        return False, "other OEM INFs"
+    if any(x in parts for x in ("nvcpl", "nvcamera", "localization")) or name in cpl_files:
+        return False, "control panel/Ansel/localization"
+    if (name.startswith("lib") and ".so" in name) or name in ("nvidia-smi", "nvidia-ngx-updater"):
+        return False, "Linux/WSL"
+    if name.endswith(".nvi") or name in ("setup.exe", "displaydriverext.dll"):
+        return False, "installer"
+    if re.search(r"physx|hdaudio|gfexperience|geforceexperience", str(relative), re.I):
+        return False, "PhysX/audio/experience"
+    if name.endswith(".sys"):
+        return True, "kernel"
+    if name.startswith("gsp_"):
+        return True, "GSP firmware"
+    if any(x in name for x in ("cuda", "ptx")) or name.startswith(("nvvm", "nvcubin", "nvopencl")):
+        return True, "CUDA/OpenCL"
+    if name.startswith(("nvml", "nvidia-smi")):
+        return True, "NVML/SMI"
+    if name.startswith(("nvoglv", "vulkan", "nv-vk", "nvvksc")):
+        return True, "GL/Vulkan"
+    if name.startswith(("nvd3d", "nvwgf", "nvdx", "nvgpucomp", "nvldumd", "nvpresent", "nvrtum", "nvdirectsr", "nvdlpp")):
+        return True, "D3D/compiler"
+    return True, "INF/catalog/other dependencies"
+
+
+def stage_driver(source, destination, sizes):
+    source, destination = Path(source), Path(destination)
+    cpl = set()
+    section = ""
+    for line in (source / "nv_dispi.inf").read_text(encoding="utf-8-sig").splitlines():
+        line = line.split(";", 1)[0].strip()
+        if line.startswith("["):
+            section = line.lower()
+        elif section.startswith("[nv_cpl") and "copy" in section and line and "=" not in line:
+            row = next(csv.reader([line], skipinitialspace=True))
+            cpl.add((row[1] if len(row) > 1 and row[1].strip() else row[0]).strip().lower())
+    groups = {}
+    records = []
+    for p in sorted(source.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(source)
+        keep, group = classify_driver(rel, cpl)
+        key = ("KEEP " if keep else "DROP ") + group
+        groups[key] = groups.get(key, 0) + p.stat().st_size
+        records.append({"file": rel.as_posix(), "bytes": p.stat().st_size, "keep": keep, "group": group})
+        if keep:
+            dest = destination / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(p, dest)
+    value = {"components_bytes": groups, "files": records,
+             "retained_bytes": sum(x["bytes"] for x in records if x["keep"]),
+             "removed_bytes": sum(x["bytes"] for x in records if not x["keep"])}
+    Path(sizes).write_text(json.dumps(value, indent=2) + "\n")
+    print(json.dumps({k: v for k, v in value.items() if k != "files"}, sort_keys=True))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("stage-driver")
+    p.add_argument("source"); p.add_argument("destination"); p.add_argument("sizes")
+    p = sub.add_parser("package")
+    p.add_argument("image"); p.add_argument("directory"); p.add_argument("commit"); p.add_argument("run_url")
+    p = sub.add_parser("verify")
+    p.add_argument("directory")
+    args = parser.parse_args()
+    if args.command == "stage-driver":
+        stage_driver(args.source, args.destination, args.sizes)
+    elif args.command == "verify":
+        d = Path(args.directory)
+        verify_manifest(json.loads((d / "manifest.json").read_text()), d)
+        print("MANIFEST_OK")
+    else:
+        image = Path(args.image)
+        d = Path(args.directory)
+        parts = split_file(image, d)
+        lock = json.loads(Path("inputs.lock.json").read_text())
+        manifest = {"schema": 1, "image_sha256": sha256_file(image), "image_bytes": image.stat().st_size,
+                    "repo_commit": args.commit, "run_url": args.run_url,
+                    "build_date": datetime.now(timezone.utc).isoformat(), "input_hashes": lock["files"],
+                    "parts": [{"name": x.name, "bytes": x.stat().st_size, "sha256": sha256_file(x)} for x in parts],
+                    "sizes": json.loads(Path("out/sizes.json").read_text())}
+        verify_manifest(manifest, d)
+        (d / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        assets = parts + [d / "manifest.json"]
+        (d / "SHA256SUMS").write_text("".join(f"{sha256_file(x)}  {x.name}\n" for x in assets))
+        print(f"IMAGE_SHA256={manifest['image_sha256']} IMAGE_BYTES={manifest['image_bytes']}")
+        print(f"RELEASE_TAG=img-{manifest['image_sha256'][:16]}")
+
+
+if __name__ == "__main__":
+    main()
