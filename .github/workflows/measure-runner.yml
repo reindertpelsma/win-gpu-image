@@ -1,0 +1,138 @@
+name: Measure Windows runner input streaming
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: windows-runner-stream-measurement
+  cancel-in-progress: false
+jobs:
+  measure:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-2022
+    timeout-minutes: 40
+    permissions: {}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Record CPU, RAM and free disk before transfer
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $os = Get-CimInstance Win32_OperatingSystem
+          $machine = Get-CimInstance Win32_ComputerSystem
+          $cpus = @(Get-CimInstance Win32_Processor)
+          $drives = @(Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' | ForEach-Object {
+            @{ drive = $_.DeviceID; filesystem = $_.FileSystem; size_bytes = [long]$_.Size; free_bytes = [long]$_.FreeSpace }
+          })
+          $data = @{
+            observed_utc = [DateTime]::UtcNow.ToString('o')
+            cpu_logical_count = $machine.NumberOfLogicalProcessors
+            cpu_core_count = ($cpus | Measure-Object NumberOfCores -Sum).Sum
+            cpu_models = @($cpus | ForEach-Object { $_.Name })
+            ram_physical_bytes = [long]$machine.TotalPhysicalMemory
+            ram_visible_bytes = [long]$os.TotalVisibleMemorySize * 1024
+            ram_free_bytes = [long]$os.FreePhysicalMemory * 1024
+            os = $os.Caption; os_version = $os.Version
+            runner_image = $env:ImageOS; runner_image_version = $env:ImageVersion
+            workspace = $env:GITHUB_WORKSPACE; drives = $drives
+          }
+          $json = $data | ConvertTo-Json -Depth 6
+          $json | Set-Content (Join-Path $env:RUNNER_TEMP 'wgi-runner-before.json') -Encoding utf8
+          Write-Host ('MEASURED_RUNNER_BEFORE ' + ($data | ConvertTo-Json -Depth 6 -Compress))
+      - name: Consume two public 10 GiB files with bounded memory and no payload file
+        run: |
+          # Hypothesis: this hosted runner can consume 20 GiB in a bounded stream.
+          # Falsifier: HTTP/length/timeout failure or fewer bytes than requested.
+          # This measures public-origin ingress only, not PE or GPU performance.
+          @'
+          import json, os, time, urllib.request
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          url = 'https://proof.ovh.net/files/10Gb.dat'
+          per_request = 10 * 1024**3
+          requests = 2
+          deadline_seconds = 1800
+          block_bytes = 4 * 1024**2
+          start = time.monotonic()
+          rows = []
+          total = 0
+          failure = None
+          last_progress = start
+          try:
+              for index in range(requests):
+                  row = {'request': index + 1, 'bytes': 0, 'complete': False}
+                  rows.append(row)
+                  begin = time.monotonic()
+                  request = urllib.request.Request(url, headers={'Accept-Encoding': 'identity', 'User-Agent': 'win-gpu-image-runner-measurement/1'})
+                  with urllib.request.urlopen(request, timeout=60) as response:
+                      row['http_status'] = response.status
+                      row['resolved_url'] = response.url
+                      row['content_length'] = int(response.headers.get('Content-Length', '-1'))
+                      if response.status != 200 or row['content_length'] != per_request:
+                          raise RuntimeError('Public file status/size differs from the 10 GiB measurement contract')
+                      while True:
+                          if time.monotonic() - start > deadline_seconds:
+                              raise TimeoutError('Overall stream measurement deadline')
+                          block = response.read(min(block_bytes, per_request - row['bytes'] + 1))
+                          if not block:
+                              break
+                          row['bytes'] += len(block)
+                          total += len(block)
+                          if row['bytes'] > per_request:
+                              raise RuntimeError('Public response exceeded the declared file size')
+                          now = time.monotonic()
+                          if now - last_progress >= 30:
+                              print('STREAM_PROGRESS bytes=%d elapsed_seconds=%.2f' % (total, now - start), flush=True)
+                              last_progress = now
+                  row['seconds'] = round(time.monotonic() - begin, 3)
+                  row['complete'] = row['bytes'] == per_request
+                  row['decimal_MB_per_second'] = round(row['bytes'] / row['seconds'] / 1e6, 3)
+                  if not row['complete']:
+                      raise RuntimeError('Truncated public file')
+          except Exception as error:
+              failure = type(error).__name__ + ': ' + str(error)
+          elapsed = time.monotonic() - start
+          rate = total / elapsed if elapsed else 0
+          data = {
+              'observed_utc': datetime.now(timezone.utc).isoformat(),
+              'source_url': url, 'requests': rows, 'bytes_received': total,
+              'target_bytes': requests * per_request,
+              'elapsed_seconds': round(elapsed, 3),
+              'decimal_MB_per_second': round(rate / 1e6, 3),
+              'MiB_per_second': round(rate / 1024**2, 3),
+              'complete': failure is None and total == requests * per_request,
+              'error': failure, 'read_buffer_bytes': block_bytes,
+              'payload_written_to_disk': False,
+              'projected_150_decimal_GB_seconds_INFERRED': round(150e9 / rate, 1) if rate else None,
+              'limits': 'One runner, one public origin, two sequential reads of the same 10 GiB object; no quota, 150 GB unique-input, R2 upload, DISM, PE or GPU conclusion.'
+          }
+          Path(os.environ['RUNNER_TEMP'], 'wgi-stream.json').write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+          print('MEASURED_TRANSFER ' + json.dumps(data, separators=(',', ':')), flush=True)
+          if not data['complete']:
+              raise SystemExit(1)
+          '@ | Set-Content (Join-Path $env:RUNNER_TEMP 'wgi-measure-stream.py') -Encoding utf8
+          python (Join-Path $env:RUNNER_TEMP 'wgi-measure-stream.py')
+          if ($LASTEXITCODE -ne 0) { throw 'Bounded stream measurement did not complete; partial evidence is in the log/summary' }
+      - name: Record free disk after transfer and write metadata summary
+        if: always()
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $drives = @(Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' | ForEach-Object {
+            @{ drive = $_.DeviceID; filesystem = $_.FileSystem; size_bytes = [long]$_.Size; free_bytes = [long]$_.FreeSpace }
+          })
+          Write-Host ('MEASURED_RUNNER_AFTER ' + (@{ drives = $drives } | ConvertTo-Json -Depth 6 -Compress))
+          $beforePath = Join-Path $env:RUNNER_TEMP 'wgi-runner-before.json'
+          $streamPath = Join-Path $env:RUNNER_TEMP 'wgi-stream.json'
+          '# Windows hosted-runner input-stream measurement' | Add-Content $env:GITHUB_STEP_SUMMARY
+          'Public network ingress only; no Windows PE image or GPU was booted or timed.' | Add-Content $env:GITHUB_STEP_SUMMARY
+          foreach ($path in @($beforePath, $streamPath)) {
+            if (Test-Path -LiteralPath $path) {
+              '```json' | Add-Content $env:GITHUB_STEP_SUMMARY
+              Get-Content -LiteralPath $path | Add-Content $env:GITHUB_STEP_SUMMARY
+              '```' | Add-Content $env:GITHUB_STEP_SUMMARY
+            }
+          }
+          'After-transfer free disk:' | Add-Content $env:GITHUB_STEP_SUMMARY
+          ($drives | ConvertTo-Json -Depth 6) | Add-Content $env:GITHUB_STEP_SUMMARY
+          'A successful 20 GiB sample does not establish a 150 GB allowance or end-to-end build/upload time. No payload or vendor binary is retained or uploaded.' | Add-Content $env:GITHUB_STEP_SUMMARY
