@@ -47,6 +47,7 @@ cd win-gpu-image
 ## Details and status
 
 - [Image contents, component sizes, and probes](docs/IMAGE.md)
+- [Windows 11 test-image and R2 design (not implemented)](docs/WINDOWS11.md)
 - [Verification, attestation, consumer hash pins, and the private store](docs/TRUST.md)
 - [Workflow security and owner environment setup](SECURITY.md)
 - [Measured results and run URLs](notes/measurements.md)
