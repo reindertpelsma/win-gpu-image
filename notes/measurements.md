@@ -281,3 +281,43 @@ verified SLSA provenance attestation for the same digest. Downloaded vendor/imag
 bytes remain private and are removed after verification; only evidence metadata
 is retained locally. This final documentation change is separate, docs-only, and
 uses `[skip ci]` through a branch/PR after the first green run.
+
+## Windows 11 design stretch: hosted-runner public input stream
+
+MEASURED, 2026-10-23: the one authorized dispatch-only runner measurement
+[run 39876173005](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39876173005)
+passed at `d686ba053ddfe86db096887f54f932364e5f9655`. This is hosted-runner
+network/resource evidence; no PE or Windows guest was booted or timed, no GPU
+probe ran, and no R2 operation or secret was used. There was no second dispatch.
+
+| Observation | MEASURED value |
+| --- | --- |
+| OS / hosted image | Server 2022 `10.0.20348`; `win22` `20261012.333.1` |
+| CPU allocation | 4 logical processors / 2 reported cores; AMD EPYC 7763 model |
+| Physical/visible RAM | 17,174,360,064 bytes |
+| Initial free RAM | 14,618,484,736 bytes |
+| C: total / free before / free after | 274,284,392,448 / 88,565,571,584 / 88,518,975,488 bytes |
+| D: total / free before / free after | 161,059,172,352 / 157,867,724,800 / 157,867,700,224 bytes |
+| Download source | `https://proof.ovh.net/files/10Gb.dat`, two HTTP 200 responses |
+| Bytes consumed / elapsed | 21,474,836,480 bytes (20 GiB) / 196.422 seconds |
+| Aggregate ingress | 109.330 decimal MB/s / 104.265 MiB/s |
+| Individual request seconds / MB/s | 97.719 / 109.881; 98.703 / 108.785 |
+| Read buffer / payload persistence | 4 MiB / no payload file |
+
+MEASURED: D: free decreased by 24,576 bytes, C: by 46,596,096 bytes. Volume
+snapshots include unrelated background activity; they do not assign the cause of
+each write. The program discards download bytes and writes only small metadata.
+No artifact, image or vendor download was published by this measurement workflow.
+
+INFERRED: 150 decimal GB at the sample rate projects to 1,372 seconds (22.9 minutes)
+for ingress alone. This is not a measured 150 GB transfer, quota allowance, R2
+rate, or end-to-end build/upload duration. One runner, origin and repeated object
+do not establish future capacity. The observed D: space would leave only about
+7.87 GB beyond a staged 150 GB payload before source/image/scratch use.
+
+CODE READ: [WINDOWS11.md](../docs/WINDOWS11.md) is design only: offline-applied,
+pre-OOBE Windows with first-boot tool installation, complete NVIDIA/virtio driver
+packages and separate SPECviewperf objects. Per-instance evaluation-clock behavior
+is an owner's understanding to verify, not an established result. Streaming R2
+publication, consumer locks and public provenance are planned; no Windows 11
+disk or new publisher is implemented. Existing PE build/publishing code is unchanged.
