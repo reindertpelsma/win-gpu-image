@@ -38,8 +38,10 @@ class CpuWorkflowTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", text)
         for event in ["pull_request", "workflow_run", "issue_comment"]:
             self.assertNotIn(event, text)
-        self.assertEqual(re.findall(r"^  ([\w]+):$", text.split("permissions:")[0], re.M),
-                         ["push", "workflow_dispatch"])
+        self.assertEqual(
+            re.findall(r"^  ([\w]+):$", text.split("permissions:")[0], re.M),
+            ["push", "workflow_dispatch"],
+        )
 
     def test_every_action_is_pinned_and_both_platforms_are_bounded(self):
         text = self.source()
