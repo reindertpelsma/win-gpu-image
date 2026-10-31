@@ -30,6 +30,9 @@ static void fill(void) {
     strcpy(baseline.service, "Serial"); strcpy(baseline.inf, "msports.inf");
     strcpy(baseline.provider, "Microsoft"); strcpy(baseline.section, "ComPort.NT");
     strcpy(baseline.matching, "acpi\\pnp0501");
+    static const char ids[] = "ACPI\\PNP0501\0*PNP0501\0";
+    memcpy(baseline.hardware,ids,sizeof(ids));
+    baseline.hardware_type = 7; baseline.hardware_bytes = sizeof(ids);
 }
 int main(int argc, char **argv) {
     if (argc != 2) return 3;
@@ -59,6 +62,12 @@ int main(int argc, char **argv) {
         if (!strcmp(scenario, "typed_embedded")) data[1] = 0;
         int valid = wgi_serial_string(data, type, bytes, 4);
         printf("MOCK_TYPED valid=%d\n", valid); return valid ? 2 : 0;
+    }
+    if (!strcmp(scenario, "multi_capacity") || !strcmp(scenario, "multi_type")) {
+        const char list[] = {'a',0,0};
+        int member = multi_sz_member(list,!strcmp(scenario,"multi_type") ? 1 : 7,
+                                     sizeof(list),!strcmp(scenario,"multi_capacity") ? 2 : 3,"a");
+        printf("MOCK_MULTI member=%d\n",member); return member == -1 ? 0 : 2;
     }
     WGI_SERIAL_OPS ops = {select_current, call_install, inspect};
     int rc = wgi_serial_run(&baseline, &ops, NULL);
