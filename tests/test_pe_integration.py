@@ -46,6 +46,19 @@ class Integration(unittest.TestCase):
         self.assertLess(script.index("gpu-prepare.exe --hold"), script.index("\nwpeinit\n"))
         self.assertIn("if not defined WGI_NO_GPU goto failed", script)
 
+    def test_bootstrap_requires_hold_result_before_wpeinit(self):
+        path = ROOT / "scripts/pe-bootstrap.cmd"
+        self.assertTrue(path.exists(), "bootstrap command required")
+        script = path.read_text()
+        self.assertLess(
+            script.index("if not defined WGI_NO_GPU goto failed"), script.index("\nwpeinit\n")
+        )
+
+    def test_startnet_gates_gpu_on_bootstrap_success(self):
+        script = (ROOT / "scripts/startnet.cmd").read_text()
+        self.assertIn("--bootstrap", script)
+        self.assertLess(script.index("if errorlevel 1 goto failed"), script.index("--run 240"))
+
     def test_bootstrap_precedes_required_serial(self):
         script = (ROOT / "scripts/startnet.cmd").read_text()
         self.assertIn("--bootstrap", script)
