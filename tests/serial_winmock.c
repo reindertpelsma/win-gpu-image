@@ -38,6 +38,17 @@ BOOL SetupDiGetDeviceInstanceIdA(HDEVINFO a, SP_DEVINFO_DATA *d, char *out,
 BOOL SetupDiGetDeviceRegistryPropertyA(HDEVINFO a, SP_DEVINFO_DATA *d, DWORD key,
                                       DWORD *type, BYTE *out, DWORD cap, DWORD *size) {
     (void)a; (void)d; (void)cap; *type = REG_SZ;
+    if (key == SPDRP_HARDWAREID) {
+        static const char ids[] = "ACPI\\PNP0501\0*PNP0501\0";
+        memcpy(out,ids,sizeof(ids)); *size = sizeof(ids); *type = REG_MULTI_SZ;
+        if (!strcmp(scenario,"hardware_wrong_type")) *type = REG_SZ;
+        if (!strcmp(scenario,"hardware_size")) *size = cap + 1;
+        if (!strcmp(scenario,"hardware_no_double_nul")) out[*size - 1] = 'x';
+        if (!strcmp(scenario,"hardware_unterminated")) memset(out,'x',*size);
+        if (!strcmp(scenario,"hardware_trailing")) { out[*size] = 0; ++*size; }
+        if (!strcmp(scenario,"hardware_after_dif") && dif_calls) *type = REG_SZ;
+        return 1;
+    }
     const char *text = key == SPDRP_SERVICE ? "Serial" : key == SPDRP_CLASSGUID ?
         "{4d36e978-e325-11ce-bfc1-08002be10318}" : "diagnostic";
     strcpy((char *)out,text); *size = (DWORD)strlen(text) + 1;
@@ -60,7 +71,10 @@ LONG RegQueryValueExA(HKEY key, const char *name, void *reserved, DWORD *type,
     const char *s = !strcmp(name,"InfPath") ? "msports.inf" :
         !strcmp(name,"ProviderName") ? "Microsoft" :
         !strcmp(name,"InfSection") ? "ComPort.NT" :
-        !strcmp(name,"MatchingDeviceId") ? "acpi\\pnp0501" :
+        !strcmp(name,"MatchingDeviceId") ?
+        (!strcmp(scenario,"hardware_nonmember") ? "*PNP0400" :
+         !strcmp(scenario,"hardware_star_not_glob") ? "*PNP05*" :
+         !strcmp(scenario,"hardware_case") ? "*pnp0501" : "*PNP0501") :
         !strcmp(scenario,"installer_untrusted") ? "Other.dll,Other" :
         "MsPorts.dll,PortsClassInstaller";
     strcpy((char *)out,s); *size = (DWORD)strlen(s) + 1; *type = REG_SZ;
