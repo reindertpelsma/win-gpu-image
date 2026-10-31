@@ -24,7 +24,10 @@ remain unchanged. A bootstrap receipt never substitutes for a GPU verdict.
 The child-job timers do not bound the surrounding diagnostic WinAPI calls;
 the host's observation limits remain the backstop. Diagnostics tee to stdout
 and a marked result disk when available, with another disk-open attempt after
-PnP initialization; pre-PnP disk capture is not guaranteed.
+PnP initialization; pre-PnP disk capture is not guaranteed. Structured UART/SCM
+receipts and bounded runtime setup-log excerpts are collected separately so a
+large generic log tail cannot hide earlier device evidence. Their read/write,
+coverage and truncation states are diagnostic data, never GPU/serial acceptance.
 
 The startup sequence holds the NVIDIA service/device stopped while PE initializes,
 then installs the complete unmodified INF, obtains the exact display device's
@@ -56,10 +59,13 @@ not from the historical image's successful smoke.
 The first PE2 [image build](https://github.com/reindertpelsma/win-gpu-image/actions/runs/41204715947)
 passed source tests, pinned-input verification and offline image construction,
 then failed the strict smoke with COM1 open error2 and no device mapping. It
-published no image or attestation. The bounded PnP bootstrap and independent
-service/UART diagnostics address the startup dependency without treating that
-ordering as an exclusively proved root cause. Another strict smoke must verify
-the correction; the diagnostic disk remains insufficient for acceptance.
+published no image or attestation. The subsequent bootstrap
+[image build](https://github.com/reindertpelsma/win-gpu-image/actions/runs/41207316430)
+also failed with COM1 error2 and no mapping. Its last100 result-log lines omitted
+the earlier UART/SCM snapshots behind an offline SetupAPI tail, so they establish
+no UART binding cause. Separately bounded receipts repair that capture gap;
+they do not claim to repair COM1. Another strict smoke must supply the missing
+evidence; the diagnostic disk remains insufficient for acceptance.
 
 ## Same-image native control, then virtual GPU
 
