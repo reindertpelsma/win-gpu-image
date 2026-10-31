@@ -1,13 +1,14 @@
 @echo off
-rem The offline service is disabled. Hold the exact adapter before wpeinit can bind it.
+rem Bootstrap already held the device before wpeinit. Revalidate before installing.
+if not exist X:\wgi-bootstrap-ok.txt goto failed
+findstr /x /c:"WGI_BOOTSTRAP_OK_V1" X:\wgi-bootstrap-ok.txt >nul
+if errorlevel 1 goto failed
 set WGI_FAILED=0
 X:\Windows\System32\gpu-prepare.exe --hold
 set WGI_HOLD_RC=%errorlevel%
 set WGI_NO_GPU=
 if "%WGI_HOLD_RC%"=="3" set WGI_NO_GPU=1
 if not "%WGI_HOLD_RC%"=="0" if not defined WGI_NO_GPU goto failed
-wpeinit
-if errorlevel 1 goto failed
 rem This is a boot marker after wpeinit, not a GPU-success claim.
 echo WGI_PE_BOOT_OK_V1
 for %%D in (C D E F G H I J K L M N O P Q R S T U V W Y Z) do (

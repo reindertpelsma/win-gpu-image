@@ -87,7 +87,8 @@ cl /nologo /O2 /MT /W4 /c programs/pe-contract.c /Fo:work/programs/pe-contract.o
 if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
  /Fe:work/programs/serial-log.exe /Fo:work/programs/serial-log.obj ^
- programs/serial-log.c work/programs/pe-contract.obj /link cfgmgr32.lib advapi32.lib
+ programs/serial-log.c work/programs/pe-contract.obj ^
+ /link setupapi.lib cfgmgr32.lib advapi32.lib
 if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
  /Fe:work/programs/gpu-prepare.exe /Fo:work/programs/gpu-prepare.obj ^
@@ -138,7 +139,7 @@ try {
     $system32 = "$root/work/mount/Windows/System32"
     Copy-Item work/programs/*.exe,work/programs/*.dll $system32 -Force
     Copy-Item work/driver/nvidia-smi.exe,work/driver/nvml.dll $system32 -Force
-    foreach ($name in @('startnet.cmd','gpu-tests.cmd')) {
+    foreach ($name in @('startnet.cmd','gpu-tests.cmd','pe-bootstrap.cmd')) {
         $content = (Get-Content "scripts/$name" -Raw).Replace("`r`n","`n").Replace("`n","`r`n")
         [IO.File]::WriteAllText("$system32/$name", $content, [Text.Encoding]::ASCII)
     }

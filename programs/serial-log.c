@@ -2,13 +2,15 @@
 #define _WIN32_WINNT 0x0602
 #include <windows.h>
 #include <cfgmgr32.h>
+#include <setupapi.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "pe-contract.h"
 
 static HANDLE serial = INVALID_HANDLE_VALUE, result = INVALID_HANDLE_VALUE;
-static int serial_failed;
+static int serial_failed, diagnostic_failed, diagnostic_only;
 static ULONGLONG write_end;
 static int serial_write(const void *bytes, unsigned count, unsigned *written) {
     DWORD n = 0;
@@ -17,16 +19,32 @@ static int serial_write(const void *bytes, unsigned count, unsigned *written) {
     *written = n;
     return ok;
 }
-static int emit(const char *bytes, unsigned count) {
-    DWORD n;
+static int diagnostic_write(const void *bytes, unsigned count, unsigned *written) {
+    DWORD n = 0;
     WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), bytes, count, &n, NULL);
-    if (result != INVALID_HANDLE_VALUE) {
-        WriteFile(result, bytes, count, &n, NULL);
-        FlushFileBuffers(result);
+    if (result != INVALID_HANDLE_VALUE &&
+        (!WriteFile(result, bytes, count, &n, NULL) || n != count || !FlushFileBuffers(result))) {
+        diagnostic_failed = 1;
+        *written = 0;
+        return 0;
     }
+    *written = count;
+    return 1;
+}
+static void diagnostic(const char *format, ...) {
+    char buffer[2048];
+    va_list args;
+    va_start(args, format);
+    int n = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    if (n < 0) { diagnostic_failed = 1; return; }
+    unsigned count = n < (int)sizeof(buffer) ? (unsigned)n : sizeof(buffer) - 1;
+    if (wgi_write_all(diagnostic_write, buffer, count)) diagnostic_failed = 1;
+}
+static int emit(const char *bytes, unsigned count) {
     write_end = GetTickCount64() + 2000;
-    if (serial == INVALID_HANDLE_VALUE || wgi_write_all(serial_write, bytes, count)) {
-        serial_failed = 1;
+    if (wgi_tee(diagnostic_write, serial_write, bytes, count, !diagnostic_only)) {
+        if (!diagnostic_only) serial_failed = 1;
         return 0;
     }
     return 1;
@@ -44,23 +62,241 @@ static void result_open(void) {
         }
     }
 }
+static int bounded_string(const char *s, DWORD bytes, DWORD capacity) {
+    return bytes && bytes <= capacity && memchr(s, 0, bytes) == s + bytes - 1;
+}
+static int device_string(HDEVINFO set, SP_DEVINFO_DATA *device, DWORD property,
+                         char *buffer, DWORD capacity) {
+    DWORD type = 0, bytes = 0;
+    memset(buffer, 0, capacity);
+    return SetupDiGetDeviceRegistryPropertyA(set, device, property, &type,
+        (BYTE *)buffer, capacity, &bytes) && type == REG_SZ &&
+        bounded_string(buffer, bytes, capacity);
+}
+static void registry_string(HKEY key, const char *name, const char *label) {
+    char value[512]; DWORD bytes = sizeof(value), type = 0;
+    memset(value, 0, sizeof(value));
+    LONG rc = RegQueryValueExA(key, name, NULL, &type, (BYTE *)value, &bytes);
+    if (rc == ERROR_SUCCESS && type == REG_SZ &&
+        bounded_string(value, bytes, sizeof(value)))
+        diagnostic("WGI_UART_%s value=%s\r\n", label, value);
+    else diagnostic("WGI_UART_%s unavailable rc=%ld type=%lu bytes=%lu\r\n",
+                    label, rc, type, bytes);
+}
+static void resources(DEVINST device, ULONG kind) {
+    LOG_CONF config;
+    CONFIGRET rc = CM_Get_First_Log_Conf(&config, device, kind);
+    diagnostic("WGI_UART_RESOURCES kind=%lu config_rc=%lu\r\n", kind, rc);
+    if (rc != CR_SUCCESS) return;
+    RES_DES current = (RES_DES)config;
+    for (unsigned i = 0; i < 32; ++i) {
+        RES_DES next; RESOURCEID type;
+        rc = CM_Get_Next_Res_Des(&next, current, ResType_All, &type, 0);
+        if (current != (RES_DES)config) CM_Free_Res_Des_Handle(current);
+        current = (RES_DES)config;
+        if (rc != CR_SUCCESS) {
+            diagnostic("WGI_UART_RESOURCE_END rc=%lu\r\n", rc); break;
+        }
+        current = next;
+        ULONG bytes = 0; BYTE data[4096] = {0};
+        rc = CM_Get_Res_Des_Data_Size(&bytes, current, 0);
+        if (rc == CR_SUCCESS && bytes && bytes <= sizeof(data))
+            rc = CM_Get_Res_Des_Data(current, data, bytes, 0);
+        else {
+            diagnostic("WGI_UART_RESOURCE type=%lu size=%lu size_rc=%lu\r\n", type, bytes, rc);
+            continue;
+        }
+        char hex[257]; unsigned count = bytes < 128 ? bytes : 128;
+        for (unsigned j = 0; j < count; ++j) snprintf(hex + j * 2, 3, "%02x", data[j]);
+        hex[count * 2] = 0;
+        diagnostic("WGI_UART_RESOURCE type=%lu bytes=%lu rc=%lu raw_prefix=%s\r\n",
+                   type, bytes, rc, rc == CR_SUCCESS ? hex : "UNAVAILABLE");
+    }
+    if (current != (RES_DES)config) CM_Free_Res_Des_Handle(current);
+    CM_Free_Log_Conf_Handle(config);
+}
+static void uart_devices(void) {
+    HDEVINFO set = SetupDiGetClassDevsA(NULL, NULL, NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT);
+    if (set == INVALID_HANDLE_VALUE) {
+        diagnostic("WGI_UART_ENUM failed error=%lu\r\n", GetLastError()); return;
+    }
+    unsigned selected = 0;
+    for (DWORD i = 0; i < 4096; ++i) {
+        SP_DEVINFO_DATA device;
+        memset(&device, 0, sizeof(device)); device.cbSize = sizeof(device);
+        if (!SetupDiEnumDeviceInfo(set, i, &device)) {
+            diagnostic("WGI_UART_ENUM_END error=%lu selected=%u\r\n", GetLastError(), selected);
+            break;
+        }
+        char id[1024] = {0}, service[128], cls[128], driver[512]; DWORD id_bytes = 0;
+        if (!SetupDiGetDeviceInstanceIdA(set, &device, id, sizeof(id), &id_bytes) ||
+            !bounded_string(id, id_bytes, sizeof(id))) continue;
+        int service_ok = device_string(set, &device, SPDRP_SERVICE, service, sizeof(service));
+        int class_ok = device_string(set, &device, SPDRP_CLASS, cls, sizeof(cls));
+        char hwids[4096]; DWORD bytes = 0, type = 0;
+        memset(hwids, 0, sizeof(hwids));
+        int hw_ok = SetupDiGetDeviceRegistryPropertyA(set, &device, SPDRP_HARDWAREID,
+            &type, (BYTE *)hwids, sizeof(hwids), &bytes) && type == REG_MULTI_SZ &&
+            bytes >= 2 && bytes <= sizeof(hwids) && !hwids[bytes - 1] && !hwids[bytes - 2];
+        int uart = !_strnicmp(id, "ACPI\\PNP0501", 12) || !_strnicmp(id, "ACPI\\PNP0500", 12) ||
+            (service_ok && (!_stricmp(service, "Serial") || !_stricmp(service, "Serenum"))) ||
+            (class_ok && !_stricmp(cls, "Ports"));
+        if (hw_ok) {
+            DWORD off = 0;
+            while (off < bytes - 1 && hwids[off]) {
+                const char *p = hwids + off;
+                const char *end = memchr(p, 0, bytes - off);
+                if (!end) { hw_ok = 0; break; }
+                if (!_stricmp(p, "*PNP0501") || !_stricmp(p, "*PNP0500") ||
+                    !_stricmp(p, "ACPI\\PNP0501") || !_stricmp(p, "ACPI\\PNP0500")) uart = 1;
+                off += (DWORD)(end - p) + 1;
+            }
+            if (off != bytes - 1) hw_ok = 0;
+        }
+        if (!uart) continue;
+        ++selected;
+        ULONG status = 0, problem = 0;
+        CONFIGRET status_rc = CM_Get_DevNode_Status(&status, &problem, device.DevInst, 0);
+        int driver_ok = device_string(set, &device, SPDRP_DRIVER, driver, sizeof(driver));
+        diagnostic("WGI_UART id=%s class=%s service=%s status_rc=%lu status=%lu problem=%lu\r\n",
+                   id, class_ok ? cls : "UNKNOWN", service_ok ? service : "UNKNOWN",
+                   status_rc, status, problem);
+        diagnostic("WGI_UART_DRIVER key=%s hwids_valid=%d\r\n",
+                   driver_ok ? driver : "UNKNOWN", hw_ok);
+        if (hw_ok) {
+            DWORD off = 0;
+            while (off < bytes - 1 && hwids[off]) {
+                const char *end = memchr(hwids + off, 0, bytes - off);
+                if (!end) break;
+                diagnostic("WGI_UART_HWID value=%s\r\n", hwids + off);
+                off += (DWORD)(end - (hwids + off)) + 1;
+            }
+        }
+        HKEY hardware = SetupDiOpenDevRegKey(set, &device, DICS_FLAG_GLOBAL, 0,
+                                             DIREG_DEV, KEY_QUERY_VALUE);
+        if (hardware != INVALID_HANDLE_VALUE) {
+            registry_string(hardware, "PortName", "PORTNAME"); RegCloseKey(hardware);
+        } else diagnostic("WGI_UART_PORTNAME open_error=%lu\r\n", GetLastError());
+        HKEY software = SetupDiOpenDevRegKey(set, &device, DICS_FLAG_GLOBAL, 0,
+                                             DIREG_DRV, KEY_QUERY_VALUE);
+        if (software != INVALID_HANDLE_VALUE) {
+            registry_string(software, "InfPath", "INF"); RegCloseKey(software);
+        } else diagnostic("WGI_UART_INF open_error=%lu\r\n", GetLastError());
+        resources(device.DevInst, ALLOC_LOG_CONF);
+        resources(device.DevInst, BOOT_LOG_CONF);
+    }
+    SetupDiDestroyDeviceInfoList(set);
+}
+static void serial_namespace(void) {
+    char target[512] = {0};
+    DWORD bytes = QueryDosDeviceA("COM1", target, sizeof(target));
+    diagnostic("WGI_COM1_NAMESPACE mapping=%s query_error=%lu\r\n",
+        bytes && bytes <= sizeof(target) && memchr(target, 0, bytes) ? target : "UNKNOWN",
+        bytes ? 0 : GetLastError());
+    HKEY key;
+    LONG rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0,
+                            KEY_QUERY_VALUE, &key);
+    diagnostic("WGI_SERIALCOMM open_rc=%ld\r\n", rc);
+    if (rc != ERROR_SUCCESS) return;
+    for (DWORD i = 0; i < 128; ++i) {
+        char name[256], value[512]; DWORD names = sizeof(name), size = sizeof(value), type = 0;
+        memset(name, 0, sizeof(name)); memset(value, 0, sizeof(value));
+        rc = RegEnumValueA(key, i, name, &names, NULL, &type, (BYTE *)value, &size);
+        if (rc == ERROR_NO_MORE_ITEMS) break;
+        if (rc == ERROR_SUCCESS && names < sizeof(name) && name[names] == 0 && type == REG_SZ &&
+            bounded_string(value, size, sizeof(value)))
+            diagnostic("WGI_SERIALCOMM name=%s port=%s\r\n", name, value);
+        else diagnostic("WGI_SERIALCOMM index=%lu rc=%ld type=%lu bytes=%lu\r\n", i, rc,type,size);
+    }
+    RegCloseKey(key);
+}
+static void log_tail(const char *path) {
+    HANDLE file = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE |
+                              FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
+    if (file == INVALID_HANDLE_VALUE) {
+        diagnostic("WGI_LOG path=%s open_error=%lu\r\n", path, GetLastError()); return;
+    }
+    LARGE_INTEGER size, offset;
+    if (!GetFileSizeEx(file, &size)) { CloseHandle(file); return; }
+    offset.QuadPart = size.QuadPart > 65536 ? size.QuadPart - 65536 : 0;
+    diagnostic("WGI_LOG_BEGIN path=%s total=%lld offset=%lld\r\n",
+               path, size.QuadPart, offset.QuadPart);
+    if (SetFilePointerEx(file, offset, NULL, FILE_BEGIN)) {
+        DWORD left = 65536;
+        while (left) {
+            char buffer[4096]; DWORD n = 0;
+            DWORD request = left < sizeof(buffer) ? left : sizeof(buffer);
+            if (!ReadFile(file, buffer, request, &n, NULL) || !n)
+                break;
+            unsigned written = 0;
+            if (!diagnostic_write(buffer, n, &written)) break;
+            left -= n;
+        }
+    }
+    diagnostic("\r\nWGI_LOG_END\r\n");
+    CloseHandle(file);
+}
+static void service_snapshot(const char *name, const char *phase);
+static void serial_diagnostics(const char *phase) {
+    diagnostic("WGI_SERIAL_SNAPSHOT phase=%s\r\n", phase);
+    service_snapshot("Serial", phase);
+    service_snapshot("Serenum", phase);
+    serial_namespace();
+    uart_devices();
+    log_tail("X:\\Windows\\System32\\wpeinit.log");
+    log_tail("X:\\Windows\\inf\\setupapi.dev.log");
+    log_tail("X:\\Windows\\inf\\setupapi.offline.log");
+}
+
+static void service_state(SC_HANDLE service, const char *name, const char *phase) {
+    SERVICE_STATUS_PROCESS status; DWORD bytes = 0;
+    memset(&status, 0, sizeof(status));
+    BOOL ok = QueryServiceStatusEx(service, SC_STATUS_PROCESS_INFO,
+                                  (BYTE *)&status, sizeof(status), &bytes);
+    diagnostic("WGI_SERIAL_SERVICE_STATE name=%s phase=%s ok=%d state=%lu exit=%lu error=%lu\r\n",
+               name, phase, ok, status.dwCurrentState, status.dwWin32ExitCode,
+               ok ? 0 : GetLastError());
+    union { QUERY_SERVICE_CONFIGA config; BYTE bytes[4096]; } configuration;
+    ok = QueryServiceConfigA(service, &configuration.config, sizeof(configuration), &bytes);
+    diagnostic("WGI_SERIAL_SERVICE_CONFIG name=%s phase=%s ok=%d start=%lu error=%lu\r\n",
+               name, phase, ok, ok ? configuration.config.dwStartType : 0,
+               ok ? 0 : GetLastError());
+}
+static void service_snapshot(const char *name, const char *phase) {
+    SC_HANDLE scm = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
+    if (!scm) { diagnostic("WGI_SERIAL_SCM query_error=%lu\r\n", GetLastError()); return; }
+    SC_HANDLE service = OpenServiceA(scm, name, SERVICE_QUERY_STATUS | SERVICE_QUERY_CONFIG);
+    if (service) {
+        service_state(service, name, phase);
+        CloseServiceHandle(service);
+    } else diagnostic("WGI_SERIAL_SERVICE name=%s phase=%s query_error=%lu\r\n",
+                      name, phase, GetLastError());
+    CloseServiceHandle(scm);
+}
 static void service_start(const char *name) {
     SC_HANDLE scm = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
-    if (!scm) return;
-    SC_HANDLE svc = OpenServiceA(scm, name, SERVICE_START | SERVICE_CHANGE_CONFIG);
+    if (!scm) { diagnostic("WGI_SERIAL_SCM open_error=%lu\r\n", GetLastError()); return; }
+    SC_HANDLE svc = OpenServiceA(scm, name, SERVICE_START | SERVICE_CHANGE_CONFIG |
+                                 SERVICE_QUERY_STATUS | SERVICE_QUERY_CONFIG);
     if (svc) {
-        ChangeServiceConfigA(svc, SERVICE_NO_CHANGE, SERVICE_DEMAND_START,
-                             SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        service_state(svc, name, "before");
+        BOOL configured = ChangeServiceConfigA(svc, SERVICE_NO_CHANGE, SERVICE_DEMAND_START,
+            SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        DWORD config_error = configured ? 0 : GetLastError();
         BOOL ok = StartServiceA(svc, 0, NULL);
-        printf("WGI_SERIAL_SERVICE name=%s start_ok=%d error=%lu\n",
-               name, ok, ok ? 0 : GetLastError());
+        DWORD start_error = ok ? 0 : GetLastError();
+        diagnostic("WGI_SERIAL_SERVICE name=%s config_ok=%d config_error=%lu "
+                   "start_ok=%d start_error=%lu\r\n",
+                   name, configured, config_error, ok, start_error);
+        service_state(svc, name, "after");
         CloseServiceHandle(svc);
-    } else printf("WGI_SERIAL_SERVICE name=%s open_error=%lu\n", name, GetLastError());
+    } else diagnostic("WGI_SERIAL_SERVICE name=%s open_error=%lu\r\n", name, GetLastError());
     CloseServiceHandle(scm);
 }
 static int serial_open(void) {
     service_start("Serial");
     service_start("Serenum");
+    serial_diagnostics("after-wpeinit-before-com");
     DEVINST root;
     if (CM_Locate_DevNodeA(&root, NULL, CM_LOCATE_DEVNODE_NORMAL) == CR_SUCCESS)
         CM_Reenumerate_DevNode(root, CM_REENUMERATE_ASYNCHRONOUS);
@@ -96,7 +332,7 @@ static int serial_open(void) {
     return SetCommState(serial, &dcb) && SetCommTimeouts(serial, &timeout);
 }
 
-static int supervise(unsigned seconds, char *command) {
+static int supervise(unsigned seconds, char *command, int gpu_required) {
     HANDLE read = NULL, write = NULL, job = NULL;
     PROCESS_INFORMATION pi;
     STARTUPINFOA si;
@@ -144,7 +380,8 @@ static int supervise(unsigned seconds, char *command) {
             DWORD child_rc;
             if (used) { line[used] = 0; marker_flags |= wgi_markers(line); }
             if (GetExitCodeProcess(pi.hProcess, &child_rc))
-                rc = wgi_terminal(marker_flags == 1 ? "WGI_GPU_PASS\n" : "", child_rc, 0);
+                rc = wgi_supervised(marker_flags == 1 ? "WGI_GPU_PASS\n" : "",
+                                    child_rc, 0, gpu_required);
             break;
         } else Sleep(20);
         if (GetTickCount64() >= end) { timed_out = 1; break; }
@@ -156,14 +393,22 @@ done:
         TerminateProcess(pi.hProcess, 2);
         WaitForSingleObject(pi.hProcess, 5000);
     }
-    if (timed_out) text("WGI_GPU_TIMEOUT\r\n");
-    if (rc || serial_failed) text("WGI_GPU_FAIL\r\nWGI_GPU_END\r\n");
+    if (gpu_required) {
+        if (timed_out) text("WGI_GPU_TIMEOUT\r\n");
+        if (rc || serial_failed) text("WGI_GPU_FAIL\r\nWGI_GPU_END\r\n");
+    } else diagnostic("WGI_BOOTSTRAP_END rc=%d timed_out=%d\r\n", rc, timed_out);
     if (pi.hThread) CloseHandle(pi.hThread);
     if (pi.hProcess) CloseHandle(pi.hProcess);
     if (read) CloseHandle(read);
     if (write) CloseHandle(write);
     if (job) CloseHandle(job);
-    return rc || serial_failed || timed_out;
+    return rc || serial_failed || diagnostic_failed || timed_out;
+}
+static int cpu_diagnostic_write(const void *bytes, unsigned count, unsigned *written) {
+    (void)bytes; *written = count; return 1;
+}
+static int cpu_failed_serial(const void *bytes, unsigned count, unsigned *written) {
+    (void)bytes; (void)count; *written = 0; return 0;
 }
 int main(int argc, char **argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -173,11 +418,24 @@ int main(int argc, char **argv) {
             wgi_terminal("WGI_GPU_PASS\n", 0, 1) &&
             wgi_terminal("WGI_PE_BOOT_OK_V1\n", 0, 0) &&
             wgi_terminal("WGI_GPU_PASS\rgarbage\n", 0, 0) &&
-            wgi_terminal("WGI_GPU_PASS\nWGI_GPU_FAIL_SUFFIX\n", 0, 0);
+            wgi_terminal("WGI_GPU_PASS\nWGI_GPU_FAIL_SUFFIX\n", 0, 0) &&
+            !wgi_supervised("", 0, 0, 0) && wgi_supervised("", 0, 0, 1) &&
+            wgi_supervised("", 1, 0, 0) && wgi_supervised("", 0, 1, 0) &&
+            !wgi_tee(cpu_diagnostic_write, cpu_failed_serial, "test", 4, 0) &&
+            wgi_tee(cpu_diagnostic_write, cpu_failed_serial, "test", 4, 1);
         puts(ok ? "WGI_CPU_POLICY_PASS" : "WGI_CPU_POLICY_FAIL");
         return ok ? 0 : 1;
     }
     result_open();
+    if (argc == 3 && !strcmp(argv[1], "--bootstrap")) {
+        diagnostic_only = 1;
+        serial_diagnostics("before-bootstrap");
+        int bootstrap_rc = supervise(240, argv[2], 0);
+        if (result == INVALID_HANDLE_VALUE) result_open();
+        serial_diagnostics("after-bootstrap");
+        if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
+        return bootstrap_rc || diagnostic_failed;
+    }
     if (!serial_open()) {
         text("WGI_SERIAL_FAIL configuration_or_open\r\nWGI_GPU_FAIL\r\nWGI_GPU_END\r\n");
         if (serial != INVALID_HANDLE_VALUE) CloseHandle(serial);
@@ -193,7 +451,7 @@ int main(int argc, char **argv) {
             char marker[128];
             snprintf(marker, sizeof(marker), "WGI_PE_START_V2 terminal_budget_s=%lu\r\n", seconds);
             if (!text(marker)) rc = 2;
-            else rc = supervise((unsigned)seconds, argv[3]);
+            else rc = supervise((unsigned)seconds, argv[3], 1);
         }
     } else if (argc > 1) {
         for (int i = 1; i < argc; ++i) {
