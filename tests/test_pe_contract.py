@@ -177,6 +177,72 @@ class Contract(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertNotEqual(rc, 0)
 
+    def capped(self, chunks, limit=128, fail=False):
+        observed = []
+
+        def write(p, n, written):
+            if fail:
+                written[0] = 0
+                return 0
+            observed.append(c.string_at(p, n))
+            written[0] = n
+            return 1
+
+        callback = WRITE(write)
+        used, truncated = c.c_uint(0), c.c_int(0)
+        self.lib.wgi_bounded_write.argtypes = [
+            WRITE,
+            c.POINTER(c.c_uint),
+            c.POINTER(c.c_int),
+            c.c_uint,
+            c.c_char_p,
+            c.c_uint,
+        ]
+        statuses = []
+        for chunk in chunks:
+            statuses.append(
+                self.lib.wgi_bounded_write(
+                    callback, c.byref(used), c.byref(truncated), limit, chunk, len(chunk)
+                )
+            )
+        return statuses, b"".join(observed), used.value, truncated.value
+
+    def test_receipt_total_byte_cap(self):
+        statuses, data, used, truncated = self.capped([b"x" * 1024])
+        self.assertEqual(statuses, [0])
+        self.assertLessEqual(len(data), 128)
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 1)
+
+    def test_multiwrite_receipt_cap(self):
+        _, data, used, truncated = self.capped([b"a" * 80, b"b" * 80])
+        self.assertLessEqual(len(data), 128)
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 1)
+
+    def test_receipt_censoring_is_explicit(self):
+        _, data, _, _ = self.capped([b"x" * 1024])
+        self.assertIn(b"WGI_DIAGNOSTIC_TRUNCATED", data)
+
+    def test_repeated_truncation_has_one_marker(self):
+        _, data, _, _ = self.capped([b"x" * 1024, b"later"])
+        self.assertEqual(data.count(b"WGI_DIAGNOSTIC_TRUNCATED"), 1)
+        self.assertNotIn(b"later", data)
+
+    def test_receipt_write_error_is_visible(self):
+        statuses, _, _, _ = self.capped([b"entry"], fail=True)
+        self.assertNotEqual(statuses[0], 0)
+
+    def test_runtime_write_error_is_visible(self):
+        statuses, _, _, _ = self.capped([b"runtime"], limit=512, fail=True)
+        self.assertNotEqual(statuses[0], 0)
+
+    def test_small_receipt_preserved(self):
+        _, data, used, truncated = self.capped([b"WGI_UART problem=28\r\n"])
+        self.assertEqual(data, b"WGI_UART problem=28\r\n")
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 0)
+
     def test_explicit_pass(self):
         self.assertEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r\n", 0, 0), 0)
 
