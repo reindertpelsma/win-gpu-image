@@ -19,7 +19,10 @@ HMODULE LoadLibraryA(const char *name) {
     return !strcmp(name, "nvcuda.dll") && !fail("library") ? (void *)1 : NULL;
 }
 unsigned long GetLastError(void) { return 126; }
-int FreeLibrary(HMODULE lib) { (void)lib; return !event("library_free"); }
+int FreeLibrary(HMODULE lib) {
+    (void)lib;
+    return !event("library_free") && !ctx && !module && !allocated;
+}
 static int __stdcall init(unsigned flags) { return flags ? 1 : event("init"); }
 static int __stdcall count(int *n) {
     *n = fail("zero_devices") ? 0 : (fail("excess_devices") ? 1000000 : 1);

@@ -43,10 +43,58 @@ EXPORTS = (
 )
 
 
+def host_compiler():
+    """Find installed tools; Windows recipe tests precede Build-Image's VS activation."""
+    env = dict(os.environ)
+    compiler = next((shutil.which(n) for n in ("cl", "gcc", "clang") if shutil.which(n)), None)
+    if compiler is not None or os.name != "nt":
+        return compiler, env
+    vswhere = (
+        Path(env.get("ProgramFiles(x86)", r"C:\Program Files (x86)"))
+        / "Microsoft Visual Studio/Installer/vswhere.exe"
+    )
+    if not vswhere.is_file():
+        return None, env
+    found = subprocess.run(
+        [
+            str(vswhere),
+            "-latest",
+            "-products",
+            "*",
+            "-requires",
+            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+            "-property",
+            "installationPath",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=True,
+    )
+    install = found.stdout.strip()
+    if not install:
+        return None, env
+    devcmd = Path(install) / "Common7/Tools/VsDevCmd.bat"
+    ready = subprocess.run(
+        ["cmd.exe", "/d", "/s", "/c", f'call "{devcmd}" -arch=x64 -host_arch=x64 >nul && set'],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=True,
+    )
+    env = {k.upper(): v for k, v in env.items()}
+    for line in ready.stdout.splitlines():
+        if "=" in line and not line.startswith("="):
+            key, value = line.split("=", 1)
+            env[key.upper()] = value
+    path = env.get("PATH", "")
+    return shutil.which("cl", path=path), env
+
+
 class CompiledCudaProbe(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        compiler = next((shutil.which(n) for n in ("cl", "gcc", "clang") if shutil.which(n)), None)
+        compiler, compile_env = host_compiler()
         if compiler is None:
             raise unittest.SkipTest(
                 "CPU mock needs installed MSVC, GCC or Clang; GPU is never used"
@@ -83,7 +131,9 @@ class CompiledCudaProbe(unittest.TestCase):
                 "-o",
                 str(cls.exe),
             ]
-        built = subprocess.run(args, cwd=cls.temp.name, capture_output=True, text=True, timeout=60)
+        built = subprocess.run(
+            args, cwd=cls.temp.name, env=compile_env, capture_output=True, text=True, timeout=60
+        )
         if built.returncode:
             raise AssertionError(built.stdout + built.stderr)
 
@@ -119,6 +169,19 @@ class CompiledCudaProbe(unittest.TestCase):
             with self.subTest(stage=stage):
                 self.assert_refused(self.run_probe(stage))
 
+    def test_driver_error_stops_dependent_work_before_cleanup(self):
+        for stage, forbidden in (
+            ("init", "create"),
+            ("device", "create"),
+            ("upload", "launch"),
+            ("launch", "sync"),
+            ("sync", "download"),
+        ):
+            with self.subTest(stage=stage):
+                run = self.run_probe(stage)
+                self.assert_refused(run)
+                self.assertNotIn("MOCK " + forbidden, run.stderr)
+
     def test_acquired_resources_are_released_even_after_failures(self):
         for stage in (
             "load",
@@ -131,6 +194,7 @@ class CompiledCudaProbe(unittest.TestCase):
             "free",
             "unload",
             "destroy",
+            "library_free",
         ):
             with self.subTest(stage=stage):
                 run = self.run_probe(stage)
@@ -142,6 +206,14 @@ class CompiledCudaProbe(unittest.TestCase):
                 if stage not in ("load", "function", "alloc"):
                     self.assertIn("MOCK free", events)
                 self.assertNotIn("CUDA_PASS", run.stdout)
+
+    def test_cleanup_failure_still_reaches_context_destroy_and_dll_release(self):
+        for stage in ("free", "unload"):
+            with self.subTest(stage=stage):
+                run = self.run_probe(stage)
+                self.assertIn("MOCK destroy", run.stderr)
+                self.assertIn("MOCK library_free", run.stderr)
+                self.assert_refused(run)
 
     def test_missing_compute_api_refuses_before_init(self):
         for export in EXPORTS:
