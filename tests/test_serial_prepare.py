@@ -133,6 +133,16 @@ class SerialPrepare(unittest.TestCase):
     def test_dif_failure_no_final_install(self):
         self.assertNotIn("step=2", self.refused("call_fail").stdout)
 
+    def test_multi_sz_type_and_capacity_are_independent_guards(self):
+        for case in ("multi_capacity", "multi_type"):
+            with self.subTest(case=case):
+                self.assertEqual(self.run_case(case).returncode, 0)
+
+    def test_multi_sz_type_and_capacity_report_invalid(self):
+        for case in ("multi_capacity", "multi_type"):
+            with self.subTest(case=case):
+                self.assertIn("MOCK_MULTI member=-1", self.run_case(case).stdout)
+
     def test_typed_strings_reject_malformed(self):
         for case in ("typed_bad", "typed_bounds", "typed_nul", "typed_embedded"):
             with self.subTest(case=case):
@@ -194,6 +204,91 @@ class SerialWinAPI(unittest.TestCase):
 
     def run_case(self, name):
         return subprocess.run([str(self.exe), name], text=True, capture_output=True, timeout=5)
+
+    def test_matching_more_data_never_parses_unvalidated_buffer(self):
+        r = self.run_case("matching_more_data")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("name=MatchingDeviceId rc=234", r.stdout)
+        self.assertIn("type=7 bytes=23 membership=-1", r.stdout)
+        self.assertNotIn("WINMOCK_DIF", r.stdout)
+        self.assertIn("calls=0 builds=0", r.stdout)
+
+    def test_matching_access_error_never_parses_unvalidated_buffer(self):
+        r = self.run_case("matching_access_error")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("name=MatchingDeviceId rc=5", r.stdout)
+        self.assertIn("type=7 bytes=23 membership=-1", r.stdout)
+        self.assertNotIn("WINMOCK_DIF", r.stdout)
+        self.assertIn("calls=0 builds=0", r.stdout)
+
+    def test_observed_star_hardware_match_runs_normal_pipeline(self):
+        r = self.run_case("ok")
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("calls=3 ", r.stdout)
+
+    def test_observed_star_hardware_match_checks_each_phase(self):
+        r = self.run_case("ok")
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("name=MatchingDeviceId value=*PNP0501", r.stdout)
+        self.assertEqual(r.stdout.count("selected same_installed=1"), 5)
+
+    def test_hardware_match_is_case_insensitive_exact(self):
+        r = self.run_case("hardware_case")
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertIn("calls=3 ", r.stdout)
+
+    def test_hardware_case_preserves_install_identity(self):
+        r = self.run_case("hardware_case")
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertEqual(r.stdout.count("selected same_installed=1"), 5)
+
+    def test_hardware_malformed_and_nonmember_stop(self):
+        for case in (
+            "hardware_wrong_type",
+            "hardware_read_error",
+            "hardware_size",
+            "hardware_no_double_nul",
+            "hardware_unterminated",
+            "hardware_trailing",
+            "hardware_nonmember",
+            "hardware_star_not_glob",
+            "hardware_early_match_bad_tail",
+            "hardware_early_empty",
+        ):
+            with self.subTest(case=case):
+                r = self.run_case(case)
+                self.assertNotEqual(r.returncode, 0, r.stdout)
+                self.assertIn("calls=0 builds=0", r.stdout)
+
+    def test_hardware_malformed_and_nonmember_never_install(self):
+        for case in (
+            "hardware_wrong_type",
+            "hardware_read_error",
+            "hardware_size",
+            "hardware_no_double_nul",
+            "hardware_unterminated",
+            "hardware_trailing",
+            "hardware_nonmember",
+            "hardware_star_not_glob",
+            "hardware_early_match_bad_tail",
+            "hardware_early_empty",
+        ):
+            with self.subTest(case=case):
+                self.assertNotIn("WINMOCK_DIF", self.run_case(case).stdout)
+
+    def test_hardware_membership_rechecked_after_each_dif(self):
+        for case in ("hardware_after_dif", "hardware_member_lost", "matching_after_dif"):
+            with self.subTest(case=case):
+                r = self.run_case(case)
+                self.assertNotEqual(r.returncode, 0, r.stdout)
+                self.assertIn("calls=1 ", r.stdout)
+
+    def test_hardware_membership_change_blocks_next_dif(self):
+        for case in ("hardware_after_dif", "hardware_member_lost", "matching_after_dif"):
+            with self.subTest(case=case):
+                r = self.run_case(case)
+                self.assertNotIn("WINMOCK_DIF function=32", r.stdout)
+                self.assertNotIn("WINMOCK_DIF function=2\n", r.stdout)
 
     def test_refused_candidate_provider_is_visible(self):
         r = self.run_case("selected_provider")

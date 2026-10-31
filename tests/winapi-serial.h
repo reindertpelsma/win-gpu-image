@@ -10,6 +10,7 @@
 #define GetFileAttributesA wgi_serial_mock_attributes
 #define QueryDosDeviceA wgi_serial_mock_namespace
 #define REG_SZ 1
+#define REG_MULTI_SZ 7
 #define MAX_PATH 260
 #define TRUE 1
 #define FALSE 0
@@ -32,6 +33,7 @@
 #define DIGCF_ALLCLASSES 4
 #define DIGCF_PRESENT 2
 #define DIGCF_DEVICEINTERFACE 16
+#define SPDRP_HARDWAREID 1
 #define SPDRP_SERVICE 4
 #define SPDRP_CLASSGUID 8
 #define SPDRP_DRIVER 9

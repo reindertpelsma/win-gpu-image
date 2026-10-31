@@ -77,6 +77,15 @@ registered installer only after exact-device and component checks. A missing
 prerequisite, failed step, reboot requirement or absent final COM1 stops the
 attempt. Actual serial smoke remains the acceptance test.
 
+The first guarded [naming build](https://github.com/reindertpelsma/win-gpu-image/actions/runs/41214337117)
+stopped before driver selection or installer dispatch: its current matching ID
+was `*PNP0501`, while the initial operator guard assumed `acpi\pnp0501`. This
+was an operator precondition mismatch, leaving the installation hypothesis
+untested. The matching ID is now validated against the complete, typed and
+bounded hardware-ID list actually reported for that device, with literal
+case-insensitive membership rechecked after every installation step. Other
+device, driver, installer, reboot and COM1 requirements remain unchanged.
+
 ## Same-image native control, then virtual GPU
 
 After separate resource approval, select one verified single-GPU VM-capable

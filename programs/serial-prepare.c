@@ -13,7 +13,8 @@ typedef struct {
     unsigned count, started, problem;
     int name_state, com_state, installer_ok;
     char id[1024], class_name[80], service[128], inf[260], provider[256];
-    char section[256], extension[64], matching[256];
+    char section[256], extension[64], matching[256], hardware[4096];
+    unsigned hardware_type, hardware_bytes;
 } WGI_SERIAL_SNAPSHOT;
 typedef struct {
     int (*select_current)(void *, const WGI_SERIAL_SNAPSHOT *);
@@ -33,12 +34,31 @@ static int equal_text(const char *a, const char *b) {
 static int wgi_serial_string(const char *s, unsigned type, unsigned bytes, size_t cap) {
     return type == 1 && bytes && bytes <= cap && memchr(s, 0, bytes) == s + bytes - 1;
 }
+/* Full REG_MULTI_SZ validation precedes acceptance, even if an early ID matches. */
+static int multi_sz_member(const char *list, unsigned type, unsigned bytes, size_t capacity,
+                           const char *matching) {
+    if (type != 7 || bytes < 2 || bytes > capacity ||
+        list[bytes - 1] || list[bytes - 2] || !matching[0]) return -1;
+    unsigned offset = 0; int found = 0;
+    while (offset < bytes - 1 && list[offset]) {
+        const char *id = list + offset;
+        const char *end = memchr(id,0,bytes - offset);
+        if (!end) return -1;
+        if (equal_text(id,matching)) found = 1; /* '*' is an ordinary literal byte. */
+        offset += (unsigned)(end - id) + 1;
+    }
+    return offset == bytes - 1 ? found : -1;
+}
+static int hardware_member(const WGI_SERIAL_SNAPSHOT *s) {
+    return multi_sz_member(s->hardware,s->hardware_type,s->hardware_bytes,
+                           sizeof(s->hardware),s->matching);
+}
 static int eligible(const WGI_SERIAL_SNAPSHOT *s) {
     return s->count == 1 && equal_text(s->id, "ACPI\\PNP0501\\1") &&
         equal_text(s->class_name, "{4d36e978-e325-11ce-bfc1-08002be10318}") &&
         equal_text(s->service, "Serial") && s->started && !s->problem &&
         equal_text(s->inf, "msports.inf") && equal_text(s->provider, "Microsoft") &&
-        s->section[0] && equal_text(s->matching, "acpi\\pnp0501") && s->installer_ok &&
+        s->section[0] && hardware_member(s) == 1 && s->installer_ok &&
         s->name_state == 0 && s->com_state == 0;
 }
 static int same_identity(const WGI_SERIAL_SNAPSHOT *a, const WGI_SERIAL_SNAPSHOT *b) {
@@ -46,7 +66,8 @@ static int same_identity(const WGI_SERIAL_SNAPSHOT *a, const WGI_SERIAL_SNAPSHOT
         equal_text(a->id, b->id) && equal_text(a->class_name, b->class_name) &&
         equal_text(a->service, b->service) && equal_text(a->inf, b->inf) &&
         equal_text(a->provider, b->provider) && equal_text(a->section, b->section) &&
-        equal_text(a->extension, b->extension) && equal_text(a->matching, b->matching);
+        equal_text(a->extension, b->extension) && equal_text(a->matching, b->matching) &&
+        hardware_member(b) == 1;
 }
 static int checked(const WGI_SERIAL_SNAPSHOT *s, const WGI_SERIAL_OPS *ops, void *ctx,
                    unsigned *retained_flags) {
@@ -152,6 +173,11 @@ static int current(SERIAL_CONTEXT *c, WGI_SERIAL_SNAPSHOT *s) {
     s->started = !!(status & DN_STARTED); s->problem = problem;
     if (!prop(c, SPDRP_CLASSGUID, s->class_name, sizeof(s->class_name)) ||
         !prop(c, SPDRP_SERVICE, s->service, sizeof(s->service))) return 0;
+    DWORD hw_type = 0, hw_bytes = 0;
+    BOOL hw_ok = SetupDiGetDeviceRegistryPropertyA(c->set,&c->node,SPDRP_HARDWAREID,
+        &hw_type,(BYTE *)s->hardware,sizeof(s->hardware),&hw_bytes);
+    DWORD hw_error = hw_ok ? 0 : GetLastError();
+    s->hardware_type = hw_type; s->hardware_bytes = hw_bytes;
     HKEY key = SetupDiOpenDevRegKey(c->set, &c->node, DICS_FLAG_GLOBAL, 0,
                                    DIREG_DRV, KEY_QUERY_VALUE);
     if (key == INVALID_HANDLE_VALUE) return 0;
@@ -162,6 +188,10 @@ static int current(SERIAL_CONTEXT *c, WGI_SERIAL_SNAPSHOT *s) {
     if (ext != ERROR_SUCCESS && ext != ERROR_FILE_NOT_FOUND) ok = 0;
     ok &= reg_text(key, "MatchingDeviceId", s->matching, sizeof(s->matching)) == ERROR_SUCCESS;
     RegCloseKey(key);
+    int membership = hw_ok && ok ? hardware_member(s) : -1;
+    printf("WGI_SERIAL_PREP hardware api_ok=%d error=%lu type=%lu bytes=%lu membership=%d\n",
+           hw_ok,hw_error,hw_type,hw_bytes,membership);
+    ok &= membership == 1;
     printf("WGI_SERIAL_PREP current status=%lu problem=%lu metadata_ok=%d\n",status,problem,ok);
     return ok;
 }
