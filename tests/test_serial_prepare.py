@@ -205,6 +205,22 @@ class SerialWinAPI(unittest.TestCase):
     def run_case(self, name):
         return subprocess.run([str(self.exe), name], text=True, capture_output=True, timeout=5)
 
+    def test_matching_more_data_never_parses_unvalidated_buffer(self):
+        r = self.run_case("matching_more_data")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("name=MatchingDeviceId rc=234", r.stdout)
+        self.assertIn("type=7 bytes=23 membership=-1", r.stdout)
+        self.assertNotIn("WINMOCK_DIF", r.stdout)
+        self.assertIn("calls=0 builds=0", r.stdout)
+
+    def test_matching_access_error_never_parses_unvalidated_buffer(self):
+        r = self.run_case("matching_access_error")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("name=MatchingDeviceId rc=5", r.stdout)
+        self.assertIn("type=7 bytes=23 membership=-1", r.stdout)
+        self.assertNotIn("WINMOCK_DIF", r.stdout)
+        self.assertIn("calls=0 builds=0", r.stdout)
+
     def test_observed_star_hardware_match_runs_normal_pipeline(self):
         r = self.run_case("ok")
         self.assertEqual(r.returncode, 0, r.stdout)
