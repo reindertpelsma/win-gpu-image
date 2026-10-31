@@ -67,6 +67,16 @@ no UART binding cause. Separately bounded receipts repair that capture gap;
 they do not claim to repair COM1. Another strict smoke must supply the missing
 evidence; the diagnostic disk remains insufficient for acceptance.
 
+The subsequent [capture build](https://github.com/reindertpelsma/win-gpu-image/actions/runs/41210940731)
+retained complete UART/service receipts but still failed COM1. It observed a
+started ACPI PNP0501 device bound to the stock serial driver, while its external
+port name and COM1 mapping were missing. This supports investigating standard
+Ports installation/naming; it does not prove an exclusive cause. The proposed
+bounded preparation keeps the currently installed driver and uses the normal
+registered installer only after exact-device and component checks. A missing
+prerequisite, failed step, reboot requirement or absent final COM1 stops the
+attempt. Actual serial smoke remains the acceptance test.
+
 ## Same-image native control, then virtual GPU
 
 After separate resource approval, select one verified single-GPU VM-capable
