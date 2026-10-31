@@ -15,6 +15,13 @@ startup and terminal verdict. Missing COM1, short/failed writes, missing verdict
 timeout, nonzero child status or missing required probe result fails closed.
 A result disk is supplementary evidence, not a substitute for COM1 acceptance.
 
+Startup first uses a separate bounded diagnostic-only bootstrap: hold the
+NVIDIA device stopped, run `wpeinit` so PnP can initialize the UART, and record
+bootstrap completion. It emits no serial/GPU success. Only successful bootstrap
+may enter the separate COM1-required GPU supervisor. Both phases use the existing
+240-second owned-child bound; the host's startup, verdict and total smoke limits
+remain unchanged. A bootstrap receipt never substitutes for a GPU verdict.
+
 The startup sequence holds the NVIDIA service/device stopped while PE initializes,
 then installs the complete unmodified INF, obtains the exact display device's
 driver software key, writes `EnableGpuFirmware=1` as DWORD into that class key
@@ -41,6 +48,14 @@ FAIL outcome alongside the result-disk boot marker and offline driver listing.
 It proves the observation path and negative result handling, not NVIDIA binding.
 Actual new-image behavior and size come from the main build's recorded result,
 not from the historical image's successful smoke.
+
+The first PE2 [image build](https://github.com/reindertpelsma/win-gpu-image/actions/runs/41204715947)
+passed source tests, pinned-input verification and offline image construction,
+then failed the strict smoke with COM1 open error2 and no device mapping. It
+published no image or attestation. The bounded PnP bootstrap and independent
+service/UART diagnostics address the startup dependency without treating that
+ordering as an exclusively proved root cause. Another strict smoke must verify
+the correction; the diagnostic disk remains insufficient for acceptance.
 
 ## Same-image native control, then virtual GPU
 
