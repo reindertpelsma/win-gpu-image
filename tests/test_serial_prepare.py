@@ -206,6 +206,11 @@ class SerialWinAPI(unittest.TestCase):
         self.assertIn("selected_driver provider_valid=0 provider=UNPROVEN", r.stdout)
         self.assertNotIn("xxxxxxxx", r.stdout)
 
+    def test_malformed_candidate_provider_does_not_leak_bytes(self):
+        r = self.run_case("selected_provider_nul")
+        self.assertNotIn("xxxxxxxx", r.stdout)
+        self.assertIn("provider=UNPROVEN", r.stdout)
+
     def test_refused_candidate_inf_is_visible(self):
         r = self.run_case("selected_inf")
         self.assertNotEqual(r.returncode, 0)

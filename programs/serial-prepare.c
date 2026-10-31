@@ -255,16 +255,42 @@ static void interfaces(SERIAL_CONTEXT *c, const char *phase) {
     printf("WGI_SERIAL_PREP interfaces phase=%s matched=%u complete=%d\n",phase,matched,complete);
     SetupDiDestroyDeviceInfoList(set);
 }
+/* Diagnostic formatting only: never emit an unproved or control-bearing field. */
+static int printable_field(const char *text, size_t capacity) {
+    const char *end = memchr(text, 0, capacity);
+    if (!end) return 0;
+    for (const char *p = text; p < end; ++p)
+        if ((unsigned char)*p < 32 || (unsigned char)*p > 126) return 0;
+    return 1;
+}
 static int selected_matches(SERIAL_CONTEXT *c, const WGI_SERIAL_SNAPSHOT *s) {
     SP_DRVINFO_DATA_A info; unsigned char buffer[16384]; DWORD needed = 0;
     memset(&info, 0, sizeof(info)); info.cbSize = sizeof(info);
     memset(buffer, 0, sizeof(buffer));
     SP_DRVINFO_DETAIL_DATA_A *detail = (void *)buffer; detail->cbSize = sizeof(*detail);
-    if (!SetupDiGetSelectedDriverA(c->set, &c->node, &info) ||
-        !memchr(info.ProviderName, 0, sizeof(info.ProviderName)) ||
-        !equal_text(info.ProviderName, s->provider) ||
-        !SetupDiGetDriverInfoDetailA(c->set, &c->node, &info, detail, sizeof(buffer), &needed) ||
-        needed < sizeof(*detail) || needed > sizeof(buffer) ||
+    BOOL selected_ok = SetupDiGetSelectedDriverA(c->set, &c->node, &info);
+    DWORD error = selected_ok ? 0 : GetLastError();
+    int provider_valid = selected_ok && printable_field(info.ProviderName,
+                                                        sizeof(info.ProviderName));
+    printf("WGI_SERIAL_PREP selected_api ok=%d error=%lu\n",selected_ok,error);
+    printf("WGI_SERIAL_PREP selected_driver provider_valid=%d provider=%s\n",provider_valid,
+           provider_valid ? info.ProviderName : "UNPROVEN");
+    if (!selected_ok || !memchr(info.ProviderName, 0, sizeof(info.ProviderName)) ||
+        !equal_text(info.ProviderName, s->provider)) return 0;
+    BOOL detail_ok = SetupDiGetDriverInfoDetailA(c->set, &c->node, &info, detail,
+                                                sizeof(buffer), &needed);
+    error = detail_ok ? 0 : GetLastError();
+    int size_valid = needed >= sizeof(*detail) && needed <= sizeof(buffer);
+    int inf_valid = detail_ok && size_valid &&
+        printable_field(detail->InfFileName,sizeof(detail->InfFileName));
+    int section_valid = detail_ok && size_valid &&
+        printable_field(detail->SectionName,sizeof(detail->SectionName));
+    printf("WGI_SERIAL_PREP detail_api ok=%d error=%lu needed=%lu capacity=%u size_valid=%d\n",
+           detail_ok,error,needed,(unsigned)sizeof(buffer),size_valid);
+    printf("WGI_SERIAL_PREP selected_detail inf_valid=%d inf=%s section_valid=%d section=%s\n",
+           inf_valid,inf_valid ? detail->InfFileName : "UNPROVEN",section_valid,
+           section_valid ? detail->SectionName : "UNPROVEN");
+    if (!detail_ok || !size_valid ||
         !memchr(detail->InfFileName, 0, sizeof(detail->InfFileName)) ||
         !memchr(detail->SectionName, 0, sizeof(detail->SectionName))) return 0;
     char windows[MAX_PATH], expected[MAX_PATH], section[256], actual[256];
@@ -276,13 +302,21 @@ static int selected_matches(SERIAL_CONTEXT *c, const WGI_SERIAL_SNAPSHOT *s) {
     length = snprintf(section, sizeof(section), "%s%s",s->section,s->extension);
     if (length < 0 || (unsigned)length >= sizeof(section)) return 0;
     HINF inf = SetupOpenInfFileA(expected, NULL, INF_STYLE_WIN4, NULL);
-    if (inf == INVALID_HANDLE_VALUE) return 0;
-    DWORD bytes = 0;
+    if (inf == INVALID_HANDLE_VALUE) {
+        printf("WGI_SERIAL_PREP selected_inf_open error=%lu\n",GetLastError()); return 0;
+    }
+    DWORD bytes = 0; memset(actual,0,sizeof(actual));
     BOOL ok = SetupDiGetActualSectionToInstallA(inf, detail->SectionName, actual,
                                                sizeof(actual), &bytes, NULL);
+    error = ok ? 0 : GetLastError();
     SetupCloseInfFile(inf);
-    if (!ok || !wgi_serial_string(actual, REG_SZ, bytes, sizeof(actual)) ||
-        !equal_text(actual, section)) return 0;
+    int actual_valid = ok && wgi_serial_string(actual,REG_SZ,bytes,sizeof(actual));
+    int display_valid = actual_valid && printable_field(actual,sizeof(actual));
+    printf("WGI_SERIAL_PREP actual_api ok=%d error=%lu bytes=%lu\n",ok,error,bytes);
+    printf("WGI_SERIAL_PREP selected_actual valid=%d section=%s matches_current=%d\n",
+           display_valid,display_valid ? actual : "UNPROVEN",
+           actual_valid && equal_text(actual,section));
+    if (!actual_valid || !equal_text(actual, section)) return 0;
     if (c->selected_valid &&
         (memcmp(&info.DriverDate, &c->selected.DriverDate, sizeof(info.DriverDate)) ||
          info.DriverVersion != c->selected.DriverVersion ||
@@ -328,7 +362,8 @@ static int inspect(void *ctx, WGI_SERIAL_SNAPSHOT *s, unsigned *flags) {
     /* Query restart outputs first: never let another DIF call overwrite them. */
     if (!SetupDiGetDeviceInstallParamsA(c->set, &c->node, &p)) return 0;
     *flags = p.Flags & (DI_NEEDREBOOT | DI_NEEDRESTART);
-    printf("WGI_SERIAL_PREP install_params restart_flags=%u\n", *flags);
+    printf("WGI_SERIAL_PREP install_params flags=%lu flagsex=%lu restart_flags=%u\n",
+           p.Flags,p.FlagsEx,*flags);
     if (!(p.Flags & DI_QUIETINSTALL) ||
         (p.FlagsEx & (DI_FLAGSEX_INSTALLEDDRIVER | DI_FLAGSEX_ALLOWEXCLUDEDDRVS)) !=
         (DI_FLAGSEX_INSTALLEDDRIVER | DI_FLAGSEX_ALLOWEXCLUDEDDRVS)) return 0;
