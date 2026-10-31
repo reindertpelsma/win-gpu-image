@@ -1,0 +1,33 @@
+name: CPU source checks
+on:
+  push:
+    branches: [main, "codex/**"]
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Test CPU contracts and mock driver paths
+        run: python3 -m unittest discover -s tests -v
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile original probes and test recipe helpers
+        shell: pwsh
+        run: ./tests/Test-Source.ps1

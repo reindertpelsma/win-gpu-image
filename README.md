@@ -51,6 +51,10 @@ cd win-gpu-image
 - [Verification, attestation, consumer hash pins, and the private store](docs/TRUST.md)
 - [Workflow security and owner environment setup](SECURITY.md)
 - [Measured results and run URLs](notes/measurements.md)
+- [PE2 serial/GSP/compute contract and hardware promotion plan](docs/PE2_PLAN.md)
 
-**CI green:** [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657), 8192 MiB tested (not a minimum); [sizes and limits](docs/IMAGE.md).
+**Historical image:** [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657), 8192 MiB tested (not a minimum); [sizes and limits](docs/IMAGE.md).
+PE2 requires real serial markers, both GSP registry readbacks and a compute-kernel/readback probe.
+Its no-GPU smoke tests observation only; NVIDIA hardware and full Windows desktop
+verification remain separate requirements.
 Do not open pull requests that add binaries.
