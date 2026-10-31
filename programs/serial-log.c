@@ -10,7 +10,7 @@
 #include "pe-contract.h"
 
 static HANDLE serial = INVALID_HANDLE_VALUE, result = INVALID_HANDLE_VALUE;
-static int serial_failed, diagnostic_failed, diagnostic_only;
+static int serial_failed, diagnostic_failed, diagnostic_only, capture_failed;
 static HANDLE receipt = INVALID_HANDLE_VALUE, runtime = INVALID_HANDLE_VALUE;
 static unsigned receipt_bytes, runtime_bytes;
 static int receipt_truncated, runtime_truncated;
@@ -49,15 +49,29 @@ static int runtime_raw_write(const void *bytes, unsigned count, unsigned *writte
     *written = n;
     return ok;
 }
+static void close_receipt(void) {
+    if (receipt != INVALID_HANDLE_VALUE) CloseHandle(receipt);
+    receipt = INVALID_HANDLE_VALUE;
+}
+static void close_runtime(void) {
+    if (runtime != INVALID_HANDLE_VALUE) CloseHandle(runtime);
+    runtime = INVALID_HANDLE_VALUE;
+}
 static void receipt_record(const char *bytes, unsigned count) {
     if (receipt == INVALID_HANDLE_VALUE) return;
     if (wgi_bounded_write(receipt_raw_write, &receipt_bytes, &receipt_truncated,
-        RECEIPT_LIMIT, bytes, count) || !FlushFileBuffers(receipt)) diagnostic_failed = 1;
+        RECEIPT_LIMIT, bytes, count) || !FlushFileBuffers(receipt)) {
+        capture_failed = 1;
+        close_receipt();
+    }
 }
 static void runtime_record(const char *bytes, unsigned count) {
     if (runtime == INVALID_HANDLE_VALUE) return;
     if (wgi_bounded_write(runtime_raw_write, &runtime_bytes, &runtime_truncated,
-        RUNTIME_LIMIT, bytes, count) || !FlushFileBuffers(runtime)) diagnostic_failed = 1;
+        RUNTIME_LIMIT, bytes, count) || !FlushFileBuffers(runtime)) {
+        capture_failed = 1;
+        close_runtime();
+    }
 }
 static void diagnostic(const char *format, ...) {
     char buffer[2048];
@@ -92,34 +106,33 @@ static void result_open(void) {
                                  OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
             result_drive = drive;
             char summary[] = "C:\\wgi-serial-receipt.txt"; summary[0] = drive;
-            if (receipt != INVALID_HANDLE_VALUE) CloseHandle(receipt);
+            close_receipt();
             receipt = CreateFileA(summary, GENERIC_READ | FILE_APPEND_DATA, FILE_SHARE_READ,
                                   NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-            LARGE_INTEGER size;
-            if (receipt == INVALID_HANDLE_VALUE || !GetFileSizeEx(receipt, &size) ||
-                size.QuadPart < 0 || size.QuadPart > RECEIPT_LIMIT) diagnostic_failed = 1;
-            else {
-                receipt_bytes = (unsigned)size.QuadPart;
-                receipt_truncated = receipt_bytes == RECEIPT_LIMIT;
+            LARGE_INTEGER size = {0};
+            int size_ok = receipt != INVALID_HANDLE_VALUE && GetFileSizeEx(receipt, &size);
+            if (wgi_receipt_resume(size.QuadPart, size_ok, RECEIPT_LIMIT,
+                &receipt_bytes, &receipt_truncated)) {
+                capture_failed = 1;
+                close_receipt();
             }
             break;
         }
     }
 }
 static void result_close(void) {
-    if (receipt != INVALID_HANDLE_VALUE) CloseHandle(receipt);
-    if (runtime != INVALID_HANDLE_VALUE) CloseHandle(runtime);
+    close_receipt();
+    close_runtime();
     if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
 }
 static void runtime_begin(const char *phase) {
-    if (runtime != INVALID_HANDLE_VALUE) CloseHandle(runtime);
-    runtime = INVALID_HANDLE_VALUE;
+    close_runtime();
     runtime_bytes = 0; runtime_truncated = 0;
     if (!result_drive) return;
     char path[] = "C:\\wgi-runtime-setup.txt"; path[0] = result_drive;
     runtime = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS,
                           FILE_ATTRIBUTE_NORMAL, NULL);
-    if (runtime == INVALID_HANDLE_VALUE) { diagnostic_failed = 1; return; }
+    if (runtime == INVALID_HANDLE_VALUE) { capture_failed = 1; return; }
     char header[128];
     int n = snprintf(header, sizeof(header), "WGI_RUNTIME_SNAPSHOT phase=%s\r\n", phase);
     if (n > 0 && n < (int)sizeof(header)) runtime_record(header, (unsigned)n);
@@ -283,42 +296,86 @@ static void serial_namespace(void) {
     }
     RegCloseKey(key);
 }
+static void log_state(const char *path, int runtime_evidence, long long size,
+                      long long offset, unsigned expected, unsigned actual, int size_ok,
+                      DWORD size_error, int seek_ok, DWORD seek_error, DWORD read_error,
+                      int early_eof) {
+    int read_complete = size_ok && !wgi_log_status(expected, actual, seek_ok,
+                                                  read_error == 0 && !early_eof);
+    int complete = read_complete && !diagnostic_failed &&
+        (!runtime_evidence || (runtime != INVALID_HANDLE_VALUE && !runtime_truncated));
+    char state[1024];
+    int n = snprintf(state, sizeof(state),
+        "WGI_LOG_STATE path=%s size_ok=%d initial_size=%lld offset=%lld expected=%u read=%u "
+        "size_error=%lu seek_ok=%d seek_error=%lu read_error=%lu early_eof=%d read_complete=%d "
+        "complete=%d runtime_available=%d runtime_truncated=%d diagnostic_error=%d capture_error=%d\r\n",
+        path, size_ok, size, offset, expected, actual, size_error, seek_ok, seek_error,
+        read_error, early_eof, read_complete, complete, runtime != INVALID_HANDLE_VALUE,
+        runtime_truncated, diagnostic_failed, capture_failed);
+    if (n > 0 && n < (int)sizeof(state)) {
+        diagnostic("%s", state);
+        if (runtime_evidence) runtime_record(state, (unsigned)n);
+    }
+}
 static void log_tail(const char *path, int runtime_evidence) {
     HANDLE file = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE |
                               FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
     if (file == INVALID_HANDLE_VALUE) {
-        diagnostic("WGI_LOG path=%s open_error=%lu\r\n", path, GetLastError()); return;
+        DWORD error = GetLastError();
+        diagnostic("WGI_LOG path=%s open_error=%lu optional_unavailable=1\r\n", path, error);
+        log_state(path, runtime_evidence, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
+        return;
     }
-    LARGE_INTEGER size, offset;
-    if (!GetFileSizeEx(file, &size)) { CloseHandle(file); return; }
+    LARGE_INTEGER size = {0}, offset = {0};
+    BOOL size_ok = GetFileSizeEx(file, &size);
+    DWORD size_error = size_ok ? 0 : GetLastError();
+    if (!size_ok || size.QuadPart < 0) {
+        if (size_ok) size_error = ERROR_INVALID_DATA;
+        capture_failed = 1;
+        log_state(path, runtime_evidence, -1, -1, 0, 0, 0, size_error, 0, 0, 0, 0);
+        CloseHandle(file); return;
+    }
     offset.QuadPart = size.QuadPart > 65536 ? size.QuadPart - 65536 : 0;
-    diagnostic("WGI_LOG_BEGIN path=%s total=%lld offset=%lld\r\n",
-               path, size.QuadPart, offset.QuadPart);
+    unsigned expected = (unsigned)(size.QuadPart - offset.QuadPart), actual = 0;
+    diagnostic("WGI_LOG_BEGIN path=%s total=%lld offset=%lld expected=%u\r\n",
+               path, size.QuadPart, offset.QuadPart, expected);
     if (runtime_evidence) {
         char header[512];
         int n = snprintf(header, sizeof(header),
-            "WGI_RUNTIME_LOG_BEGIN path=%s total=%lld offset=%lld\r\n",
-            path, size.QuadPart, offset.QuadPart);
+            "WGI_RUNTIME_LOG_BEGIN path=%s total=%lld offset=%lld expected=%u\r\n",
+            path, size.QuadPart, offset.QuadPart, expected);
         if (n > 0 && n < (int)sizeof(header)) runtime_record(header, (unsigned)n);
     }
-    if (SetFilePointerEx(file, offset, NULL, FILE_BEGIN)) {
-        DWORD left = 65536;
-        while (left) {
+    BOOL seek_ok = SetFilePointerEx(file, offset, NULL, FILE_BEGIN);
+    DWORD seek_error = seek_ok ? 0 : GetLastError(), read_error = 0;
+    int early_eof = 0;
+    if (seek_ok) {
+        while (actual < expected) {
             char buffer[4096]; DWORD n = 0;
-            DWORD request = left < sizeof(buffer) ? left : sizeof(buffer);
-            if (!ReadFile(file, buffer, request, &n, NULL) || !n)
+            unsigned remaining = expected - actual;
+            DWORD request = remaining < sizeof(buffer) ? remaining : sizeof(buffer);
+            if (!ReadFile(file, buffer, request, &n, NULL)) {
+                read_error = GetLastError();
+                if (!read_error) read_error = ERROR_READ_FAULT;
                 break;
+            }
+            if (!n) { early_eof = 1; break; }
+            if (n > request) { read_error = ERROR_INVALID_DATA; break; }
+            actual += n;
             unsigned written = 0;
             if (!diagnostic_write(buffer, n, &written)) break;
             if (runtime_evidence) runtime_record(buffer, n);
-            left -= n;
         }
     }
+    if (wgi_log_status(expected, actual, seek_ok, read_error == 0 && !early_eof))
+        capture_failed = 1;
     diagnostic("\r\nWGI_LOG_END\r\n");
     if (runtime_evidence) {
         const char end[] = "\r\nWGI_RUNTIME_LOG_END\r\n";
         runtime_record(end, sizeof(end) - 1);
     }
+    log_state(path, runtime_evidence, size.QuadPart, offset.QuadPart, expected, actual,
+              1, 0, seek_ok, seek_error, read_error, early_eof);
     CloseHandle(file);
 }
 static void service_snapshot(const char *name, const char *phase);
@@ -334,11 +391,13 @@ static void serial_diagnostics(const char *phase) {
     log_tail("X:\\Windows\\inf\\setupapi.offline.log", 0);
     char state[160];
     int n = snprintf(state, sizeof(state),
-        "WGI_RUNTIME_STATE receipt_truncated=%d runtime_truncated=%d error=%d\r\n",
-        receipt_truncated, runtime_truncated, diagnostic_failed);
+        "WGI_RUNTIME_STATE receipt_truncated=%d runtime_truncated=%d error=%d capture_error=%d\r\n",
+        receipt_truncated, runtime_truncated, diagnostic_failed, capture_failed);
     if (n > 0 && n < (int)sizeof(state)) runtime_record(state, (unsigned)n);
-    diagnostic("WGI_DIAGNOSTIC_STATE receipt_truncated=%d runtime_truncated=%d error=%d\r\n",
-               receipt_truncated, runtime_truncated, diagnostic_failed);
+    diagnostic("WGI_DIAGNOSTIC_STATE receipt_truncated=%d runtime_truncated=%d error=%d "
+               "capture_error=%d receipt_available=%d runtime_available=%d\r\n",
+               receipt_truncated, runtime_truncated, diagnostic_failed, capture_failed,
+               receipt != INVALID_HANDLE_VALUE, runtime != INVALID_HANDLE_VALUE);
 }
 
 static void service_state(SC_HANDLE service, const char *name, const char *phase) {
