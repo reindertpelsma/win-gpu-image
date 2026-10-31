@@ -94,6 +94,10 @@ cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
  /Fe:work/programs/gpu-prepare.exe /Fo:work/programs/gpu-prepare.obj ^
  programs/gpu-prepare.c work/programs/pe-contract.obj /link setupapi.lib cfgmgr32.lib advapi32.lib
 if errorlevel 1 exit /b 1
+cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
+ /Fe:work/programs/serial-prepare.exe /Fo:work/programs/serial-prepare.obj ^
+ programs/serial-prepare.c /link setupapi.lib cfgmgr32.lib advapi32.lib
+if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /std:c11 /Fe:work/programs/cuda-query.exe /Fo:work/programs/cuda-query.obj programs/cuda-query.c
 if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /EHsc /std:c++17 /Fe:work/programs/d3d11-offscreen.exe /Fo:work/programs/d3d11-offscreen.obj programs/d3d11-offscreen.cpp /link d3d11.lib dxgi.lib
