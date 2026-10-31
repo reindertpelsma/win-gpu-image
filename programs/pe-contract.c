@@ -55,3 +55,45 @@ int wgi_tee(WgiWrite diagnostic, WgiWrite serial, const char *bytes,
 int wgi_supervised(const char *text, int child_rc, int timed_out, int gpu_required) {
     return child_rc || timed_out || (gpu_required && wgi_terminal(text, 0, 0));
 }
+
+int wgi_bounded_write(WgiWrite write, unsigned *used, int *truncated,
+                      unsigned limit, const char *bytes, unsigned count) {
+    const char marker[] = "\r\nWGI_DIAGNOSTIC_TRUNCATED\r\n";
+    unsigned reserve = sizeof(marker) - 1;
+    if (limit < reserve || *used > limit) return 1;
+    if (*truncated) return 0;
+    unsigned available = limit - *used;
+    if (available < reserve) return 1;
+    available -= reserve;
+    unsigned take = count < available ? count : available;
+    if (wgi_write_all(write, bytes, take)) {
+        *used = limit; /* Permanently exhaust budget: partial bytes may already exist. */
+        return 1;
+    }
+    *used += take;
+    if (take != count) {
+        if (wgi_write_all(write, marker, reserve)) {
+            *used = limit;
+            return 1;
+        }
+        *used += reserve;
+        *truncated = 1;
+    }
+    return 0;
+}
+
+int wgi_receipt_resume(long long bytes, int size_ok, unsigned limit,
+                       unsigned *used, int *truncated) {
+    if (!size_ok || bytes < 0 || (unsigned long long)bytes > limit) {
+        *used = limit; /* Poison this budget even if a caller forgets to close. */
+        *truncated = 0; /* I/O/metadata error, not a censoring claim. */
+        return 1;
+    }
+    *used = (unsigned)bytes;
+    *truncated = *used == limit;
+    return 0;
+}
+
+int wgi_log_status(unsigned expected, unsigned actual, int seek_ok, int read_ok) {
+    return !seek_ok || !read_ok || actual != expected;
+}
