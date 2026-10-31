@@ -53,6 +53,8 @@ typedef struct { DWORD cbSize; char ProviderName[256]; } SP_DRVINFO_DATA_A;
 #define ERROR_SUCCESS 0
 #define ERROR_NO_MORE_ITEMS 259
 #define SERVICE_DEMAND_START 3
+/* Avoid colliding with MinGW/MSVC runtime use of the real kernel32 export. */
+#define GetLastError wgi_mock_GetLastError
 DWORD GetLastError(void);
 int SetupDiGetDeviceRegistryPropertyA(HDEVINFO, SP_DEVINFO_DATA *, DWORD,
                                     DWORD *, BYTE *, DWORD, DWORD *);

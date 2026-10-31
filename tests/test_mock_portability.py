@@ -14,7 +14,9 @@ class WindowsMockPortability(unittest.TestCase):
     def build(self, sources, includes=(), compile_only=False):
         compiler = shutil.which("x86_64-w64-mingw32-gcc")
         if compiler is None:
-            self.skipTest("optional Linux-to-Windows compiler absent; native Windows tests still run")
+            self.skipTest(
+                "optional Linux-to-Windows compiler absent; native Windows tests still run"
+            )
         with tempfile.TemporaryDirectory(prefix="wgi-cross-") as scratch:
             command = [
                 compiler,
