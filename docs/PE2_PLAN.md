@@ -21,6 +21,10 @@ bootstrap completion. It emits no serial/GPU success. Only successful bootstrap
 may enter the separate COM1-required GPU supervisor. Both phases use the existing
 240-second owned-child bound; the host's startup, verdict and total smoke limits
 remain unchanged. A bootstrap receipt never substitutes for a GPU verdict.
+The child-job timers do not bound the surrounding diagnostic WinAPI calls;
+the host's observation limits remain the backstop. Diagnostics tee to stdout
+and a marked result disk when available, with another disk-open attempt after
+PnP initialization; pre-PnP disk capture is not guaranteed.
 
 The startup sequence holds the NVIDIA service/device stopped while PE initializes,
 then installs the complete unmodified INF, obtains the exact display device's
