@@ -33,6 +33,47 @@ Copy-Item $pe[0].FullName work/base.wim
 Invoke-Checked $seven @('x','-y','-bd',"-o$root/work/nvidia",'cache/nvidia.exe','Display.Driver/*')
 Invoke-Checked python @('scripts/recipe.py','stage-driver','work/nvidia/Display.Driver','work/driver','out/sizes.json')
 
+# Preboot policy is registry-only; no Windows or NVIDIA binary is patched.
+function Set-HiveDword($Hive, [string]$Path, [string]$Name, [int]$Value) {
+    $key = $Hive.CreateSubKey($Path)
+    try {
+        $key.SetValue($Name, $Value, [Microsoft.Win32.RegistryValueKind]::DWord)
+        if ($key.GetValueKind($Name) -ne [Microsoft.Win32.RegistryValueKind]::DWord -or
+            $key.GetValue($Name) -ne $Value) { throw "Offline readback failed: $Path/$Name" }
+    } finally { $key.Close() }
+}
+function Set-OfflinePeServices([string]$Mount) {
+    $name = "WGI_PE_BUILD_$PID"
+    Invoke-Checked reg.exe @('load', "HKLM\$name", "$Mount/Windows/System32/config/SYSTEM")
+    $hive = $null
+    try {
+        $hive = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($name, $true)
+        $sets = @($hive.GetSubKeyNames() | Where-Object { $_ -match '^ControlSet[0-9]{3}$' })
+        if (!$sets.Count) { throw 'Offline SYSTEM has no control sets' }
+        foreach ($set in $sets) {
+            $nv = "$set\Services\nvlddmkm"
+            Set-HiveDword -Hive $hive -Path $nv -Name 'EnableGpuFirmware' -Value 1
+            # Keep NVIDIA disabled until the native runtime helper verifies BOTH GSP keys.
+            Set-HiveDword -Hive $hive -Path $nv -Name 'Start' -Value 4
+            foreach ($service in @('Serial', 'Serenum')) {
+                $path = "$set\Services\$service"
+                $start = if ($service -eq 'Serial') { 1 } else { 3 }
+                Set-HiveDword -Hive $hive -Path $path -Name 'Start' -Value $start
+                Set-HiveDword -Hive $hive -Path $path -Name 'Type' -Value 1
+                Set-HiveDword -Hive $hive -Path $path -Name 'ErrorControl' -Value 1
+                $key = $hive.CreateSubKey($path)
+                try {
+                    $key.SetValue('ImagePath', "\SystemRoot\System32\drivers\$service.sys",
+                                  [Microsoft.Win32.RegistryValueKind]::ExpandString)
+                } finally { $key.Close() }
+            }
+        }
+    } finally {
+        if ($hive) { $hive.Close() }
+        Invoke-Checked reg.exe @('unload', "HKLM\$name")
+    }
+}
+
 # Use MSVC and the runner SDK; all in-repo program source is original.
 $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
 $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -42,7 +83,15 @@ $compile = @"
 @echo off
 call "$devcmd" -arch=x64 -host_arch=x64
 if errorlevel 1 exit /b 1
-cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS /Fe:work/programs/serial-log.exe /Fo:work/programs/serial-log.obj programs/serial-log.c
+cl /nologo /O2 /MT /W4 /c programs/pe-contract.c /Fo:work/programs/pe-contract.obj
+if errorlevel 1 exit /b 1
+cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
+ /Fe:work/programs/serial-log.exe /Fo:work/programs/serial-log.obj ^
+ programs/serial-log.c work/programs/pe-contract.obj /link cfgmgr32.lib advapi32.lib
+if errorlevel 1 exit /b 1
+cl /nologo /O2 /MT /W4 /D_CRT_SECURE_NO_WARNINGS ^
+ /Fe:work/programs/gpu-prepare.exe /Fo:work/programs/gpu-prepare.obj ^
+ programs/gpu-prepare.c work/programs/pe-contract.obj /link setupapi.lib cfgmgr32.lib advapi32.lib
 if errorlevel 1 exit /b 1
 cl /nologo /O2 /MT /W4 /std:c11 /Fe:work/programs/cuda-query.exe /Fo:work/programs/cuda-query.obj programs/cuda-query.c
 if errorlevel 1 exit /b 1
@@ -98,6 +147,7 @@ try {
     foreach ($driver in @('serial.sys','serenum.sys')) {
         if (!(Test-Path "$system32/drivers/$driver")) { throw "PE missing $driver" }
     }
+    Set-OfflinePeServices "$root/work/mount"
     $repoMetrics = Get-NvidiaDriverStoreMetrics "$system32/DriverStore/FileRepository"
     $repoBytes = $repoMetrics.bytes
     Write-Host "MEASURED OFFLINE_DRIVERSTORE_BYTES=$repoBytes FILES=$($repoMetrics.files)"
