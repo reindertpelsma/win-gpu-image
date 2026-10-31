@@ -1,4 +1,5 @@
 """Boundary contracts that can be checked without running Windows servicing or a GPU."""
+
 from pathlib import Path
 import unittest
 
@@ -16,6 +17,17 @@ class Integration(unittest.TestCase):
         build = (ROOT / "scripts/Build-Image.ps1").read_text()
         self.assertIn("'Start' -Value 4", build)
         self.assertIn("ControlSet", build)
+
+    def test_nv_service_cannot_start_at_boot(self):
+        build = (ROOT / "scripts/Build-Image.ps1").read_text()
+        policy = build[build.index("function Set-OfflinePeServices") :]
+        self.assertIn("-Path $nv -Name 'Start' -Value 4", policy)
+        self.assertNotIn("-Path $nv -Name 'Start' -Value 3", policy)
+
+    def test_boot_smoke_has_no_serial_waiver(self):
+        script = (ROOT / "tests/Smoke-Boot.ps1").read_text()
+        self.assertNotIn("serial_required = $false", script)
+        self.assertIn("$serial_boot_marker -and $serial_terminal_fail", script)
 
     def test_helper_is_built(self):
         build = (ROOT / "scripts/Build-Image.ps1").read_text()

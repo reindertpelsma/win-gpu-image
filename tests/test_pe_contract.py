@@ -1,8 +1,11 @@
 """CPU-only native orchestration policies; no Windows device or GPU required."""
+
 import ctypes as c
 from pathlib import Path
 import subprocess
 import tempfile
+import os
+from pe_compile import compile_c
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,10 +16,9 @@ WRITE = c.CFUNCTYPE(c.c_int, c.c_void_p, c.c_uint, c.POINTER(c.c_uint))
 class Contract(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory(dir="/data")
-        so = Path(cls.tmp.name) / "policy.so"
-        subprocess.run(["cc", "-shared", "-fPIC", "-DWGI_TEST", "-Wall", "-Wextra", "-Werror",
-                        str(ROOT / "programs/pe-contract.c"), "-o", str(so)], check=True)
+        cls.tmp = tempfile.TemporaryDirectory(dir="/data" if Path("/data").exists() else None)
+        so = Path(cls.tmp.name) / ("policy.dll" if os.name == "nt" else "policy.so")
+        compile_c([ROOT / "programs/pe-contract.c"], so, shared=True, defines=("WGI_TEST",))
         cls.lib = c.CDLL(str(so))
         cls.lib.wgi_gsp.argtypes = [STEP]
         cls.lib.wgi_write_all.argtypes = [WRITE, c.c_char_p, c.c_uint]
@@ -24,13 +26,20 @@ class Contract(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        if os.name == "nt":
+            import _ctypes
+
+            _ctypes.FreeLibrary(cls.lib._handle)
+        del cls.lib
         cls.tmp.cleanup()
 
     def sequence(self, fail=-1):
         calls = []
+
         def step(n):
             calls.append(n)
             return n != fail
+
         cb = STEP(step)
         result = self.lib.wgi_gsp(cb)
         return result, calls
@@ -76,10 +85,12 @@ class Contract(unittest.TestCase):
 
     def writer(self, sizes, ok=True):
         seen = []
+
         def write(p, n, written):
             seen.append(c.string_at(p, n))
             written[0] = sizes.pop(0) if sizes else n
             return ok
+
         cb = WRITE(write)
         return self.lib.wgi_write_all(cb, b"abcdef", 6), seen
 
