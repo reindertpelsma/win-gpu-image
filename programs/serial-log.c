@@ -308,7 +308,8 @@ static void log_state(const char *path, int runtime_evidence, long long size,
     int n = snprintf(state, sizeof(state),
         "WGI_LOG_STATE path=%s size_ok=%d initial_size=%lld offset=%lld expected=%u read=%u "
         "size_error=%lu seek_ok=%d seek_error=%lu read_error=%lu early_eof=%d read_complete=%d "
-        "complete=%d runtime_available=%d runtime_truncated=%d diagnostic_error=%d capture_error=%d\r\n",
+        "complete=%d runtime_available=%d runtime_truncated=%d "
+        "diagnostic_error=%d capture_error=%d\r\n",
         path, size_ok, size, offset, expected, actual, size_error, seek_ok, seek_error,
         read_error, early_eof, read_complete, complete, runtime != INVALID_HANDLE_VALUE,
         runtime_truncated, diagnostic_failed, capture_failed);
