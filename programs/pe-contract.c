@@ -19,16 +19,29 @@ int wgi_write_all(WgiWrite write, const char *bytes, unsigned count) {
     return 0;
 }
 
-static int line(const char *text, const char *marker) {
-    size_t n = strlen(marker);
-    for (const char *p = text; *p; ++p) {
-        if ((p == text || p[-1] == '\n') && !strncmp(p, marker, n) &&
-            (p[n] == '\r' || p[n] == '\n' || p[n] == 0)) return 1;
+/* 1=exact PASS, 2=exact FAIL, 4=malformed near-marker. Any fault poisons PASS. */
+int wgi_markers(const char *text) {
+    int flags = 0;
+    const char *p = text;
+    while (*p) {
+        const char *end = strchr(p, '\n');
+        size_t length = end ? (size_t)(end - p) : strlen(p);
+        if (end && length && p[length - 1] == '\r') --length;
+        const char *markers[] = {"WGI_GPU_PASS", "WGI_GPU_FAIL"};
+        for (unsigned m = 0; m < 2; ++m) {
+            size_t n = strlen(markers[m]);
+            for (size_t i = 0; i + n <= length; ++i) {
+                if (!memcmp(p + i, markers[m], n)) {
+                    flags |= i == 0 && length == n ? (m == 0 ? 1 : 2) : 4;
+                }
+            }
+        }
+        if (!end) break;
+        p = end + 1;
     }
-    return 0;
+    return flags;
 }
 
 int wgi_terminal(const char *text, int child_rc, int timed_out) {
-    return child_rc || timed_out || line(text, "WGI_GPU_FAIL") ||
-        !line(text, "WGI_GPU_PASS");
+    return child_rc || timed_out || wgi_markers(text) != 1;
 }

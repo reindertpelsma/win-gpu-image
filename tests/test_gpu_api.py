@@ -36,6 +36,39 @@ class NativeAPI(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("enabled=0", r.stdout)
 
+    def test_driver_wrong_property_type(self):
+        self.refused("driver_type")
+
+    def test_service_wrong_property_type(self):
+        self.refused("service_type_prop")
+
+    def test_driver_reported_size_out_of_bounds(self):
+        self.refused("driver_size")
+
+    def test_service_reported_size_out_of_bounds(self):
+        self.refused("service_size")
+
+    def test_instance_reported_size_out_of_bounds(self):
+        self.refused("instance_size")
+
+    def test_compatible_reported_size_out_of_bounds(self):
+        self.refused("compatible_size")
+
+    def test_driver_nul_outside_reported_data(self):
+        self.refused("driver_nul_size")
+
+    def test_service_nul_outside_reported_data(self):
+        self.refused("service_nul_size")
+
+    def test_unterminated_driver(self):
+        self.refused("driver_unterminated")
+
+    def test_unterminated_compatible(self):
+        self.refused("compatible_unterminated")
+
+    def test_unterminated_provider(self):
+        self.refused("provider_unterminated")
+
     def test_class_wrong_type(self):
         self.refused("class_type")
 

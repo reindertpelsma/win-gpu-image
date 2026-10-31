@@ -104,7 +104,7 @@ static int supervise(unsigned seconds, char *command) {
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits;
     memset(&pi, 0, sizeof(pi)); memset(&si, 0, sizeof(si));
     memset(&limits, 0, sizeof(limits)); si.cb = sizeof(si);
-    int rc = 2, timed_out = 0, pass = 0, fail = 0;
+    int rc = 2, timed_out = 0, marker_flags = 0;
     char line[4096]; unsigned used = 0; DWORD total = 0;
     ULONGLONG end = GetTickCount64() + (ULONGLONG)seconds * 1000;
     if (!CreatePipe(&read, &write, &sa, 0) ||
@@ -131,19 +131,20 @@ static int supervise(unsigned seconds, char *command) {
             total += n;
             if (total > 4 * 1024 * 1024) { text("WGI_OUTPUT_LIMIT\r\n"); break; }
             for (DWORD i = 0; i < n; ++i) {
+                if (!buffer[i]) marker_flags |= 4;
                 if (used < sizeof(line) - 1) line[used++] = buffer[i];
+                else marker_flags |= 4;
                 if (buffer[i] == '\n') {
                     line[used] = 0;
-                    if (!wgi_terminal(line, 0, 0)) pass = 1;
-                    if (!strcmp(line, "WGI_GPU_FAIL\r\n") ||
-                        !strcmp(line, "WGI_GPU_FAIL\n")) fail = 1;
+                    marker_flags |= wgi_markers(line);
                     used = 0;
                 }
             }
         } else if (WaitForSingleObject(pi.hProcess, 0) == WAIT_OBJECT_0) {
             DWORD child_rc;
+            if (used) { line[used] = 0; marker_flags |= wgi_markers(line); }
             if (GetExitCodeProcess(pi.hProcess, &child_rc))
-                rc = wgi_terminal(pass && !fail ? "WGI_GPU_PASS\n" : "", child_rc, 0);
+                rc = wgi_terminal(marker_flags == 1 ? "WGI_GPU_PASS\n" : "", child_rc, 0);
             break;
         } else Sleep(20);
         if (GetTickCount64() >= end) { timed_out = 1; break; }
@@ -170,7 +171,9 @@ int main(int argc, char **argv) {
         /* No COM, SCM, registry, disk, process, device or GPU operations in this mode. */
         int ok = !wgi_terminal("WGI_GPU_PASS\n", 0, 0) &&
             wgi_terminal("WGI_GPU_PASS\n", 0, 1) &&
-            wgi_terminal("WGI_PE_BOOT_OK_V1\n", 0, 0);
+            wgi_terminal("WGI_PE_BOOT_OK_V1\n", 0, 0) &&
+            wgi_terminal("WGI_GPU_PASS\rgarbage\n", 0, 0) &&
+            wgi_terminal("WGI_GPU_PASS\nWGI_GPU_FAIL_SUFFIX\n", 0, 0);
         puts(ok ? "WGI_CPU_POLICY_PASS" : "WGI_CPU_POLICY_FAIL");
         return ok ? 0 : 1;
     }

@@ -45,6 +45,7 @@ typedef struct { DWORD cbSize; char ProviderName[256]; } SP_DRVINFO_DATA_A;
 #define KEY_SET_VALUE 1
 #define KEY_QUERY_VALUE 2
 #define REG_MULTI_SZ 7
+#define REG_SZ 1
 #define REG_DWORD 4
 #define CR_SUCCESS 0
 #define CM_PROB_DISABLED 22

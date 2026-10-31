@@ -127,6 +127,33 @@ class Contract(unittest.TestCase):
     def test_explicit_pass(self):
         self.assertEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r\n", 0, 0), 0)
 
+    def test_bare_cr_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r", 0, 0), 0)
+
+    def test_second_cr_suffix_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\rmore\n", 0, 0), 0)
+
+    def test_cr_suffix_after_pass_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\rgarbage\n", 0, 0), 0)
+
+    def test_cr_suffix_fail_after_pass_is_fault(self):
+        text = b"WGI_GPU_PASS\nWGI_GPU_FAIL\rgarbage\n"
+        self.assertNotEqual(self.lib.wgi_terminal(text, 0, 0), 0)
+
+    def test_prefixed_fail_after_pass_is_fault(self):
+        text = b"WGI_GPU_PASS\nPREFIX_WGI_GPU_FAIL\n"
+        self.assertNotEqual(self.lib.wgi_terminal(text, 0, 0), 0)
+
+    def test_suffixed_fail_after_pass_is_fault(self):
+        text = b"WGI_GPU_PASS\nWGI_GPU_FAIL_SUFFIX\n"
+        self.assertNotEqual(self.lib.wgi_terminal(text, 0, 0), 0)
+
+    def test_prefixed_pass_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"PREFIX_WGI_GPU_PASS\n", 0, 0), 0)
+
+    def test_suffixed_pass_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS_SUFFIX\n", 0, 0), 0)
+
     def test_boot_smoke_separate(self):
         self.assertNotEqual(self.lib.wgi_terminal(b"WGI_PE_BOOT_OK_V1\r\n", 0, 0), 0)
 

@@ -18,11 +18,27 @@ static const char *inf;
 static DWORD class_value, service_value;
 static int no_adapter;
 
+static int terminated(const char *buffer, DWORD bytes, DWORD capacity) {
+    return bytes && bytes <= capacity &&
+        memchr(buffer, 0, bytes) == buffer + bytes - 1;
+}
+
+static int registry_property(SP_DEVINFO_DATA *info, DWORD key, DWORD wanted,
+                             char *buffer, DWORD capacity, DWORD *used) {
+    DWORD type = 0, bytes = 0;
+    memset(buffer, 0, capacity);
+    if (!SetupDiGetDeviceRegistryPropertyA(devices, info, key, &type,
+        (BYTE *)buffer, capacity, &bytes) || type != wanted || !bytes || bytes > capacity)
+        return 0;
+    if (wanted == REG_SZ && !terminated(buffer, bytes, capacity)) return 0;
+    if (wanted == REG_MULTI_SZ &&
+        (bytes < 2 || buffer[bytes - 1] || buffer[bytes - 2])) return 0;
+    if (used) *used = bytes;
+    return 1;
+}
+
 static int property(DWORD key, char *buffer, DWORD count) {
-    DWORD type = 0;
-    memset(buffer, 0, count);
-    return SetupDiGetDeviceRegistryPropertyA(devices, &device, key, &type,
-                                             (BYTE *)buffer, count, NULL);
+    return registry_property(&device, key, REG_SZ, buffer, count, NULL);
 }
 
 static int change(DWORD state) {
@@ -47,32 +63,41 @@ static int change(DWORD state) {
 static int find_adapter(void) {
     devices = SetupDiGetClassDevsA(NULL, "PCI", NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT);
     if (devices == INVALID_HANDLE_VALUE) return 0;
-    int found = 0;
-    for (DWORD i = 0; ; ++i) {
+    int found = 0, complete = 0;
+    for (DWORD i = 0; i < 4096; ++i) {
         SP_DEVINFO_DATA candidate;
         memset(&candidate, 0, sizeof(candidate)); candidate.cbSize = sizeof(candidate);
         if (!SetupDiEnumDeviceInfo(devices, i, &candidate)) {
             if (GetLastError() != ERROR_NO_MORE_ITEMS) return 0;
+            complete = 1;
             break;
         }
-        char id[1024], compatible[4096]; DWORD type;
-        if (!SetupDiGetDeviceInstanceIdA(devices, &candidate, id, sizeof(id), NULL) ||
-            _strnicmp(id, "PCI\\VEN_10DE&", 13)) continue;
-        memset(compatible, 0, sizeof(compatible));
-        if (!SetupDiGetDeviceRegistryPropertyA(devices, &candidate, SPDRP_COMPATIBLEIDS,
-            &type, (BYTE *)compatible, sizeof(compatible), NULL) || type != REG_MULTI_SZ) continue;
+        char id[1024], compatible[4096]; DWORD id_size = 0, bytes = 0;
+        memset(id, 0, sizeof(id));
+        if (!SetupDiGetDeviceInstanceIdA(devices, &candidate, id, sizeof(id), &id_size) ||
+            !terminated(id, id_size, sizeof(id))) return 0;
+        if (id_size < 14 || _strnicmp(id, "PCI\\VEN_10DE&", 13)) continue;
+        if (!registry_property(&candidate, SPDRP_COMPATIBLEIDS, REG_MULTI_SZ,
+                               compatible, sizeof(compatible), &bytes)) return 0;
         int display = 0;
-        for (char *p = compatible; *p; p += strlen(p) + 1) {
-            if (!_strnicmp(p, "PCI\\CC_0300", 11) ||
-                !_strnicmp(p, "PCI\\CC_0302", 11)) display = 1;
+        DWORD offset = 0;
+        while (offset < bytes - 1 && compatible[offset]) {
+            char *p = compatible + offset;
+            char *end = memchr(p, 0, bytes - offset);
+            if (!end) return 0;
+            size_t length = (size_t)(end - p);
+            if (length >= 11 && (!_strnicmp(p, "PCI\\CC_0300", 11) ||
+                                 !_strnicmp(p, "PCI\\CC_0302", 11))) display = 1;
+            offset += (DWORD)length + 1;
         }
+        if (offset != bytes - 1) return 0;
         if (!display) continue;
         if (++found != 1) return 0;
         device = candidate;
         printf("WGI_ADAPTER instance=%s\n", id);
     }
-    no_adapter = found == 0;
-    return found == 1;
+    no_adapter = complete && found == 0;
+    return complete && found == 1;
 }
 
 static int write_one(HKEY key, const char *name, DWORD value) {
@@ -102,6 +127,7 @@ static int step(int n) {
         SP_DRVINFO_DATA_A driver;
         memset(&driver, 0, sizeof(driver)); driver.cbSize = sizeof(driver);
         if (!SetupDiGetSelectedDriverA(devices, &device, &driver) ||
+            !memchr(driver.ProviderName, 0, sizeof(driver.ProviderName)) ||
             _stricmp(driver.ProviderName, "NVIDIA")) return 0;
         return SetupDiCallClassInstaller(DIF_INSTALLDEVICE, devices, &device);
     }
