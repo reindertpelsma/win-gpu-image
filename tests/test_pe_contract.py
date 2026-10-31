@@ -177,6 +177,178 @@ class Contract(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertNotEqual(rc, 0)
 
+    def capped(self, chunks, limit=128, fail=False):
+        observed = []
+
+        def write(p, n, written):
+            if fail:
+                written[0] = 0
+                return 0
+            observed.append(c.string_at(p, n))
+            written[0] = n
+            return 1
+
+        callback = WRITE(write)
+        used, truncated = c.c_uint(0), c.c_int(0)
+        self.lib.wgi_bounded_write.argtypes = [
+            WRITE,
+            c.POINTER(c.c_uint),
+            c.POINTER(c.c_int),
+            c.c_uint,
+            c.c_char_p,
+            c.c_uint,
+        ]
+        statuses = []
+        for chunk in chunks:
+            statuses.append(
+                self.lib.wgi_bounded_write(
+                    callback, c.byref(used), c.byref(truncated), limit, chunk, len(chunk)
+                )
+            )
+        return statuses, b"".join(observed), used.value, truncated.value
+
+    def test_receipt_total_byte_cap(self):
+        statuses, data, used, truncated = self.capped([b"x" * 1024])
+        self.assertEqual(statuses, [0])
+        self.assertLessEqual(len(data), 128)
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 1)
+
+    def test_multiwrite_receipt_cap(self):
+        _, data, used, truncated = self.capped([b"a" * 80, b"b" * 80])
+        self.assertLessEqual(len(data), 128)
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 1)
+
+    def test_receipt_censoring_is_explicit(self):
+        _, data, _, _ = self.capped([b"x" * 1024])
+        self.assertIn(b"WGI_DIAGNOSTIC_TRUNCATED", data)
+
+    def test_repeated_truncation_has_one_marker(self):
+        statuses, data, _, _ = self.capped([b"x" * 1024, b"later"])
+        self.assertEqual(statuses, [0, 0])
+        self.assertEqual(data.count(b"WGI_DIAGNOSTIC_TRUNCATED"), 1)
+        self.assertNotIn(b"later", data)
+
+    def test_censoring_is_not_an_io_error(self):
+        statuses, _, _, truncated = self.capped([b"x" * 1024, b"more", b"last"])
+        self.assertEqual(statuses, [0, 0, 0])
+        self.assertEqual(truncated, 1)
+
+    def test_receipt_write_error_is_visible(self):
+        statuses, _, _, _ = self.capped([b"entry"], fail=True)
+        self.assertNotEqual(statuses[0], 0)
+
+    def test_runtime_write_error_is_visible(self):
+        statuses, _, _, _ = self.capped([b"runtime"], limit=512, fail=True)
+        self.assertNotEqual(statuses[0], 0)
+
+    def test_small_receipt_preserved(self):
+        _, data, used, truncated = self.capped([b"WGI_UART problem=28\r\n"])
+        self.assertEqual(data, b"WGI_UART problem=28\r\n")
+        self.assertEqual(used, len(data))
+        self.assertEqual(truncated, 0)
+
+    def resume(self, size, size_ok):
+        self.lib.wgi_receipt_resume.argtypes = [
+            c.c_longlong,
+            c.c_int,
+            c.c_uint,
+            c.POINTER(c.c_uint),
+            c.POINTER(c.c_int),
+        ]
+        used, truncated = c.c_uint(0), c.c_int(0)
+        rc = self.lib.wgi_receipt_resume(size, size_ok, 128, c.byref(used), c.byref(truncated))
+        return rc, used, truncated
+
+    def test_oversized_existing_receipt_refused(self):
+        rc, used, truncated = self.resume(129, 1)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(used.value, 128)
+        self.assertEqual(truncated.value, 0)
+
+    def test_size_query_failure_refused(self):
+        rc, used, _ = self.resume(0, 0)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(used.value, 128)
+
+    def partial_failure(self, limit, first_count):
+        calls, physical = [], []
+
+        def write(p, n, written):
+            calls.append(n)
+            if len(calls) == 1:
+                written[0] = min(first_count, n)
+                physical.append(c.string_at(p, written[0]))
+                return 1
+            if len(calls) == 2:
+                written[0] = 0
+                return 0
+            written[0] = n
+            physical.append(c.string_at(p, n))
+            return 1
+
+        callback = WRITE(write)
+        used, truncated = c.c_uint(0), c.c_int(0)
+        self.lib.wgi_bounded_write.argtypes = [
+            WRITE,
+            c.POINTER(c.c_uint),
+            c.POINTER(c.c_int),
+            c.c_uint,
+            c.c_char_p,
+            c.c_uint,
+        ]
+        rc1 = self.lib.wgi_bounded_write(
+            callback, c.byref(used), c.byref(truncated), limit, b"x" * 1024, 1024
+        )
+        before = len(calls)
+        rc2 = self.lib.wgi_bounded_write(
+            callback, c.byref(used), c.byref(truncated), limit, b"later" * 100, 500
+        )
+        return rc1, rc2, before, len(calls), len(b"".join(physical))
+
+    def test_partial_receipt_failure_prevents_later_append(self):
+        first, later, before, after, physical = self.partial_failure(128, 2)
+        self.assertNotEqual(first, 0)
+        self.assertNotEqual(later, 0)
+        self.assertEqual(before, after)
+        self.assertLessEqual(physical, 128)
+
+    def test_partial_runtime_failure_prevents_later_append(self):
+        first, later, before, after, physical = self.partial_failure(64, 1)
+        self.assertNotEqual(first, 0)
+        self.assertNotEqual(later, 0)
+        self.assertEqual(before, after)
+        self.assertLessEqual(physical, 64)
+
+    def log_status(self, expected, actual, seek_ok, read_ok):
+        self.lib.wgi_log_status.argtypes = [c.c_uint, c.c_uint, c.c_int, c.c_int]
+        return self.lib.wgi_log_status(expected, actual, seek_ok, read_ok)
+
+    def test_seek_failure_not_complete_for_empty_file(self):
+        self.assertNotEqual(self.log_status(0, 0, 0, 1), 0)
+
+    def test_seek_failure_not_complete_even_if_counts_match(self):
+        self.assertNotEqual(self.log_status(4, 4, 0, 1), 0)
+
+    def test_read_failure_not_complete_for_empty_file(self):
+        self.assertNotEqual(self.log_status(0, 0, 1, 0), 0)
+
+    def test_read_failure_not_complete_even_if_counts_match(self):
+        self.assertNotEqual(self.log_status(4, 4, 1, 0), 0)
+
+    def test_early_eof_not_complete(self):
+        self.assertNotEqual(self.log_status(128, 0, 1, 1), 0)
+
+    def test_short_prefix_not_complete(self):
+        self.assertNotEqual(self.log_status(128, 127, 1, 1), 0)
+
+    def test_empty_log_can_be_complete(self):
+        self.assertEqual(self.log_status(0, 0, 1, 1), 0)
+
+    def test_full_log_can_be_complete(self):
+        self.assertEqual(self.log_status(128, 128, 1, 1), 0)
+
     def test_explicit_pass(self):
         self.assertEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r\n", 0, 0), 0)
 
