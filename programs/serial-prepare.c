@@ -188,7 +188,7 @@ static int current(SERIAL_CONTEXT *c, WGI_SERIAL_SNAPSHOT *s) {
     if (ext != ERROR_SUCCESS && ext != ERROR_FILE_NOT_FOUND) ok = 0;
     ok &= reg_text(key, "MatchingDeviceId", s->matching, sizeof(s->matching)) == ERROR_SUCCESS;
     RegCloseKey(key);
-    int membership = hw_ok ? hardware_member(s) : -1;
+    int membership = hw_ok && ok ? hardware_member(s) : -1;
     printf("WGI_SERIAL_PREP hardware api_ok=%d error=%lu type=%lu bytes=%lu membership=%d\n",
            hw_ok,hw_error,hw_type,hw_bytes,membership);
     ok &= membership == 1;

@@ -91,6 +91,11 @@ LONG RegQueryValueExA(HKEY key, const char *name, void *reserved, DWORD *type,
         !strcmp(scenario,"installer_untrusted") ? "Other.dll,Other" :
         "MsPorts.dll,PortsClassInstaller";
     strcpy((char *)out,s); *size = (DWORD)strlen(s) + 1; *type = REG_SZ;
+    if (!strcmp(name,"MatchingDeviceId") &&
+        (!strcmp(scenario,"matching_more_data") || !strcmp(scenario,"matching_access_error"))) {
+        memset(out,'x',capacity); *size = capacity + 1;
+        return !strcmp(scenario,"matching_more_data") ? 234 : 5;
+    }
     if (!strcmp(name,"InfPath") && !strcmp(scenario,"registry_type")) *type = 7;
     if (!strcmp(name,"ProviderName") && !strcmp(scenario,"registry_bounds"))
         *size = capacity + 1;
