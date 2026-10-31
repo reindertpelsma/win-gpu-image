@@ -46,7 +46,17 @@ BOOL SetupDiGetDeviceRegistryPropertyA(HDEVINFO a, SP_DEVINFO_DATA *d, DWORD key
         if (!strcmp(scenario,"hardware_no_double_nul")) out[*size - 1] = 'x';
         if (!strcmp(scenario,"hardware_unterminated")) memset(out,'x',*size);
         if (!strcmp(scenario,"hardware_trailing")) { out[*size] = 0; ++*size; }
+        if (!strcmp(scenario,"hardware_early_match_bad_tail")) out[*size - 1] = 'x';
+        if (!strcmp(scenario,"hardware_early_empty")) {
+            static const char malformed[] = "ACPI\\PNP0501\0\0*PNP0501\0";
+            memcpy(out,malformed,sizeof(malformed)); *size = sizeof(malformed);
+        }
         if (!strcmp(scenario,"hardware_after_dif") && dif_calls) *type = REG_SZ;
+        if (!strcmp(scenario,"hardware_member_lost") && dif_calls) {
+            static const char lost[] = "ACPI\\PNP0501\0";
+            memcpy(out,lost,sizeof(lost)); *size = sizeof(lost);
+        }
+        if (!strcmp(scenario,"hardware_read_error")) return 0;
         return 1;
     }
     const char *text = key == SPDRP_SERVICE ? "Serial" : key == SPDRP_CLASSGUID ?
@@ -72,7 +82,10 @@ LONG RegQueryValueExA(HKEY key, const char *name, void *reserved, DWORD *type,
         !strcmp(name,"ProviderName") ? "Microsoft" :
         !strcmp(name,"InfSection") ? "ComPort.NT" :
         !strcmp(name,"MatchingDeviceId") ?
-        (!strcmp(scenario,"hardware_nonmember") ? "*PNP0400" :
+        ((!strcmp(scenario,"hardware_early_match_bad_tail") ||
+          !strcmp(scenario,"hardware_early_empty") ||
+          (!strcmp(scenario,"matching_after_dif") && dif_calls)) ? "ACPI\\PNP0501" :
+         !strcmp(scenario,"hardware_nonmember") ? "*PNP0400" :
          !strcmp(scenario,"hardware_star_not_glob") ? "*PNP05*" :
          !strcmp(scenario,"hardware_case") ? "*pnp0501" : "*PNP0501") :
         !strcmp(scenario,"installer_untrusted") ? "Other.dll,Other" :
