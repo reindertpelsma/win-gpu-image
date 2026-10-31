@@ -11,6 +11,12 @@
 
 static HANDLE serial = INVALID_HANDLE_VALUE, result = INVALID_HANDLE_VALUE;
 static int serial_failed, diagnostic_failed, diagnostic_only;
+static HANDLE receipt = INVALID_HANDLE_VALUE, runtime = INVALID_HANDLE_VALUE;
+static unsigned receipt_bytes, runtime_bytes;
+static int receipt_truncated, runtime_truncated;
+static char result_drive;
+#define RECEIPT_LIMIT 131072u
+#define RUNTIME_LIMIT 262144u
 static ULONGLONG write_end;
 static int serial_write(const void *bytes, unsigned count, unsigned *written) {
     DWORD n = 0;
@@ -31,6 +37,28 @@ static int diagnostic_write(const void *bytes, unsigned count, unsigned *written
     *written = count;
     return 1;
 }
+static int receipt_raw_write(const void *bytes, unsigned count, unsigned *written) {
+    DWORD n = 0;
+    int ok = WriteFile(receipt, bytes, count, &n, NULL);
+    *written = n;
+    return ok;
+}
+static int runtime_raw_write(const void *bytes, unsigned count, unsigned *written) {
+    DWORD n = 0;
+    int ok = WriteFile(runtime, bytes, count, &n, NULL);
+    *written = n;
+    return ok;
+}
+static void receipt_record(const char *bytes, unsigned count) {
+    if (receipt == INVALID_HANDLE_VALUE) return;
+    if (wgi_bounded_write(receipt_raw_write, &receipt_bytes, &receipt_truncated,
+        RECEIPT_LIMIT, bytes, count) || !FlushFileBuffers(receipt)) diagnostic_failed = 1;
+}
+static void runtime_record(const char *bytes, unsigned count) {
+    if (runtime == INVALID_HANDLE_VALUE) return;
+    if (wgi_bounded_write(runtime_raw_write, &runtime_bytes, &runtime_truncated,
+        RUNTIME_LIMIT, bytes, count) || !FlushFileBuffers(runtime)) diagnostic_failed = 1;
+}
 static void diagnostic(const char *format, ...) {
     char buffer[2048];
     va_list args;
@@ -39,6 +67,7 @@ static void diagnostic(const char *format, ...) {
     va_end(args);
     if (n < 0) { diagnostic_failed = 1; return; }
     unsigned count = n < (int)sizeof(buffer) ? (unsigned)n : sizeof(buffer) - 1;
+    receipt_record(buffer, count);
     if (wgi_write_all(diagnostic_write, buffer, count)) diagnostic_failed = 1;
 }
 static int emit(const char *bytes, unsigned count) {
@@ -49,7 +78,10 @@ static int emit(const char *bytes, unsigned count) {
     }
     return 1;
 }
-static int text(const char *s) { return emit(s, (unsigned)strlen(s)); }
+static int text(const char *s) {
+    receipt_record(s, (unsigned)strlen(s));
+    return emit(s, (unsigned)strlen(s));
+}
 static void result_open(void) {
     for (char drive = 'C'; drive <= 'Z'; ++drive) {
         if (drive == 'X') continue;
@@ -58,9 +90,39 @@ static void result_open(void) {
             char path[] = "C:\\wgi-results.txt"; path[0] = drive;
             result = CreateFileA(path, FILE_APPEND_DATA, FILE_SHARE_READ, NULL,
                                  OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            result_drive = drive;
+            char summary[] = "C:\\wgi-serial-receipt.txt"; summary[0] = drive;
+            if (receipt != INVALID_HANDLE_VALUE) CloseHandle(receipt);
+            receipt = CreateFileA(summary, GENERIC_READ | FILE_APPEND_DATA, FILE_SHARE_READ,
+                                  NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            LARGE_INTEGER size;
+            if (receipt == INVALID_HANDLE_VALUE || !GetFileSizeEx(receipt, &size) ||
+                size.QuadPart < 0 || size.QuadPart > RECEIPT_LIMIT) diagnostic_failed = 1;
+            else {
+                receipt_bytes = (unsigned)size.QuadPart;
+                receipt_truncated = receipt_bytes == RECEIPT_LIMIT;
+            }
             break;
         }
     }
+}
+static void result_close(void) {
+    if (receipt != INVALID_HANDLE_VALUE) CloseHandle(receipt);
+    if (runtime != INVALID_HANDLE_VALUE) CloseHandle(runtime);
+    if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
+}
+static void runtime_begin(const char *phase) {
+    if (runtime != INVALID_HANDLE_VALUE) CloseHandle(runtime);
+    runtime = INVALID_HANDLE_VALUE;
+    runtime_bytes = 0; runtime_truncated = 0;
+    if (!result_drive) return;
+    char path[] = "C:\\wgi-runtime-setup.txt"; path[0] = result_drive;
+    runtime = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS,
+                          FILE_ATTRIBUTE_NORMAL, NULL);
+    if (runtime == INVALID_HANDLE_VALUE) { diagnostic_failed = 1; return; }
+    char header[128];
+    int n = snprintf(header, sizeof(header), "WGI_RUNTIME_SNAPSHOT phase=%s\r\n", phase);
+    if (n > 0 && n < (int)sizeof(header)) runtime_record(header, (unsigned)n);
 }
 static int bounded_string(const char *s, DWORD bytes, DWORD capacity) {
     return bytes && bytes <= capacity && memchr(s, 0, bytes) == s + bytes - 1;
@@ -80,6 +142,14 @@ static void registry_string(HKEY key, const char *name, const char *label) {
     if (rc == ERROR_SUCCESS && type == REG_SZ &&
         bounded_string(value, bytes, sizeof(value)))
         diagnostic("WGI_UART_%s value=%s\r\n", label, value);
+    else diagnostic("WGI_UART_%s unavailable rc=%ld type=%lu bytes=%lu\r\n",
+                    label, rc, type, bytes);
+}
+static void registry_dword(HKEY key, const char *name, const char *label) {
+    DWORD value = 0, bytes = sizeof(value), type = 0;
+    LONG rc = RegQueryValueExA(key, name, NULL, &type, (BYTE *)&value, &bytes);
+    if (rc == ERROR_SUCCESS && type == REG_DWORD && bytes == sizeof(value))
+        diagnostic("WGI_UART_%s value=%lu\r\n", label, value);
     else diagnostic("WGI_UART_%s unavailable rc=%ld type=%lu bytes=%lu\r\n",
                     label, rc, type, bytes);
 }
@@ -175,7 +245,10 @@ static void uart_devices(void) {
         HKEY hardware = SetupDiOpenDevRegKey(set, &device, DICS_FLAG_GLOBAL, 0,
                                              DIREG_DEV, KEY_QUERY_VALUE);
         if (hardware != INVALID_HANDLE_VALUE) {
-            registry_string(hardware, "PortName", "PORTNAME"); RegCloseKey(hardware);
+            registry_string(hardware, "PortName", "PORTNAME");
+            registry_string(hardware, "Identifier", "IDENTIFIER");
+            registry_dword(hardware, "SerialSkipExternalNaming", "SKIP_EXTERNAL_NAMING");
+            RegCloseKey(hardware);
         } else diagnostic("WGI_UART_PORTNAME open_error=%lu\r\n", GetLastError());
         HKEY software = SetupDiOpenDevRegKey(set, &device, DICS_FLAG_GLOBAL, 0,
                                              DIREG_DRV, KEY_QUERY_VALUE);
@@ -210,7 +283,7 @@ static void serial_namespace(void) {
     }
     RegCloseKey(key);
 }
-static void log_tail(const char *path) {
+static void log_tail(const char *path, int runtime_evidence) {
     HANDLE file = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE |
                               FILE_SHARE_DELETE, NULL, OPEN_EXISTING, 0, NULL);
     if (file == INVALID_HANDLE_VALUE) {
@@ -221,6 +294,13 @@ static void log_tail(const char *path) {
     offset.QuadPart = size.QuadPart > 65536 ? size.QuadPart - 65536 : 0;
     diagnostic("WGI_LOG_BEGIN path=%s total=%lld offset=%lld\r\n",
                path, size.QuadPart, offset.QuadPart);
+    if (runtime_evidence) {
+        char header[512];
+        int n = snprintf(header, sizeof(header),
+            "WGI_RUNTIME_LOG_BEGIN path=%s total=%lld offset=%lld\r\n",
+            path, size.QuadPart, offset.QuadPart);
+        if (n > 0 && n < (int)sizeof(header)) runtime_record(header, (unsigned)n);
+    }
     if (SetFilePointerEx(file, offset, NULL, FILE_BEGIN)) {
         DWORD left = 65536;
         while (left) {
@@ -230,10 +310,15 @@ static void log_tail(const char *path) {
                 break;
             unsigned written = 0;
             if (!diagnostic_write(buffer, n, &written)) break;
+            if (runtime_evidence) runtime_record(buffer, n);
             left -= n;
         }
     }
     diagnostic("\r\nWGI_LOG_END\r\n");
+    if (runtime_evidence) {
+        const char end[] = "\r\nWGI_RUNTIME_LOG_END\r\n";
+        runtime_record(end, sizeof(end) - 1);
+    }
     CloseHandle(file);
 }
 static void service_snapshot(const char *name, const char *phase);
@@ -243,9 +328,17 @@ static void serial_diagnostics(const char *phase) {
     service_snapshot("Serenum", phase);
     serial_namespace();
     uart_devices();
-    log_tail("X:\\Windows\\System32\\wpeinit.log");
-    log_tail("X:\\Windows\\inf\\setupapi.dev.log");
-    log_tail("X:\\Windows\\inf\\setupapi.offline.log");
+    runtime_begin(phase);
+    log_tail("X:\\Windows\\System32\\wpeinit.log", 1);
+    log_tail("X:\\Windows\\inf\\setupapi.dev.log", 1);
+    log_tail("X:\\Windows\\inf\\setupapi.offline.log", 0);
+    char state[160];
+    int n = snprintf(state, sizeof(state),
+        "WGI_RUNTIME_STATE receipt_truncated=%d runtime_truncated=%d error=%d\r\n",
+        receipt_truncated, runtime_truncated, diagnostic_failed);
+    if (n > 0 && n < (int)sizeof(state)) runtime_record(state, (unsigned)n);
+    diagnostic("WGI_DIAGNOSTIC_STATE receipt_truncated=%d runtime_truncated=%d error=%d\r\n",
+               receipt_truncated, runtime_truncated, diagnostic_failed);
 }
 
 static void service_state(SC_HANDLE service, const char *name, const char *phase) {
@@ -272,6 +365,18 @@ static void service_snapshot(const char *name, const char *phase) {
     } else diagnostic("WGI_SERIAL_SERVICE name=%s phase=%s query_error=%lu\r\n",
                       name, phase, GetLastError());
     CloseServiceHandle(scm);
+    char path[256];
+    int n = snprintf(path, sizeof(path), "SYSTEM\\CurrentControlSet\\Services\\%s\\Parameters",
+                     name);
+    HKEY key;
+    LONG rc = n > 0 && n < (int)sizeof(path) ? RegOpenKeyExA(HKEY_LOCAL_MACHINE, path, 0,
+        KEY_QUERY_VALUE, &key) : ERROR_INVALID_PARAMETER;
+    diagnostic("WGI_SERIAL_PARAMETERS name=%s open_rc=%ld\r\n", name, rc);
+    if (rc == ERROR_SUCCESS) {
+        registry_string(key, "Identifier", "SERVICE_IDENTIFIER");
+        registry_dword(key, "SerialSkipExternalNaming", "SERVICE_SKIP_EXTERNAL_NAMING");
+        RegCloseKey(key);
+    }
 }
 static void service_start(const char *name) {
     SC_HANDLE scm = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
@@ -433,13 +538,15 @@ int main(int argc, char **argv) {
         int bootstrap_rc = supervise(240, argv[2], 0);
         if (result == INVALID_HANDLE_VALUE) result_open();
         serial_diagnostics("after-bootstrap");
-        if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
+        diagnostic("WGI_BOOTSTRAP_RESULT rc=%d diagnostic_error=%d\r\n",
+                   bootstrap_rc, diagnostic_failed);
+        result_close();
         return bootstrap_rc || diagnostic_failed;
     }
     if (!serial_open()) {
         text("WGI_SERIAL_FAIL configuration_or_open\r\nWGI_GPU_FAIL\r\nWGI_GPU_END\r\n");
         if (serial != INVALID_HANDLE_VALUE) CloseHandle(serial);
-        if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
+        result_close();
         return 2;
     }
     int rc = 0;
@@ -465,6 +572,6 @@ int main(int argc, char **argv) {
             if (!emit(buffer, n)) break;
     }
     CloseHandle(serial);
-    if (result != INVALID_HANDLE_VALUE) CloseHandle(result);
+    result_close();
     return rc || serial_failed;
 }

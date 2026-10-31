@@ -47,13 +47,28 @@ try {
     }
     [IO.File]::WriteAllText($receipt, ('z' * 200000))
     $r = Read-PeDiagnosticFile $receipt 'GUEST_RECEIPT' 131072
-    if (!$r.read_truncated -or $r.bytes_read -gt 131072 -or !$r.output_truncated) {
+    if (!$r.read_truncated -or $r.bytes_read -gt 131072 -or !$r.output_truncated -or
+        $r.format_valid) {
         throw 'Oversized/malformed receipt did not retain explicit bounded-read state'
     }
     [IO.File]::WriteAllText($receipt, "WGI_DIAGNOSTIC_TRUNCATED`r`n")
     if (!(Read-PeDiagnosticFile $receipt 'GUEST_RECEIPT' 131072).source_truncated) {
         throw 'Guest-side censoring marker was ignored'
     }
+    [IO.File]::WriteAllBytes($receipt, [byte[]](0,27,10,255,58,58,101,114,114,111,114,58,58))
+    $script:capturedLines.Clear()
+    $r = Read-PeDiagnosticFile $receipt 'GUEST_RECEIPT' 131072
+    $printed = $script:capturedLines -join "`n"
+    if ($r.format_valid -or $printed.Contains([string][char]0) -or
+        $printed.Contains([string][char]27) -or $printed -match '::error::') {
+        throw 'Malformed/control bytes were not explicitly invalid and safely escaped'
+    }
+    $locked = [IO.File]::Open($receipt, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite,
+                              [IO.FileShare]::None)
+    try {
+        $r = Read-PeDiagnosticFile $receipt 'GUEST_RECEIPT' 131072
+        if ($r.captured -or !$r.error) { throw 'Actual file read error was hidden' }
+    } finally { $locked.Dispose() }
     Remove-Item -LiteralPath $receipt
     if ((Read-PeDiagnosticFile $receipt 'GUEST_RECEIPT' 131072).captured) {
         throw 'Missing receipt falsely claimed capture'

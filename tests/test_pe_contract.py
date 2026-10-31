@@ -225,9 +225,15 @@ class Contract(unittest.TestCase):
         self.assertIn(b"WGI_DIAGNOSTIC_TRUNCATED", data)
 
     def test_repeated_truncation_has_one_marker(self):
-        _, data, _, _ = self.capped([b"x" * 1024, b"later"])
+        statuses, data, _, _ = self.capped([b"x" * 1024, b"later"])
+        self.assertEqual(statuses, [0, 0])
         self.assertEqual(data.count(b"WGI_DIAGNOSTIC_TRUNCATED"), 1)
         self.assertNotIn(b"later", data)
+
+    def test_censoring_is_not_an_io_error(self):
+        statuses, _, _, truncated = self.capped([b"x" * 1024, b"more", b"last"])
+        self.assertEqual(statuses, [0, 0, 0])
+        self.assertEqual(truncated, 1)
 
     def test_receipt_write_error_is_visible(self):
         statuses, _, _, _ = self.capped([b"entry"], fail=True)

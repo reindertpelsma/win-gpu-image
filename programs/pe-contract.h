@@ -13,6 +13,8 @@ WGI_API int wgi_write_all(WgiWrite write, const char *bytes, unsigned count);
 WGI_API int wgi_markers(const char *text);
 WGI_API int wgi_tee(WgiWrite diagnostic, WgiWrite serial, const char *bytes,
                     unsigned count, int serial_required);
+WGI_API int wgi_bounded_write(WgiWrite write, unsigned *used, int *truncated,
+                              unsigned limit, const char *bytes, unsigned count);
 WGI_API int wgi_supervised(const char *text, int child_rc, int timed_out, int gpu_required);
 WGI_API int wgi_terminal(const char *text, int child_rc, int timed_out);
 #endif

@@ -55,3 +55,23 @@ int wgi_tee(WgiWrite diagnostic, WgiWrite serial, const char *bytes,
 int wgi_supervised(const char *text, int child_rc, int timed_out, int gpu_required) {
     return child_rc || timed_out || (gpu_required && wgi_terminal(text, 0, 0));
 }
+
+int wgi_bounded_write(WgiWrite write, unsigned *used, int *truncated,
+                      unsigned limit, const char *bytes, unsigned count) {
+    const char marker[] = "\r\nWGI_DIAGNOSTIC_TRUNCATED\r\n";
+    unsigned reserve = sizeof(marker) - 1;
+    if (limit < reserve || *used > limit) return 1;
+    if (*truncated) return 0;
+    unsigned available = limit - *used;
+    if (available < reserve) return 1;
+    available -= reserve;
+    unsigned take = count < available ? count : available;
+    if (wgi_write_all(write, bytes, take)) return 1;
+    *used += take;
+    if (take != count) {
+        if (wgi_write_all(write, marker, reserve)) return 1;
+        *used += reserve;
+        *truncated = 1;
+    }
+    return 0;
+}
