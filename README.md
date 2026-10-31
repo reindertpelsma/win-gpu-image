@@ -1,6 +1,11 @@
 # win-gpu-image
 
-A standalone recipe for a throwaway Windows PE ISO for GPU driver tests and probes.
+A standalone recipe for a throwaway Windows PE ISO.
+
+**Status: PE2 is limited to one separately approved, bounded experiment.**
+Full Windows 11 Enterprise Evaluation remains the main GPU test environment.
+The existing PE recipe and technical work are retained; this repository does
+not implement that full Windows installation.
 The images contain Microsoft and NVIDIA binaries that copyright does not
 allow us to publish, so the **build is public** but the **output stays in a private
 store** (a convenience copy for rented Vast.ai test boxes); anyone else rebuilds
@@ -8,30 +13,28 @@ from the recipe.
 
 ## Purpose and intended use
 
-This repository builds a throwaway Windows PE environment used only to test GPU
-drivers and GPU virtualization stacks: boot it in a VM, load a GPU driver, run
-small compute and graphics probes, and report pass or fail over serial. It is a
-test environment, not a general-purpose operating system, not a deployment or
-production image, and not a desktop. Images are rebuilt from vendor downloads
-whenever the recipe or inputs change and are not meant to be kept or used for
-anything else. Downstream projects (for example GPU virtualization tools) may run
-the resulting image in CI and test sweeps on rented machines. Pass or fail here
-says only that these probes ran. It makes no performance claim and no compatibility
-guarantee.
+The retained recipe contains small compute and graphics probes and a serial
+reporting contract. Their presence and any historical test result do not establish
+permission to use PE for GPU testing. Licence review remains open; this repository
+makes no claim that the old use complies with Microsoft or NVIDIA terms.
+
+The PE experiment requires native-control success and matching virtual-GPU
+probe results before any smoke-gate integration is proposed. Native driver
+failure or a missing verdict ends that route. Existing merged sources and
+immutable historical artifacts are preserved. A build, serial marker or private
+image copy alone is not a deployment recommendation.
 
 Non-goals: running real workloads, hosting services, daily use, redistributing the
-image or any vendor file.
+image or any vendor file. Building from a public recipe does not grant rights to
+its third-party inputs or output.
 
-Any future minimal-Windows disk image has the same testing-only purpose. Licence
-review is open; this repository makes no claim that this use complies with
-Microsoft or NVIDIA terms.
-
-## Why a PE instead of a full Windows install
+## Historical PE design
 
 PE starts each test clean from RAM without activation/OOBE/accounts.
 The base is small; the complete signed driver adds about 2.6 GB.
 PE lacks DWM, a shell and a desktop; NVIDIA-in-PE remains unproven.
-It complements full Windows. [Full comparison and planned middle option](docs/WHY-PE.md).
+[Earlier comparison and alternative-image proposal](docs/WHY-PE.md) is historical;
+an alternative minimal Windows base is not the current execution plan.
 
 ## Build it yourself
 
@@ -41,7 +44,7 @@ Use an elevated Windows PowerShell 7 terminal; tools, exact local commands,
 ```powershell
 git clone https://github.com/reindertpelsma/win-gpu-image.git
 cd win-gpu-image
-# Follow docs/BUILD.md, including VM RAM requirements and measured results.
+# Follow docs/BUILD.md, including prerequisites and licence review.
 ```
 
 ## Details and status
@@ -50,11 +53,12 @@ cd win-gpu-image
 - [Windows 11 test-image and R2 design (not implemented)](docs/WINDOWS11.md)
 - [Verification, attestation, consumer hash pins, and the private store](docs/TRUST.md)
 - [Workflow security and owner environment setup](SECURITY.md)
-- [Measured results and run URLs](notes/measurements.md)
-- [PE2 serial/GSP/compute contract and hardware promotion plan](docs/PE2_PLAN.md)
+- [Historical records and run URLs](notes/measurements.md)
+- [Retained PE2 serial/GSP/compute design](docs/PE2_PLAN.md)
 
 **Historical image:** [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657), 8192 MiB tested (not a minimum); [sizes and limits](docs/IMAGE.md).
-PE2 requires real serial markers, both GSP registry readbacks and a compute-kernel/readback probe.
-Its no-GPU smoke tests observation only; NVIDIA hardware and full Windows desktop
-verification remain separate requirements.
+The retained PE2 design requires real serial markers, both GSP registry readbacks
+and a compute-kernel/readback probe. Its no-GPU smoke tests observation only;
+NVIDIA-in-PE operation remains unverified. PE is an experiment, not an
+integrated GPU gate or a replacement for full Windows testing.
 Do not open pull requests that add binaries.
