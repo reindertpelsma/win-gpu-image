@@ -51,13 +51,13 @@ int main(int argc, char **argv) {
     if (!strcmp(scenario, "com_present")) baseline.com_state = 1;
     if (!strcmp(scenario, "typed_bad") || !strcmp(scenario, "typed_bounds") ||
         !strcmp(scenario, "typed_nul") || !strcmp(scenario, "typed_embedded")) {
-        char data[4] = {'a', 'b', 'c', 0};
+        char data[8] = {'a', 'b', 'c', 0};
         unsigned type = 1, bytes = 4;
         if (!strcmp(scenario, "typed_bad")) type = 7;
-        if (!strcmp(scenario, "typed_bounds")) bytes = 5;
+        if (!strcmp(scenario, "typed_bounds")) { data[3] = 'x'; data[4] = 0; bytes = 5; }
         if (!strcmp(scenario, "typed_nul")) data[3] = 'x';
         if (!strcmp(scenario, "typed_embedded")) data[1] = 0;
-        int valid = wgi_serial_string(data, type, bytes, sizeof(data));
+        int valid = wgi_serial_string(data, type, bytes, 4);
         printf("MOCK_TYPED valid=%d\n", valid); return valid ? 2 : 0;
     }
     WGI_SERIAL_OPS ops = {select_current, call_install, inspect};

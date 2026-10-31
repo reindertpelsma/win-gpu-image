@@ -266,8 +266,21 @@ static void uart_devices(void) {
         HKEY software = SetupDiOpenDevRegKey(set, &device, DICS_FLAG_GLOBAL, 0,
                                              DIREG_DRV, KEY_QUERY_VALUE);
         if (software != INVALID_HANDLE_VALUE) {
-            registry_string(software, "InfPath", "INF"); RegCloseKey(software);
+            registry_string(software, "InfPath", "INF");
+            registry_string(software, "InfSection", "INF_SECTION");
+            registry_string(software, "InfSectionExt", "INF_SECTION_EXT");
+            registry_string(software, "ProviderName", "PROVIDER");
+            registry_string(software, "MatchingDeviceId", "MATCHING_ID");
+            RegCloseKey(software);
         } else diagnostic("WGI_UART_INF open_error=%lu\r\n", GetLastError());
+        const DWORD extra[] = {SPDRP_FRIENDLYNAME, SPDRP_PHYSICAL_DEVICE_OBJECT_NAME};
+        const char *labels[] = {"FRIENDLY_NAME", "PDO_NAME"};
+        for (unsigned j = 0; j < 2; ++j) {
+            char value[1024];
+            int valid = device_string(set, &device, extra[j], value, sizeof(value));
+            diagnostic("WGI_UART_%s valid=%d value=%s\r\n", labels[j], valid,
+                       valid ? value : "UNKNOWN");
+        }
         resources(device.DevInst, ALLOC_LOG_CONF);
         resources(device.DevInst, BOOT_LOG_CONF);
     }
@@ -380,12 +393,65 @@ static void log_tail(const char *path, int runtime_evidence) {
     CloseHandle(file);
 }
 static void service_snapshot(const char *name, const char *phase);
+/* Read-only final-state discriminants; none replaces successful COM1 I/O. */
+static void ports_install_diagnostics(void) {
+    static const GUID ports =
+        {0x4d36e978,0xe325,0x11ce,{0xbf,0xc1,0x08,0x00,0x2b,0xe1,0x03,0x18}};
+    static const GUID comport =
+        {0x86e0d1e0,0x8089,0x11d0,{0x9c,0xe4,0x08,0x00,0x3e,0x30,0x1f,0x73}};
+    HKEY key = SetupDiOpenClassRegKeyExA(&ports,KEY_QUERY_VALUE,DIOCR_INSTALLER,NULL,NULL);
+    if (key != INVALID_HANDLE_VALUE) {
+        registry_string(key,"Installer32","PORTS_INSTALLER32"); RegCloseKey(key);
+    } else diagnostic("WGI_UART_PORTS_INSTALLER32 open_error=%lu\r\n",GetLastError());
+    char system[MAX_PATH], path[MAX_PATH];
+    UINT length = GetSystemDirectoryA(system,sizeof(system));
+    if (length && length < sizeof(system)) {
+        int n = snprintf(path,sizeof(path),"%s\\MsPorts.dll",system);
+        if (n > 0 && (unsigned)n < sizeof(path)) {
+            DWORD attributes = GetFileAttributesA(path);
+            diagnostic("WGI_UART_PORTS_DLL attributes=%lu error=%lu\r\n",attributes,
+                       attributes == INVALID_FILE_ATTRIBUTES ? GetLastError() : 0);
+        }
+    }
+    HDEVINFO set = SetupDiGetClassDevsA(&comport,NULL,NULL,DIGCF_DEVICEINTERFACE);
+    if (set == INVALID_HANDLE_VALUE) {
+        diagnostic("WGI_UART_INTERFACES open_error=%lu\r\n",GetLastError()); return;
+    }
+    unsigned matched = 0; int complete = 0;
+    for (DWORD i = 0; i < 4096; ++i) {
+        SP_DEVICE_INTERFACE_DATA face;
+        memset(&face,0,sizeof(face)); face.cbSize = sizeof(face);
+        if (!SetupDiEnumDeviceInterfaces(set,NULL,&comport,i,&face)) {
+            complete = GetLastError() == ERROR_NO_MORE_ITEMS; break;
+        }
+        unsigned char buffer[8192]; DWORD needed = 0;
+        SP_DEVICE_INTERFACE_DETAIL_DATA_A *detail = (void *)buffer;
+        SP_DEVINFO_DATA device;
+        memset(buffer,0,sizeof(buffer)); detail->cbSize = sizeof(*detail);
+        memset(&device,0,sizeof(device)); device.cbSize = sizeof(device);
+        if (!SetupDiGetDeviceInterfaceDetailA(set,&face,detail,sizeof(buffer),&needed,&device) ||
+            needed < sizeof(*detail) || needed > sizeof(buffer)) break;
+        unsigned path_bytes = needed - offsetof(SP_DEVICE_INTERFACE_DETAIL_DATA_A,DevicePath);
+        if (!memchr(detail->DevicePath,0,path_bytes)) break;
+        char id[1024]; DWORD bytes = 0;
+        memset(id,0,sizeof(id));
+        if (!SetupDiGetDeviceInstanceIdA(set,&device,id,sizeof(id),&bytes) ||
+            !bounded_string(id,bytes,sizeof(id))) break;
+        if (_stricmp(id,"ACPI\\PNP0501\\1")) continue;
+        ++matched;
+        diagnostic("WGI_UART_INTERFACE id=%s flags=%lu path=%s\r\n",id,face.Flags,
+                   detail->DevicePath);
+    }
+    diagnostic("WGI_UART_INTERFACES matched=%u complete=%d\r\n",matched,complete);
+    SetupDiDestroyDeviceInfoList(set);
+}
 static void serial_diagnostics(const char *phase) {
     diagnostic("WGI_SERIAL_SNAPSHOT phase=%s\r\n", phase);
     service_snapshot("Serial", phase);
     service_snapshot("Serenum", phase);
     serial_namespace();
     uart_devices();
+    ports_install_diagnostics();
     runtime_begin(phase);
     log_tail("X:\\Windows\\System32\\wpeinit.log", 1);
     log_tail("X:\\Windows\\inf\\setupapi.dev.log", 1);
@@ -475,6 +541,7 @@ static int serial_open(void) {
         Sleep(200);
     } while (GetTickCount64() < end);
     if (serial == INVALID_HANDLE_VALUE) {
+        serial_diagnostics("after-reenumerate-com-retry-failed");
         char target[512] = {0}, diagnostic[768];
         DWORD mapped = QueryDosDeviceA("COM1", target, sizeof(target));
         snprintf(diagnostic, sizeof(diagnostic),
@@ -537,6 +604,8 @@ static int supervise(unsigned seconds, char *command, int gpu_required) {
                 else marker_flags |= 4;
                 if (buffer[i] == '\n') {
                     line[used] = 0;
+                    if (!gpu_required && !strncmp(line, "WGI_SERIAL_PREP ", 16))
+                        receipt_record(line, used);
                     marker_flags |= wgi_markers(line);
                     used = 0;
                 }
