@@ -75,7 +75,8 @@ int SetupDiBuildDriverInfoList(HDEVINFO a,SP_DEVINFO_DATA*b,DWORD c) {
 }
 int SetupDiGetSelectedDriverA(HDEVINFO a,SP_DEVINFO_DATA*b,SP_DRVINFO_DATA_A*p) {
     (void)a;(void)b;strcpy(p->ProviderName,!strcmp(scenario,"provider")?"OTHER":"NVIDIA");
-    if(!strcmp(scenario,"provider_unterminated")) memset(p->ProviderName,'N',sizeof(p->ProviderName));
+    if(!strcmp(scenario,"provider_unterminated"))
+        memset(p->ProviderName,'N',sizeof(p->ProviderName));
     return 1;
 }
 int CM_Get_DevNode_Status(ULONG*s,ULONG*p,DWORD d,DWORD f) {
