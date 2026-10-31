@@ -9,6 +9,8 @@ if not "%WGI_HOLD_RC%"=="0" if not defined WGI_NO_GPU goto failed
 rem The exact adapter is held, and offline nvlddmkm Start4 remains in force.
 wpeinit
 if errorlevel 1 goto failed
+X:\Windows\System32\serial-prepare.exe --prepare
+if errorlevel 1 goto failed
 >X:\wgi-bootstrap-ok.txt echo WGI_BOOTSTRAP_OK_V1
 echo WGI_BOOTSTRAP_OK_V1
 exit /b 0
