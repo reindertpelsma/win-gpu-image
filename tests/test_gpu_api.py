@@ -54,6 +54,12 @@ class NativeAPI(unittest.TestCase):
     def test_compatible_reported_size_out_of_bounds(self):
         self.refused("compatible_size")
 
+    def test_driver_nul_outside_reported_data(self):
+        self.refused("driver_nul_size")
+
+    def test_service_nul_outside_reported_data(self):
+        self.refused("service_nul_size")
+
     def test_unterminated_driver(self):
         self.refused("driver_unterminated")
 

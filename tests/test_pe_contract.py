@@ -127,6 +127,12 @@ class Contract(unittest.TestCase):
     def test_explicit_pass(self):
         self.assertEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r\n", 0, 0), 0)
 
+    def test_bare_cr_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r", 0, 0), 0)
+
+    def test_second_cr_suffix_is_not_terminal(self):
+        self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\rmore\n", 0, 0), 0)
+
     def test_cr_suffix_after_pass_is_not_terminal(self):
         self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\rgarbage\n", 0, 0), 0)
 

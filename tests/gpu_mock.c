@@ -30,6 +30,10 @@ int SetupDiGetDeviceRegistryPropertyA(HDEVINFO a,SP_DEVINFO_DATA*b,DWORD p,
         "{4d36e968-e325-11ce-bfc1-08002be10318}\\0007");
     if(p==SPDRP_SERVICE) strcpy((char*)v,"nvlddmkm");
     if(r) *r=(DWORD)strlen((char*)v)+(p==SPDRP_COMPATIBLEIDS?2:1);
+    if((p==SPDRP_DRIVER && !strcmp(scenario,"driver_nul_size")) ||
+       (p==SPDRP_SERVICE && !strcmp(scenario,"service_nul_size"))) {
+        if(r) *r=(DWORD)strlen((char*)v);
+    }
     if((p==SPDRP_DRIVER && !strcmp(scenario,"driver_type")) ||
        (p==SPDRP_SERVICE && !strcmp(scenario,"service_type_prop"))) *t=REG_MULTI_SZ;
     if((p==SPDRP_DRIVER && !strcmp(scenario,"driver_size")) ||
