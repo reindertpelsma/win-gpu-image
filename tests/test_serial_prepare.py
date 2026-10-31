@@ -195,6 +195,48 @@ class SerialWinAPI(unittest.TestCase):
     def run_case(self, name):
         return subprocess.run([str(self.exe), name], text=True, capture_output=True, timeout=5)
 
+    def test_refused_candidate_provider_is_visible(self):
+        r = self.run_case("selected_provider")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("selected_driver provider_valid=1 provider=Other", r.stdout)
+
+    def test_malformed_candidate_provider_never_printed(self):
+        r = self.run_case("selected_provider_nul")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("selected_driver provider_valid=0 provider=UNPROVEN", r.stdout)
+        self.assertNotIn("xxxxxxxx", r.stdout)
+
+    def test_refused_candidate_inf_is_visible(self):
+        r = self.run_case("selected_inf")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("selected_detail inf_valid=1 inf=X:\\Other\\msports.inf", r.stdout)
+
+    def test_normal_candidate_inf_is_visible(self):
+        r = self.run_case("ok")
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("selected_detail inf_valid=1 inf=X:\\Windows\\INF\\msports.inf", r.stdout)
+
+    def test_refused_resolved_section_is_visible(self):
+        r = self.run_case("selected_section")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("selected_actual valid=1 section=Other.NT matches_current=0", r.stdout)
+
+    def test_normal_resolved_section_is_visible(self):
+        r = self.run_case("ok")
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("selected_actual valid=1 section=ComPort.NT matches_current=1", r.stdout)
+
+    def test_cleared_flags_receipt_before_refusal(self):
+        r = self.run_case("cleared_flagsex")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("install_params flags=8388608 flagsex=0 restart_flags=0", r.stdout)
+        self.assertNotIn("WINMOCK_DIF", r.stdout)
+
+    def test_normal_flags_receipt_before_call(self):
+        r = self.run_case("ok")
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("install_params flags=8388608 flagsex=67110912 restart_flags=0", r.stdout)
+
     def test_real_adapter_normal_pipeline(self):
         r = self.run_case("ok")
         self.assertEqual(r.returncode, 0, r.stdout)

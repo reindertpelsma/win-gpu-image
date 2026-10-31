@@ -95,7 +95,10 @@ BOOL SetupDiGetSelectedDriverA(HDEVINFO a,SP_DEVINFO_DATA *d,SP_DRVINFO_DATA_A *
     (void)a; (void)d;
     strcpy(info->ProviderName,!strcmp(scenario,"selected_provider") ? "Other" : "Microsoft");
     info->DriverVersion = !strcmp(scenario,"selected_changed") && dif_calls ? 2 : 1;
-    info->DriverDate = 1; return 1;
+    info->DriverDate = 1;
+    if (!strcmp(scenario,"selected_provider_nul"))
+        memset(info->ProviderName,'x',sizeof(info->ProviderName));
+    return 1;
 }
 BOOL SetupDiGetDriverInfoDetailA(HDEVINFO a,SP_DEVINFO_DATA *b,SP_DRVINFO_DATA_A *c,
                                 SP_DRVINFO_DETAIL_DATA_A *detail,DWORD capacity,DWORD *size) {
@@ -119,6 +122,7 @@ BOOL SetupDiGetActualSectionToInstallA(HINF a,const char *b,char *out,DWORD cap,
 }
 BOOL SetupDiGetDeviceInstallParamsA(HDEVINFO a,SP_DEVINFO_DATA *b,SP_DEVINSTALL_PARAMS_A *out) {
     (void)a; (void)b; DWORD cb = out->cbSize; *out = params; out->cbSize = cb;
+    if (!strcmp(scenario,"cleared_flagsex") && builds) out->FlagsEx = 0;
     if (!strcmp(scenario,"reboot_first") && dif_calls == 1) out->Flags |= DI_NEEDREBOOT;
     if (!strcmp(scenario,"restart_second") && dif_calls == 2) out->Flags |= DI_NEEDRESTART;
     return 1;
