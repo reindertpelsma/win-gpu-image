@@ -1,6 +1,6 @@
 # Security model
 
-The workflow runs only on pushes to `main` and manual dispatch on `main`. It never
+The credentialed image-build workflow runs only on pushes to `main` and manual dispatch on `main`. It never
 runs on pull requests because image publishing uses a credential for a private
 store. Unreviewed contributions must not enter that execution path. Fork users
 can follow the local Windows build instructions without a store credential.
@@ -37,3 +37,13 @@ the consumer's reviewed lock file. Provenance does not prove the inputs are legi
 licences permit use, a runner was uncompromised, the build is deterministic, or an
 NVIDIA GPU binds and works. Hash verification and real hardware tests serve different
 purposes. Report recipe vulnerabilities privately to the repository owner.
+
+## Credential-free source checks
+
+A separate source workflow runs on pushes to main and codex branches, or manual
+dispatch. It has only contents-read permission, no publishing environment or
+secrets, and pinned checkout with credentials disabled. Linux runs CPU mock/recipe
+tests; Windows compiles original helper/probe sources and tests recipe functions.
+It does not fetch vendor files, build/boot an image, attest, publish, upload an
+artifact or run GPU work. No pull-request event reaches either workflow.
+A green source workflow permits review of compilation/CPU behavior only.

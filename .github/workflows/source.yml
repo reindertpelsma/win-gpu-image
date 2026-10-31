@@ -1,7 +1,7 @@
 name: CPU source checks
 on:
   push:
-    branches: [main, 'codex/**']
+    branches: [main, "codex/**"]
   workflow_dispatch:
 permissions: {}
 concurrency:

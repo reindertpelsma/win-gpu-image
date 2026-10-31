@@ -16,12 +16,23 @@ New-Item -ItemType Directory $scratch | Out-Null
 try {
     $lines = @('@echo off', "call `"$devcmd`" -arch=x64 -host_arch=x64",
         'if errorlevel 1 exit /b 1')
-    foreach ($source in Get-ChildItem programs -File | Where-Object Extension -in '.c', '.cpp') {
+    $contractObject = ''
+    if (Test-Path programs/pe-contract.c) {
+        $contractObject = "`"$scratch/pe-contract.obj`""
+        $lines += "cl /nologo /O2 /MT /W4 /std:c11 /c " +
+            "/Fo:$contractObject programs/pe-contract.c"
+        $lines += 'if errorlevel 1 exit /b 1'
+    }
+    $sources = Get-ChildItem programs -File | Where-Object {
+        $_.Extension -in '.c', '.cpp' -and $_.Name -ne 'pe-contract.c'
+    }
+    foreach ($source in $sources) {
         $name = $source.BaseName
         $language = if ($source.Extension -eq '.cpp') { '/EHsc /std:c++17' } else { '/std:c11' }
+        $support = if ($name -in 'serial-log', 'gpu-prepare') { $contractObject } else { '' }
         $lines += "cl /nologo /O2 /MT /W4 $language /D_CRT_SECURE_NO_WARNINGS " +
             "/Fe:`"$scratch/$name.exe`" /Fo:`"$scratch/$name.obj`" `"$($source.FullName)`" " +
-            '/link d3d11.lib dxgi.lib setupapi.lib cfgmgr32.lib advapi32.lib'
+            "$support /link d3d11.lib dxgi.lib setupapi.lib cfgmgr32.lib advapi32.lib"
         $lines += 'if errorlevel 1 exit /b 1'
     }
     $lines += 'exit /b 0'
@@ -29,6 +40,13 @@ try {
     [IO.File]::WriteAllText($script, ($lines -join "`r`n"), [Text.Encoding]::ASCII)
     & cmd.exe /d /c $script
     if ($LASTEXITCODE -ne 0) { throw 'Original Windows probe compilation failed' }
+    if (Test-Path programs/pe-contract.c) {
+        $selfTest = & "$scratch/serial-log.exe" --cpu-test
+        if ($LASTEXITCODE -ne 0 -or $selfTest -ne 'WGI_CPU_POLICY_PASS') {
+            throw 'Native CPU-only serial policy self-test failed'
+        }
+        Write-Host $selfTest
+    }
     Write-Host 'WGI_SOURCE_BUILD_OK CPU_ONLY=1 GPU_EXECUTION=0'
 } finally {
     [IO.Directory]::Delete($scratch, $true)

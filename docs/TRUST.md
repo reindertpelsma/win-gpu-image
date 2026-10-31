@@ -1,9 +1,11 @@
 # Verification and trust
 
-The QEMU TCG smoke test boots the freshly built ISO without a GPU or network and
-requires the exact guest-written `WGI_PE_BOOT_OK_V1` result-disk marker within a
-deadline plus the offline DISM NVIDIA display-driver check. COM1 is best-effort
-logging only. This proves PE reached its startup code and the package was serviced
+The PE2 QEMU TCG smoke boots the freshly built ISO without a GPU or network.
+It requires the exact guest-written `WGI_PE_BOOT_OK_V1` result-disk marker, the
+offline DISM NVIDIA display-driver check, actual COM1 boot/contract markers and
+the terminal GPU FAIL result expected without a GPU, within bounded time. COM1
+is required; a result-disk marker alone no longer passes. Historical run10 used
+the older result-disk-only contract. See [PE2_PLAN.md](PE2_PLAN.md). This proves PE reached its startup code and the package was serviced
 offline. It does **not** prove NVIDIA binding, CUDA, D3D, performance, or hardware support.
 Those need a separate real GPU run. Hypotheses and falsifiers appear in test headers.
 
@@ -55,7 +57,7 @@ vendor files is implied by this recipe. See [SECURITY.md](../SECURITY.md).
 
 ## Workflow rules and owner environment setup
 
-The workflow runs only on pushes to `main` and manual dispatch on `main`. It never
+The credentialed image-build workflow runs only on pushes to `main` and manual dispatch on `main`. It never
 runs on pull requests because image publishing uses a credential for a private
 store. Unreviewed contributions must not enter that execution path. Fork users
 can follow the local Windows build instructions without a store credential.
@@ -92,3 +94,13 @@ the consumer's reviewed lock file. Provenance does not prove the inputs are legi
 licences permit use, a runner was uncompromised, the build is deterministic, or an
 NVIDIA GPU binds and works. Hash verification and real hardware tests serve different
 purposes. Report recipe vulnerabilities privately to the repository owner.
+
+## Credential-free source checks
+
+A separate source workflow runs on pushes to main and codex branches, or manual
+dispatch. It has only contents-read permission, no publishing environment or
+secrets, and pinned checkout with credentials disabled. Linux runs CPU mock/recipe
+tests; Windows compiles original helper/probe sources and tests recipe functions.
+It does not fetch vendor files, build/boot an image, attest, publish, upload an
+artifact or run GPU work. No pull-request event reaches either workflow.
+A green source workflow permits review of compilation/CPU behavior only.

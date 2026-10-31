@@ -34,7 +34,7 @@ class CpuWorkflowTests(unittest.TestCase):
 
     def test_source_events_do_not_run_unreviewed_pull_requests(self):
         text = self.source()
-        self.assertIn("'codex/**'", text)
+        self.assertRegex(text, r"branches:\s*\[main,\s*['\"]codex/\*\*['\"]\]")
         self.assertIn("workflow_dispatch:", text)
         for event in ["pull_request", "workflow_run", "issue_comment"]:
             self.assertNotIn(event, text)

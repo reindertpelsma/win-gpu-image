@@ -1,9 +1,13 @@
 # Build on Windows
 
+STATUS: PE2 recipe, 2026-10-31. The serial observation contract supersedes the
+historical result-disk-only gate. See [PE2_PLAN.md](PE2_PLAN.md); GPU behavior
+remains unverified until a same-image native/virtual hardware comparison.
+
 MEASURED: [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657)
 passed the result-disk boot marker and offline driver check at 8192 MiB, then
 attested and published the image to the private store. COM1 returned error 2;
-it is best-effort logging only. The full signed display package is preserved.
+that historical build accepted best-effort serial logging. The full signed display package is preserved.
 See [the evidence log](../notes/measurements.md) for run results.
 
 Use an elevated PowerShell 7 terminal on a disposable Windows x64 machine with
@@ -17,6 +21,7 @@ installer under `work/`. Read the vendors' licence terms before running the reci
 git clone https://github.com/reindertpelsma/win-gpu-image.git
 cd win-gpu-image
 python -m unittest discover -s tests -v
+./tests/Test-Source.ps1
 ./scripts/Measure-Runner.ps1
 ./scripts/Fetch-Inputs.ps1
 ./scripts/Build-Image.ps1
@@ -69,12 +74,15 @@ only guest text logs are printed, and the VHD is never uploaded. The host seeds
 The CI sentinel requests shutdown after probes; ordinary test boots still idle.
 After QEMU exits or the configured test deadline stops it, the runner mounts the disk
 and requires the exact marker plus the offline DISM NVIDIA display-driver listing.
-COM1 is best-effort logging and never determines pass/fail.
+PE2 additionally requires actual COM1 boot/contract markers and the bounded
+terminal GPU FAIL result expected with no NVIDIA device. Missing serial cannot
+pass through result-disk evidence alone. That expected FAIL and the offline
+package check do not establish NVIDIA correctness.
 
 MEASURED, run 8: startup at 8192 MiB is confirmed by the result disk; COM1 open
 failed with error 2 (`COM1_OPEN_FAILED error=2`). No lower-RAM trials ran, so no
 minimum is established. Serial timeout details remain in the operational evidence
 log. NVIDIA binding and Vast GPU workload RAM remain unmeasured. Run 8 still
-required serial, so its attestation and publishing did not run. The owner
-subsequently replaced that gate with the
-result-disk marker; further COM enumeration experiments are out of scope.
+required serial, so its attestation and publishing did not run. The owner subsequently replaced that historical gate with the result-disk
+marker. PE2 is a new explicitly authorized serial repair and image identity;
+it does not relabel the old run as a serial success.
