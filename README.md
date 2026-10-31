@@ -2,9 +2,10 @@
 
 A standalone recipe for a throwaway Windows PE ISO.
 
-**Status: PE GPU execution is parked.** The existing recipe and technical work
-are retained. Future Windows GPU checks use a full Windows 11 Enterprise
-Evaluation installation; this repository does not implement that replacement.
+**Status: PE2 is limited to one separately approved, bounded experiment.**
+Full Windows 11 Enterprise Evaluation remains the main GPU test environment.
+The existing PE recipe and technical work are retained; this repository does
+not implement that full Windows installation.
 The images contain Microsoft and NVIDIA binaries that copyright does not
 allow us to publish, so the **build is public** but the **output stays in a private
 store** (a convenience copy for rented Vast.ai test boxes); anyone else rebuilds
@@ -17,9 +18,11 @@ reporting contract. Their presence and any historical test result do not establi
 permission to use PE for GPU testing. Licence review remains open; this repository
 makes no claim that the old use complies with Microsoft or NVIDIA terms.
 
-No new PE GPU execution or replacement PE image is planned. Existing merged
-sources and immutable historical artifacts are preserved. Do not treat a build,
-a serial marker or a private image copy as a deployment recommendation.
+The PE experiment requires native-control success and matching virtual-GPU
+probe results before any smoke-gate integration is proposed. Native driver
+failure or a missing verdict ends that route. Existing merged sources and
+immutable historical artifacts are preserved. A build, serial marker or private
+image copy alone is not a deployment recommendation.
 
 Non-goals: running real workloads, hosting services, daily use, redistributing the
 image or any vendor file. Building from a public recipe does not grant rights to
@@ -56,5 +59,6 @@ cd win-gpu-image
 **Historical image:** [run 10](https://github.com/reindertpelsma/win-gpu-image/actions/runs/39848309657), 8192 MiB tested (not a minimum); [sizes and limits](docs/IMAGE.md).
 The retained PE2 design requires real serial markers, both GSP registry readbacks
 and a compute-kernel/readback probe. Its no-GPU smoke tests observation only;
-NVIDIA-in-PE operation remains unverified. The PE2 execution lane is parked.
+NVIDIA-in-PE operation remains unverified. PE is an experiment, not an
+integrated GPU gate or a replacement for full Windows testing.
 Do not open pull requests that add binaries.
