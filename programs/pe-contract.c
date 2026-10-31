@@ -45,3 +45,13 @@ int wgi_markers(const char *text) {
 int wgi_terminal(const char *text, int child_rc, int timed_out) {
     return child_rc || timed_out || wgi_markers(text) != 1;
 }
+
+int wgi_tee(WgiWrite diagnostic, WgiWrite serial, const char *bytes,
+            unsigned count, int serial_required) {
+    if (wgi_write_all(diagnostic, bytes, count)) return 1;
+    return serial_required ? wgi_write_all(serial, bytes, count) : 0;
+}
+
+int wgi_supervised(const char *text, int child_rc, int timed_out, int gpu_required) {
+    return child_rc || timed_out || (gpu_required && wgi_terminal(text, 0, 0));
+}

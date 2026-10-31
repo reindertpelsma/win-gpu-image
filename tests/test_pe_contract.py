@@ -124,6 +124,59 @@ class Contract(unittest.TestCase):
     def test_fail_marker_cannot_pass(self):
         self.assertNotEqual(self.lib.wgi_terminal(b"WGI_GPU_FAIL\r\n", 0, 0), 0)
 
+    def test_bootstrap_child_success_is_not_gpu_acceptance(self):
+        self.lib.wgi_supervised.argtypes = [c.c_char_p, c.c_int, c.c_int, c.c_int]
+        self.assertEqual(self.lib.wgi_supervised(b"", 0, 0, 0), 0)
+        self.assertNotEqual(self.lib.wgi_supervised(b"", 0, 0, 1), 0)
+
+    def test_bootstrap_begin_is_not_gpu_verdict(self):
+        self.lib.wgi_supervised.argtypes = [c.c_char_p, c.c_int, c.c_int, c.c_int]
+        self.assertEqual(self.lib.wgi_supervised(b"WGI_BOOTSTRAP_OK\n", 0, 0, 0), 0)
+        self.assertNotEqual(self.lib.wgi_supervised(b"WGI_BOOTSTRAP_OK\n", 0, 0, 1), 0)
+
+    def test_bootstrap_child_error_stops(self):
+        self.lib.wgi_supervised.argtypes = [c.c_char_p, c.c_int, c.c_int, c.c_int]
+        self.assertNotEqual(self.lib.wgi_supervised(b"", 2, 0, 0), 0)
+
+    def test_bootstrap_timeout_stops(self):
+        self.lib.wgi_supervised.argtypes = [c.c_char_p, c.c_int, c.c_int, c.c_int]
+        self.assertNotEqual(self.lib.wgi_supervised(b"", 0, 1, 0), 0)
+
+    def tee(self, com_ok, required):
+        calls = []
+
+        def diagnostic(p, n, written):
+            calls.append(("diag", c.string_at(p, n)))
+            written[0] = n
+            return 1
+
+        def com(p, n, written):
+            calls.append(("com", c.string_at(p, n)))
+            written[0] = n if com_ok else 0
+            return com_ok
+
+        d, s = WRITE(diagnostic), WRITE(com)
+        self.lib.wgi_tee.argtypes = [WRITE, WRITE, c.c_char_p, c.c_uint, c.c_int]
+        return self.lib.wgi_tee(d, s, b"diagnostic", 10, required), calls
+
+    def test_diagnostics_survive_com_failure(self):
+        rc, calls = self.tee(False, 1)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(calls[0], ("diag", b"diagnostic"))
+
+    def test_missing_com_does_not_remove_diagnostics(self):
+        rc, calls = self.tee(False, 0)
+        self.assertEqual(rc, 0)
+        self.assertEqual(calls, [("diag", b"diagnostic")])
+
+    def test_required_serial_has_no_disk_waiver(self):
+        self.assertNotEqual(self.tee(False, 1)[0], 0)
+
+    def test_valid_diag_cannot_make_com_failure_success(self):
+        rc, calls = self.tee(False, 1)
+        self.assertEqual(len(calls), 2)
+        self.assertNotEqual(rc, 0)
+
     def test_explicit_pass(self):
         self.assertEqual(self.lib.wgi_terminal(b"WGI_GPU_PASS\r\n", 0, 0), 0)
 
